@@ -1,26 +1,6 @@
-import React from "react";
-import logo from "./logo.svg";
+import { Box, Button, Flex, Spacer, Text } from "@chakra-ui/react";
 import "./App.css";
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  HStack,
-  Radio,
-  RadioGroup,
-  RangeSlider,
-  RangeSliderFilledTrack,
-  RangeSliderThumb,
-  RangeSliderTrack,
-  Slider,
-  SliderFilledTrack,
-  SliderThumb,
-  SliderTrack,
-  Spacer,
-  Text,
-} from "@chakra-ui/react";
+import Chat from "./Chat";
 
 function App() {
   return (
@@ -41,40 +21,7 @@ function App() {
           </Button>
         </Flex>
 
-        {/* Radio Buttons */}
-        <FormControl as="fieldset">
-          <FormLabel as="legend">Radio Group</FormLabel>
-          <RadioGroup defaultValue="1">
-            <HStack spacing="24px">
-              <Radio value="1">Option 1</Radio>
-              <Radio value="2">Option 2</Radio>
-              <Radio value="3">Option 3</Radio>
-            </HStack>
-          </RadioGroup>
-        </FormControl>
-
-        {/* Slider */}
-        <FormControl id="slider">
-          <FormLabel>Slider</FormLabel>
-          <Slider defaultValue={30} min={0} max={100}>
-            <SliderTrack>
-              <SliderFilledTrack />
-            </SliderTrack>
-            <SliderThumb />
-          </Slider>
-        </FormControl>
-
-        {/* Range Slider */}
-        <FormControl id="range-slider">
-          <FormLabel>Range Slider</FormLabel>
-          <RangeSlider defaultValue={[10, 30]} min={0} max={100}>
-            <RangeSliderTrack>
-              <RangeSliderFilledTrack />
-            </RangeSliderTrack>
-            <RangeSliderThumb index={0} />
-            <RangeSliderThumb index={1} />
-          </RangeSlider>
-        </FormControl>
+        <Chat></Chat>
 
         {/* Footer */}
         <Box bg="teal.600" w="100%" p={4} color="white">
