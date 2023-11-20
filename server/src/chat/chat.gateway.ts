@@ -7,12 +7,12 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway({ namespace: '/chat/ws' })
+@WebSocketGateway({ namespace: '/chat/ws', transports: ['websocket'] })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
   }
 
