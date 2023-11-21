@@ -1,45 +1,31 @@
-import {
-  useState,
-  useEffect,
-  JSXElementConstructor,
-  Key,
-  ReactElement,
-  ReactNode,
-  ReactPortal,
-} from "react";
+import { useEffect, useState } from "react";
+import { Socket, io } from "socket.io-client";
 
 export default function Chat() {
-  const [messages, setMessages] = useState<any>([]);
-  const [input, setInput] = useState("");
-  const [ws, setWs] = useState<WebSocket>();
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [messages, setMessages] = useState<string[]>([]);
+  const [input, setInput] = useState<string>("");
 
   useEffect(() => {
-    // Connect to WebSocket server
-    const socket = new WebSocket("ws://localhost:3000/chat/ws");
+    // Connect to the WebSocket server
+    const newSocket = io("http://localhost:3000/chat/ws", {
+      transports: ["websocket"],
+    });
+    setSocket(newSocket);
 
-    socket.onopen = () => {
-      console.log("Connected to the server");
-    };
+    newSocket.on("message", (message: string) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
 
-    socket.onmessage = (event) => {
-      setMessages((prevMessages: any) => [...prevMessages, event.data]);
-    };
-
-    socket.onclose = () => {
-      console.log("Disconnected from the server");
-    };
-
-    setWs(socket);
-
-    // Cleanup on unmount
+    // Cleanup function to disconnect the socket when the component unmounts
     return () => {
-      socket.close();
+      newSocket.disconnect();
     };
   }, []);
 
-  const sendMessage = () => {
-    if (ws && input.trim()) {
-      ws.send(input);
+  const sendMessage = (): void => {
+    if (socket && input.trim()) {
+      socket.emit("message", input);
       setInput("");
     }
   };
@@ -54,7 +40,7 @@ export default function Chat() {
       />
       <button onClick={sendMessage}>Send</button>
       <ul>
-        {messages.map((message: any, index: any) => (
+        {messages.map((message, index) => (
           <li key={index}>{message}</li>
         ))}
       </ul>
