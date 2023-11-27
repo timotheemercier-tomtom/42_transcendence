@@ -5,6 +5,8 @@ import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { HealthController } from './health/health.controller';
+import { TerminusModule } from '@nestjs/terminus';
 
 const typeOrmModule = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
@@ -22,9 +24,15 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
 });
 
 @Module({
-  imports: [ConfigModule.forRoot(), ChatModule, AuthModule, typeOrmModule],
+  imports: [
+    ConfigModule.forRoot(),
+    ChatModule,
+    AuthModule,
+    typeOrmModule,
+    TerminusModule,
+  ],
   // imports: [ChatModule, AuthModule],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
