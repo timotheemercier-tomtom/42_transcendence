@@ -14,7 +14,8 @@
   "license": "ISC",
   "workspaces": [
     "client",
-    "server"
+    "server",
+    "common"
   ],
   "dependencies": {
     "concurrently": "^8.2.2"

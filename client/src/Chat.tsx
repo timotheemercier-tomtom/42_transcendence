@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
 import { Socket, io } from "socket.io-client";
+import { PMessage } from "@common";
 
-export default function Chat() {
+export default function Chat({ id: string }) {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<PMessage[]>([]);
   const [input, setInput] = useState<string>("");
 
   useEffect(() => {
     // Connect to the WebSocket server
-    const newSocket = io("http://localhost:3000/chat/ws", {
+    const sock = io("http://localhost:3000/chat/ws", {
       transports: ["websocket"],
     });
-    setSocket(newSocket);
+    setSocket(sock);
 
-    newSocket.on("message", (message: string) => {
+    sock.on("message", (message: PMessage) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
     // Cleanup function to disconnect the socket when the component unmounts
     return () => {
-      newSocket.disconnect();
+      sock.disconnect();
     };
   }, []);
 
@@ -41,7 +42,7 @@ export default function Chat() {
       <button onClick={sendMessage}>Send</button>
       <ul>
         {messages.map((message, index) => (
-          <li key={index}>{message}</li>
+          <li key={index}>{message.msg}</li>
         ))}
       </ul>
     </div>
