@@ -1,3 +1,8 @@
+/**
+ * To write tests for authentication controller.
+ * It's essential to ensure your authentication logic works as expected.
+ */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 

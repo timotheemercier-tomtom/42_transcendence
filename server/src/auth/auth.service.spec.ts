@@ -1,3 +1,7 @@
+/**
+ * For testing our authentication service.
+ */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 
