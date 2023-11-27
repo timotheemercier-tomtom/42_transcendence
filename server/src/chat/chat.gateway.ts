@@ -7,7 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
-import { PMessage } from '@common';
+import { PMessage } from 'common';
 
 @WebSocketGateway({ namespace: '/chat/ws', transports: ['websocket'] })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {

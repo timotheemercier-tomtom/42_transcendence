@@ -9,14 +9,18 @@ const FortyTwoStrategy = require('passport-42').Strategy;
 export class AuthService extends PassportStrategy(FortyTwoStrategy, '42') {
   constructor() {
     super({
-        clientID: process.env.AUTH_ID,
-        clientSecret: process.env.AUTH_SECRET,
-        callbackURL: 'http://localhost:3000/auth/42/callback',
-        scope: ['public'],
+      clientID: process.env.AUTH_ID,
+      clientSecret: process.env.AUTH_SECRET,
+      callbackURL: 'http://localhost:3000/auth/42/callback',
+      scope: ['public'],
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any): Promise<any> {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+  ): Promise<any> {
     const { username, photos } = profile;
     return {
       accessToken,

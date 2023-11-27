@@ -5,11 +5,10 @@ import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 
-
 @Module({
-    imports: [ConfigModule.forRoot(), ChatModule, AuthModule],
-    // imports: [ChatModule, AuthModule],
-    controllers: [AppController],
-    providers: [AppService],
+  imports: [ConfigModule.forRoot(), ChatModule, AuthModule],
+  // imports: [ChatModule, AuthModule],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
