@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TerminusModule } from '@nestjs/terminus';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ChatModule } from './chat/chat.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ChatModule } from './chat/chat.module';
 import { HealthController } from './health/health.controller';
-import { TerminusModule } from '@nestjs/terminus';
+import { UserModule } from './user/user.module';
+import { User } from './user/user.entity';
 
 const typeOrmModule = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
@@ -18,7 +20,7 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    entities: [],
+    entities: [User],
     synchronize: configService.get<boolean>('TYPEORM_SYNC', false),
   }),
 });
@@ -30,7 +32,9 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     AuthModule,
     typeOrmModule,
     TerminusModule,
+    UserModule,
   ],
+
   // imports: [ChatModule, AuthModule],
   controllers: [AppController, HealthController],
   providers: [AppService],

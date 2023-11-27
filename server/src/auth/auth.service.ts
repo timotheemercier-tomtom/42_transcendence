@@ -1,63 +1,45 @@
 /**
- * Contains the logic for handling user data after authentication, 
- * including communication with the 42 API. 
+ * Contains the logic for handling user data after authentication,
+ * including communication with the 42 API.
  * Interacts with the 42 API to authenticate users.
  */
 
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { UserService } from 'src/user/user.service';
+import { JwtService } from '@nestjs/jwt';
 
 const FortyTwoStrategy = require('passport-42').Strategy;
 
-
 @Injectable()
 export class AuthService extends PassportStrategy(FortyTwoStrategy, '42') {
-  constructor() {
+  constructor(
+    private userService: UserService,
+    private configService: ConfigService,
+    private jwtService: JwtService,
+  ) {
     super({
-      clientID: process.env.AUTH_ID,
-      clientSecret: process.env.AUTH_SECRET,
+      clientID: configService.get('AUTH_ID'),
+      clientSecret: configService.get('AUTH_SECRET'),
       callbackURL: 'http://localhost:3000/auth/42/callback',
       scope: ['public'],
     });
   }
 
   async validate(
-    accessToken: string,
-    refreshToken: string,
     profile: any,
   ): Promise<any> {
-    const { id, username, photos } = profile;
-    const existingUser = await this.userService.findUserById(id);
+    console.log(profile);
+
+    const { username } = profile;
+    const existingUser = await this.userService.findUserById(username);
+    console.log(existingUser);
+
     if (!existingUser) {
-        const newUser = await this.userService.createUser({ id, username, photos });
-      return { user: newUser, photo: photos[0].value, isNew: true };
+      await this.userService.createUser({ username });
     }
-    return {
-      accessToken,
-      refreshToken,
-      user: {
-        existingUser,
-        isNew: false,
-      },
-    };
+    const payload = { username };
+    accessToken: this.jwtService.sign(payload);
   }
 }
-
-
-// async validate(profile: any): Promise<any> {
-//     // Extract necessary information from the profile
-//     const { id, username, ... } = profile;
-  
-//     // Check if the user exists in your database
-//     const existingUser = await this.userService.findUserById(id);
-  
-//     if (!existingUser) {
-//       // If the user doesn't exist, create a new one
-//       const newUser = await this.userService.createUser({ id, username, ... });
-//       return { user: newUser, isNew: true };
-//     }
-  
-//     // If the user exists, return the existing user
-//     return { user: existingUser, isNew: false };
-//   }
-  
