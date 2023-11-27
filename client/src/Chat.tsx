@@ -1,33 +1,35 @@
-import { useEffect, useState } from "react";
-import { Socket, io } from "socket.io-client";
-import { PMessage } from "@common";
+import { useEffect, useState } from 'react';
+import { Socket, io } from 'socket.io-client';
+import { PMessage } from 'common';
 
-export default function Chat({ id: string }) {
+export default function Chat({ id }: { id: string }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<PMessage[]>([]);
-  const [input, setInput] = useState<string>("");
-
+  const [input, setInput] = useState<string>('');
   useEffect(() => {
-    // Connect to the WebSocket server
-    const sock = io("http://localhost:3000/chat/ws", {
-      transports: ["websocket"],
+    const sock = io('http://localhost:3000/chat/ws', {
+      transports: ['websocket'],
     });
     setSocket(sock);
 
-    sock.on("message", (message: PMessage) => {
+    sock.on('message', (message: PMessage) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
-    // Cleanup function to disconnect the socket when the component unmounts
+    sock.on('connect', () => {
+      sock.emit('join', id);
+    });
+
     return () => {
       sock.disconnect();
     };
-  }, []);
+  }, [id]);
 
   const sendMessage = (): void => {
     if (socket && input.trim()) {
-      socket.emit("message", input);
-      setInput("");
+      const msg: PMessage = { msg: input, room: id };
+      socket.emit('message', msg);
+      setInput('');
     }
   };
 
@@ -37,7 +39,7 @@ export default function Chat({ id: string }) {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
       />
       <button onClick={sendMessage}>Send</button>
       <ul>
