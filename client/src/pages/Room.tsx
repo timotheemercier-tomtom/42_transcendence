@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import Chat from '../Chat';
+import Chat from '../components/Chat';
 
 export default function Room() {
   const { id = '' } = useParams();

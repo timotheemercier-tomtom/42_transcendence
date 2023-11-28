@@ -27,19 +27,25 @@ export class AuthService extends PassportStrategy(FortyTwoStrategy, '42') {
     });
   }
 
-  async validate(
-    profile: any,
-  ): Promise<any> {
+  async validate(profile: any): Promise<any> {
     console.log(profile);
-
     const { username } = profile;
-    const existingUser = await this.userService.findUserById(username);
-    console.log(existingUser);
 
-    if (!existingUser) {
-      await this.userService.createUser({ username });
+    let user = await this.userService.findUserById(username);
+
+    if (!user) {
+      user = await this.userService.createUser({ username });
     }
+
     const payload = { username };
-    accessToken: this.jwtService.sign(payload);
+
+    /**
+     **TODO: 
+     store the JTW token in database, and check 
+     if it already exist before to process sign in.
+     **/
+
+    const accessToken = this.jwtService.sign(payload);
+    return { user, accessToken };
   }
 }

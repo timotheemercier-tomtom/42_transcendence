@@ -1,8 +1,11 @@
 import { Link, RouterProvider, createBrowserRouter } from 'react-router-dom';
-import './App.css';
-import Error404 from './page/Error404';
-import Home from './page/Home';
-import Room from './page/Room';
+import './css/App.css';
+import Error404 from './pages/Error404';
+import Home from './pages/Home';
+import Room from './pages/Room';
+import ButtonLogin from './components/ButtonLogin';
+import LoginResult from './pages/LoginResult';
+
 
 const router = createBrowserRouter([
   {
@@ -16,14 +19,18 @@ const router = createBrowserRouter([
     path: '/r/:id',
     element: <Room />,
   },
+  {
+    element: <LoginResult />,
+    path: '/login'
+  },
 ]);
 
-function App() {
+export default function App() {
   return (
     <div>
       <header>
-        header
         <nav></nav>
+        <ButtonLogin />
       </header>
       <main>
         <RouterProvider router={router} />
@@ -32,5 +39,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
