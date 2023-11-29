@@ -1,6 +1,12 @@
 /**
- * To write tests for authentication controller.
- * It's essential to ensure your authentication logic works as expected.
+ * This file contains the tests for the AuthController in a NestJS application.
+ *
+ *? Testing Setup:
+ * Utilizes NestJS's testing utilities to create a test environment.
+ * The `Test.createTestingModule` method sets up the testing module with necessary controllers and services.
+ *
+ *? Test Cases:
+ * Ensures that the AuthController is properly instantiated and defined.
  */
 
 import { Test, TestingModule } from '@nestjs/testing';

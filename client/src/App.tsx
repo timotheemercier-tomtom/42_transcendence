@@ -5,7 +5,9 @@ import Home from './pages/Home';
 import Room from './pages/Room';
 import ButtonLogin from './components/ButtonLogin';
 import LoginResult from './pages/LoginResult';
+import { UserProvider } from './pages/User';
 
+// import User from './pages/User';
 
 const router = createBrowserRouter([
   {
@@ -21,8 +23,12 @@ const router = createBrowserRouter([
   },
   {
     element: <LoginResult />,
-    path: '/login'
+    path: '/login',
   },
+  //   {
+  //     element: <User />,
+  //     path: '/p/:id',
+  //   },
 ]);
 
 export default function App() {

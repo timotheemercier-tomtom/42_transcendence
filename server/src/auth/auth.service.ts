@@ -1,8 +1,23 @@
 /**
- * Contains the logic for handling user data after authentication,
- * including communication with the 42 API.
+ * Handles authentication logic and integrates with external authentication providers.
  * Interacts with the 42 API to authenticate users.
+ *
+ *? Passport Strategy:
+ * Extends PassportStrategy with 'FortyTwoStrategy' from 'passport-42' for authenticating with 42.
+ * Configures the strategy with client ID, client secret, and callback URL.
+ *
+ *? Dependencies:
+ * Relies on ConfigService to retrieve authentication-related environment variables.
+ * Utilizes UserService to manage user-related operations.
+ * Uses JwtService from '@nestjs/jwt' for JWT token creation and validation.
+ *
+ *? Validation:
+ * Implements a 'validate' method to process user profile data after authentication.
+ * Validates and stores user information obtained from the external provider.
+ * Generates a JWT token for the authenticated user.
+ * Includes a TODO comment regarding token storage and checking for duplicates.
  */
+
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

@@ -1,6 +1,21 @@
 /**
- * Organizes our authentication-related controllers and services.
- * t's a crucial part of structuring your application in a modular way.
+ * This file is part of a NestJS application and is responsible for setting up user authentication.
+ * It organizes our authentication-related controllers and services.
+ *
+ *? Module Setup:
+ * It serves as the configuration module for user authentication.
+ * Imports necessary modules and dependencies for authentication.
+ *
+ *? Passport Module:
+ * Registers the PassportModule with a default strategy named '42' for authentication.
+ *
+ *? JWT Configuration:
+ * Configures the JwtModule asynchronously to manage JWT token creation and validation.
+ * Uses the ConfigService to retrieve the JWT secret from environment variables.
+ *
+ *? Providers and Controllers:
+ * Provides the AuthService as a service for handling authentication logic.
+ * Includes the AuthController for handling HTTP requests related to authentication.
  */
 
 import { PassportModule } from '@nestjs/passport';
