@@ -37,8 +37,8 @@ export default function Chat({ id }: { id: string }) {
   };
 
   return (
-    <Col border={1} flexGrow={1} overflow={'scroll'}>
-      <Col>
+    <Col border={1} flexGrow={1}>
+      <Col flexGrow={1} overflow={'scroll'}>
         {messages.map((v, i) => (
           <span key={i}>{v.msg}</span>
         ))}

@@ -4,9 +4,5 @@ import Chat from '../components/Chat';
 export default function Room() {
   const { id = '' } = useParams();
 
-  return (
-    <div>
-      <Chat id={id}></Chat>
-    </div>
-  );
+  return <Chat id={id}></Chat>;
 }

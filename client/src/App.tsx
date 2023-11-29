@@ -27,7 +27,7 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <Container>
+    <Container className="root">
       <Col className="app">
         <header>
           <ButtonLogin />
