@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Socket, io } from 'socket.io-client';
 import { PMessage } from 'common';
+import { Button, TextField } from '@mui/material';
+import Col from './Col';
+import Row from './Row';
 
 export default function Chat({ id }: { id: string }) {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -34,19 +37,22 @@ export default function Chat({ id }: { id: string }) {
   };
 
   return (
-    <div>
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-      />
-      <button onClick={sendMessage}>Send</button>
-      <ul>
-        {messages.map((message, index) => (
-          <li key={index}>{message.msg}</li>
+    <Col border={1} flexGrow={1}>
+      <Col flexGrow={1} overflow={'scroll'}>
+        {messages.map((v, i) => (
+          <span key={i}>{v.msg}</span>
         ))}
-      </ul>
-    </div>
+      </Col>
+      <Row>
+        <TextField
+          value={input}
+          fullWidth
+          variant="standard"
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+        />
+        <Button onClick={sendMessage}>Send</Button>
+      </Row>
+    </Col>
   );
 }
