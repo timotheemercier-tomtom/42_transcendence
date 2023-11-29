@@ -46,7 +46,7 @@ export class AuthService extends PassportStrategy(FortyTwoStrategy, '42') {
     console.log(profile);
     const { username } = profile;
 
-    let user = await this.userService.findUserById(username);
+    let user = await this.userService.findUserByUsername(username);
 
     if (!user) {
       user = await this.userService.createUser({ username });

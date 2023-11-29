@@ -11,7 +11,7 @@
  *  // @Get('42')
  *      Route for initiating the 42 OAuth authentication process.
  *  // @Get('42/callback')
- *      Callback route for 42 OAuth authentication, handling the user data after 
+ *      Callback route for 42 OAuth authentication, handling the user data after
  *      successful authentication and setting an HTTP-only cookie with the access token.
  *
  *? Authentication Guard:
@@ -42,7 +42,15 @@ export class AuthController {
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async fortyTwoAuthRedirect(@Req() req: any, @Res() res: Response) {
-    const { accessToken } = req.user;
+    const { accessToken, login, image } = req.user;
+    const profilePic = image?.versions?.small; //*url profil pic small size
+    /**
+     *  accessToken et login sont directement extraits de req.user.
+     * Pour la photo de profil, image est également extrait,
+     * et ensuite profilePicUrl est défini en utilisant
+     * les propriétés imbriquées versions et small.
+     */
+
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,

@@ -1,14 +1,12 @@
+import { Container } from '@mui/material';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import ButtonLogin from './components/ButtonLogin';
+import Col from './components/Col';
 import Error404 from './pages/Error404';
 import Home from './pages/Home';
 import Room from './pages/Room';
-import ButtonLogin from './components/ButtonLogin';
 import LoginResult from './pages/LoginResult';
-import { UserProvider } from './pages/User';
-
-// import User from './pages/User';
-import { Container } from '@mui/material';
-import Col from './components/Col';
+import UserProfile from './pages/UserProfile';
 
 const router = createBrowserRouter([
   {
@@ -24,10 +22,10 @@ const router = createBrowserRouter([
     element: <LoginResult />,
     path: '/login',
   },
-  //   {
-  //     element: <User />,
-  //     path: '/p/:id',
-  //   },
+    {
+      element: <UserProfile />,
+      path: '/p/:id',
+    },
 ]);
 
 export default function App() {

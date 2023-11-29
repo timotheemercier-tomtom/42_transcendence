@@ -21,7 +21,8 @@
  */
 
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Define the type for the context value
 type UserContextType = {
@@ -44,4 +45,3 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-export const useUser = () => useContext(UserContext);
