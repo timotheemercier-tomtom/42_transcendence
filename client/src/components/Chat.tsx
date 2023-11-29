@@ -47,6 +47,7 @@ export default function Chat({ id }: { id: string }) {
         <TextField
           value={input}
           fullWidth
+          variant="standard"
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
         />
