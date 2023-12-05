@@ -8,6 +8,9 @@ export class User {
   @Column({ unique: true })
   username: string;
 
-  // Add other relevant columns here
-  // Example: Email, First Name, Last Name, etc.
+  @Column({ nullable: true })
+  picture: string;
+
+  @Column({ nullable: true })
+  email: string;
 }

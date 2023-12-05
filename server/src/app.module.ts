@@ -9,6 +9,9 @@ import { ChatModule } from './chat/chat.module';
 import { HealthController } from './health/health.controller';
 import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
+import { UserController } from './user/user.controller';
+import { UserService } from './user/user.service';
+
 
 const typeOrmModule = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
@@ -22,6 +25,10 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     database: configService.get('DB_NAME'),
     entities: [User],
     synchronize: configService.get<boolean>('TYPEORM_SYNC', false),
+    // migrations: ['dist/migrations/*{.ts,.js}'], // Specify the migrations path
+    // migrationsRun: true, // Automatically run migrations on application launch
+    // cli: {
+    //   migrationsDir: 'src/migrations'}, // Directory for the migration files
   }),
 });
 
@@ -34,9 +41,9 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     TerminusModule,
     UserModule,
   ],
-
   // imports: [ChatModule, AuthModule],
   controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
+

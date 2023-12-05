@@ -6,7 +6,7 @@ import Error404 from './pages/Error404';
 import Home from './pages/Home';
 import Room from './pages/Room';
 import LoginResult from './pages/LoginResult';
-import UserProfile from './pages/UserProfile';
+import UserProfile from './components/UserProfile';
 
 const router = createBrowserRouter([
   {
@@ -22,10 +22,10 @@ const router = createBrowserRouter([
     element: <LoginResult />,
     path: '/login',
   },
-    {
-      element: <UserProfile />,
-      path: '/p/:id',
-    },
+  {
+    element: <UserProfile />,
+    path: '/p/:id',
+  },
 ]);
 
 export default function App() {
@@ -34,6 +34,7 @@ export default function App() {
       <Col className="app">
         <header>
           <ButtonLogin />
+          <UserProfile />
         </header>
         <Col flexGrow={1} className="page">
           <RouterProvider router={router} />

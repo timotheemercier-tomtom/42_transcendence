@@ -31,6 +31,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 
+
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -39,11 +40,15 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async signInWith42() {}
 
+  //   @Get('/auth/42',
+  //   passport.authenticate('42'));
+
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async fortyTwoAuthRedirect(@Req() req: any, @Res() res: Response) {
     const { accessToken, login, image } = req.user;
-    const profilePic = image?.versions?.small; //*url profil pic small size
+    // console.log(req.user);
+
     /**
      *  accessToken et login sont directement extraits de req.user.
      * Pour la photo de profil, image est également extrait,
@@ -54,7 +59,9 @@ export class AuthController {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,
+      sameSite: 'strict',
     });
     res.redirect('http://localhost:5173/login');
   }
+
 }

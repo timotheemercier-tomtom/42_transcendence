@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
+  static getPublicContent: any;
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,

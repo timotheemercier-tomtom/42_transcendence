@@ -1,8 +1,15 @@
+import { IsEmail, IsOptional, IsString } from 'class-validator';
+
 export class UpdateUserDto {
-    readonly email?: string;
-    readonly firstName?: string;
-    readonly lastName?: string;
-    readonly username?: string;
-    // Autres propriétés que tu souhaites pouvoir mettre à jour
-  }
-  
+  @IsOptional()
+  @IsString()
+  readonly username?: string;
+
+  @IsOptional()
+  @IsEmail()
+  readonly email?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly profilePicture?: string;
+}
