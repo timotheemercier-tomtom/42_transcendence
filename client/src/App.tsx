@@ -1,12 +1,10 @@
-import { Container } from '@mui/material';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import ButtonLogin from './components/ButtonLogin';
-import Col from './components/Col';
 import Error404 from './pages/Error404';
 import Home from './pages/Home';
 import Room from './pages/Room';
 import LoginResult from './pages/LoginResult';
 import UserProfile from './components/UserProfile';
+import AppLayout from './AppLayout';
 
 const router = createBrowserRouter([
   {
@@ -28,19 +26,29 @@ const router = createBrowserRouter([
   },
 ]);
 
-export default function App() {
-  return (
-    <Container className="root">
-      <Col className="app">
-        <header>
-          <ButtonLogin />
-          <UserProfile />
-        </header>
-        <Col flexGrow={1} className="page">
-          <RouterProvider router={router} />
-        </Col>
-        <footer>i love feet</footer>
-      </Col>
-    </Container>
-  );
-}
+
+const App: React.FC = () => {
+    return (
+      <AppLayout>
+        <RouterProvider router={router} />
+      </AppLayout>
+    );
+  };
+  
+  export default App;
+// export default function App() {
+//   return (
+//     <Container className="root">
+//       <Col className="app">
+//         <header>
+//           <ButtonLogin />
+//         </header>
+//         <Col flexGrow={1} className="page">
+//           <UserProfile />
+//           <RouterProvider router={router} />
+//         </Col>
+//         <footer>i love feet</footer>
+//       </Col>
+//     </Container>
+//   );
+// }

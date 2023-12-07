@@ -9,7 +9,7 @@ const UserProfile = () => {
   });
 
   useEffect(() => {
-    const apiUrl = 'http://localhost:3000/user';
+    const apiUrl = 'http://localhost:3000/';
 
     fetch(apiUrl, {
       method: 'GET',
@@ -17,6 +17,7 @@ const UserProfile = () => {
     })
       .then((response) => response.json())
       .then((data) => {
+        console.log('useEffect exécuté');
         setUserData({
           username: data.username,
           email: data.emails[0].value,
@@ -27,6 +28,24 @@ const UserProfile = () => {
         console.error('Error fetching user data:', error);
       });
   }, []);
+
+  // fetch(apiUrl, {
+  //   method: 'GET',
+  //   credentials: 'include', // Important: This includes cookies in the request
+  // })
+  //       .then((response) => response.json())
+  //       .then((data) => {
+  //         console.log("useEffect exécuté");
+  //         setUserData({
+  //           username: data.username,
+  //           email: data.emails[0].value,
+  //           picture: data.image.link,
+  //         });
+  //       })
+  //       .catch((error) => {
+  //         console.error('Error fetching user data:', error);
+  //       });
+  //   }, []);
 
   return (
     <div>

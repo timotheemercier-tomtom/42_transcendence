@@ -11,7 +11,7 @@ import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
-
+import { JwtModule } from '@nestjs/jwt';
 
 const typeOrmModule = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
@@ -34,16 +34,18 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     ChatModule,
     AuthModule,
     typeOrmModule,
     TerminusModule,
     UserModule,
+    JwtModule,
   ],
   // imports: [ChatModule, AuthModule],
   controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
-

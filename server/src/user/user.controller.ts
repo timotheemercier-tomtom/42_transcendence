@@ -26,16 +26,17 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  // La méthode getUser appelle userService.findUserByUsername, dans user.service.ts.
+  //   La méthode getUser appelle userService.findUserByUsername, dans user.service.ts.
   @Get(':username')
   async getUser(@Param('username') username: string): Promise<User | null> {
     return await this.userService.findUserByUsername(username);
   }
-  
-  @UseGuards(JwtAuthGuard) 
+
+  @UseGuards(JwtAuthGuard)
   @Get()
   async getSelf(@Req() request: Request & any): Promise<User | null> {
     const user = request.user;
+    console.log(user);
     return await this.userService.findUserByUsername(user.username);
   }
 

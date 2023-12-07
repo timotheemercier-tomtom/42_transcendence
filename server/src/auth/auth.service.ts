@@ -41,6 +41,7 @@ export class AuthService extends PassportStrategy(FortyTwoStrategy, '42') {
     });
   }
 
+
   async validate(
     accessToken: string,
     refreshToken: string,
@@ -48,46 +49,12 @@ export class AuthService extends PassportStrategy(FortyTwoStrategy, '42') {
   ): Promise<{ user: any; accessToken: string }> {
     const username = profile.username;
     let user = await this.userService.findUserByUsername(username);
-    console.log(profile);
+
     if (!user) {
       user = await this.userService.createUser({ username });
     }
 
     const payload = { username: user.username };
-
-    // Instead of using TokenService, directly use JwtService to create a new token
-    accessToken = this.jwtService.sign(payload);
-
-    // Assuming you no longer need to store tokens in the database, remove those calls
-    // If you do need to store them, you would add that logic here
-
     return { user, accessToken };
   }
 }
-//   async validate(
-//     accessToken: string,
-//     refreshToken: string,
-//     profile: any,
-//   ): Promise<{ user: any; accessToken: string }> {
-//     const username = profile.username;
-//     let user = await this.userService.findUserByUsername(username);
-
-//     if (!user) {
-//       user = await this.userService.createUser({ username });
-//     }
-
-//     const payload = { username: user.username };
-
-//     /* Check if JWT token already exists in the database and is valid
-//     If not, create a new one*/
-//     let token = await this.tokenService.findTokenForUser(user.id);
-//     if (!token || this.tokenService.isTokenExpired(token)) {
-//       accessToken = this.jwtService.sign(payload);
-//       //   Store the new token in the database
-//       await this.tokenService.storeTokenForUser(user.id, accessToken);
-//     } else {
-//       accessToken = token;
-//     }
-//     return { user, accessToken };
-//   }
-// }

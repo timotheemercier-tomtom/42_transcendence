@@ -6,10 +6,12 @@ import { UserController } from './user.controller';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
-  providers: [UserService, JwtStrategy, JwtAuthGuard, ConfigService],
+  imports: [TypeOrmModule.forFeature([User]), JwtModule],
+  providers: [UserService, JwtStrategy, JwtAuthGuard, ConfigService, AuthService],
   exports: [UserService],
   controllers: [UserController],
 })
