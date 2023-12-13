@@ -36,8 +36,8 @@ import { JwtModule } from '@nestjs/jwt';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'), // Use an environment variable for the secret
-        signOptions: { expiresIn: '60m' }, // Token expiration time
+        secret: configService.get('JWT_SECRET'),
+        // signOptions: { expiresIn: '60m' },
       }),
     }),
   ],
@@ -45,26 +45,3 @@ import { JwtModule } from '@nestjs/jwt';
   controllers: [AuthController],
 })
 export class AuthModule {}
-
-
-
-
-//     JwtModule.registerAsync({
-//       imports: [ConfigModule],
-//       inject: [ConfigService],
-//       useFactory: (configService: ConfigService) => ({
-//         secret: configService.get('JWT_SECRET'), // Use an environment variable for the secret
-//         signOptions: { expiresIn: '60m' }, // Token expiration time
-//       }),
-
-// JwtModule.registerAsync({
-//     useFactory: (config: ConfigService) => {
-//       return {
-//         secret: config.get<string>('JWT_SECRET_KEY'),
-//         signOptions: {
-//           expiresIn: config.get<string | number>('JWT_EXPIRATION_TIME'),
-//         },
-//       };
-//     },
-//     inject: [ConfigService],
-//   }),

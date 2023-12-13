@@ -16,7 +16,6 @@ export class FortyTwoAuthStrategy extends PassportStrategy(
       clientSecret: configService.get('AUTH_SECRET'),
       callbackURL: '/login/42/return',
       passReqToCallback: true,
-
       profileFields: {
         id: function (obj: any) {
           return String(obj.id);
@@ -27,7 +26,6 @@ export class FortyTwoAuthStrategy extends PassportStrategy(
         'name.givenName': 'first_name',
         profileUrl: 'url',
         'emails.0.value': 'email',
-        'phoneNumbers.0.value': 'phone',
         'photos.0.value': 'image_url',
       },
     });
@@ -42,7 +40,6 @@ export class FortyTwoAuthStrategy extends PassportStrategy(
   ): Promise<any> {
     request.session.accessToken = accessToken;
     console.log('accessToken', accessToken, 'refreshToken', refreshToken);
-    // Gérez la validation et le traitement de l'utilisateur ici
     return cb(null, profile);
   }
 }
