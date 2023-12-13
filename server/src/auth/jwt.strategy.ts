@@ -11,6 +11,15 @@ const extractJwtFromCookie = (req: Request): string | null => {
   return req.cookies?.['accessToken'] || null;
 };
 
+// const cookieExtractor = (req: any) => {
+//     let token = null;
+//     if (req && req.cookies) {
+//       token = req.cookies['accessToken']; // Replace 'accessToken' with your actual cookie name
+//     }
+//     return token;
+//   };
+  
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   jwtService: any;
@@ -22,7 +31,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([extractJwtFromCookie]),
       secretOrKey: configService.get('JWT_SECRET'),
-      signOptions: { expiresIn: '60m' },
       
     });
   }

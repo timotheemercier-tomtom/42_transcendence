@@ -4,11 +4,8 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { log } from 'console';
-
 @Injectable()
 export class UserService {
-  static getPublicContent: any;
-    models: any;
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -17,7 +14,7 @@ export class UserService {
   /** Cette méthode utilise la méthode findOne de TypeORM pour récupérer 
     un utilisateur de la base de données en fonction de son username. */
 
-  async findUserByUsername(username: string): Promise<User | null> {    
+  async findUserByUsername(username: string): Promise<User | null> {
     return await this.userRepository.findOne({ where: { username } });
   }
 

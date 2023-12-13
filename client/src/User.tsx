@@ -20,28 +20,29 @@
  * It provides easy access to the user data and the setUser function.
  */
 
+ 
+ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom';
-
-// // Define the type for the context value
-// type UserContextType = {
-//   user: any; // Replace 'any' with a more specific type as per your user object
-//   setUser: React.Dispatch<React.SetStateAction<any>>; // Same here for the specific type
-// };
-
-// // Create context with a default value of type UserContextType
-// const UserContext = createContext<UserContextType | null>(null);
-
-// export const UserProvider: React.FC<{ children: ReactNode }> = ({
-//   children,
-// }) => {
-//   const [user, setUser] = useState<UserContextType['user']>(null);
-
-//   return (
-//     <UserContext.Provider value={{ user, setUser }}>
-//       {children}
-//     </UserContext.Provider>
-//   );
-// };
-
+ // Define the type for the context value
+ type UserContextType = {
+   user: any; // Replace 'any' with a more specific type as per your user object
+   setUser: React.Dispatch<React.SetStateAction<any>>; // Same here for the specific type
+ };
+ 
+ // Create context with a default value of type UserContextType
+ const UserContext = createContext<UserContextType | null>(null);
+ 
+ export const UserProvider: React.FC<{ children: ReactNode }> = ({
+   children,
+ }) => {
+   const [user, setUser] = useState<UserContextType['user']>(null);
+ 
+   return (
+     <UserContext.Provider value={{ user, setUser }}>
+       {children}
+     </UserContext.Provider>
+   );
+ };
+ 
+ export const useUser = () => useContext(UserContext);
+ 

@@ -9,7 +9,7 @@ const UserProfile = () => {
   });
 
   useEffect(() => {
-    const apiUrl = 'http://localhost:3000/';
+    const apiUrl = 'http://localhost:3000/user/';
 
     fetch(apiUrl, {
       method: 'GET',

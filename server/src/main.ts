@@ -14,7 +14,7 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Accept',
     credentials: true, // Important si vous utilisez des cookies/session
   });
-  
+  app.use(cookieParser());
   await app.listen(3000);
 }
 bootstrap();

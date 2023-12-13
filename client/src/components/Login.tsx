@@ -17,22 +17,8 @@ import ButtonLogin from './ButtonLogin';
 const LoginModule: React.FC<LoginProps> = ({ open, handleClose }) => {
   const [loggedInWith42, setLoggedInWith42] = useState(false);
 
-  const clientId = process.env.AUTH_ID;
-  const redirectUri = process.env.REDIRECT_URI;
-  if (!clientId || !redirectUri) {
-    console.error('Error: Missing AUTH_ID or URI');
-    return null;
-  }
-  //   const authUrl =
-  // `https://api.intra.42.fr/oauth/authorize?response_type=code&` +
-  // `client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-  const authUrl =
-    'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-f9c49a4ef300b737' +
-    'c3a3044787c5859e8009f6c708380db159b31f81b684b003&redirect_uri=http%3A%2F%2F' +
-    'localhost%3A3000%2Fauth%2F42%2Fcallback&response_type=code';
-
   const handle42Login = () => {
-    window.location.href = authUrl;
+    window.location.href = 'http://localhost:3000/auth/42';
   };
   return (
       <Dialog open={open} onClose={handleClose}>
