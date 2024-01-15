@@ -15,7 +15,7 @@ export default function Chat({ id }: { id: string }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<PMessage[]>([]);
   const [input, setInput] = useState<string>('');
-
+  const user: string = sessionStorage.getItem('user') ?? '';
   useEffect(() => {
     const sock = io('http://localhost:3000/chat/ws', {
       transports: ['websocket'],
@@ -40,7 +40,7 @@ export default function Chat({ id }: { id: string }) {
 
   const sendMessage = (): void => {
     if (socket && input.trim()) {
-      const msg: PMessage = { msg: input, room: id };
+      const msg: PMessage = { msg: input, room: id, user };
       socket.emit('message', msg);
       setInput('');
     }
@@ -50,7 +50,9 @@ export default function Chat({ id }: { id: string }) {
     <Col border={1} flexGrow={1}>
       <Col flexGrow={1} overflow={'scroll'}>
         {messages.map((v, i) => (
-          <span key={i}>{v.msg}</span>
+          <div>
+            <span>{v.user}</span>: <span key={i}>{v.msg}</span>
+          </div>
         ))}
       </Col>
       <Row>
