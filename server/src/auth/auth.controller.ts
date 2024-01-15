@@ -35,13 +35,12 @@ export class AuthController {
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async fortyTwoAuthRedirect(@Req() req: Request | any, @Res() res: Response) {
-    const { accessToken } = req.user;
+    const { accessToken, user } = req.user;
     // accessToken est directement extraits de req.user.
 
     res.cookie('accessToken', accessToken, {
-      httpOnly: true,
       secure: true,
     });
-    res.redirect('http://localhost:5173/login');
+    res.redirect('http://localhost:5173/login?u=' + user.username);
   }
 }

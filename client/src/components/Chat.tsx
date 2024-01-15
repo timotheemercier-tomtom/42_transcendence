@@ -4,14 +4,27 @@ import { PMessage } from 'common';
 import { Button, TextField } from '@mui/material';
 import Col from './Col';
 import Row from './Row';
+import { Link, useParams } from 'react-router-dom';
+
+function getCookie(name: string) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
 
 export default function Chat({ id }: { id: string }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<PMessage[]>([]);
   const [input, setInput] = useState<string>('');
+  const { id: roomid } = useParams();
+
+  const user: string = sessionStorage.getItem('user') ?? '';
   useEffect(() => {
     const sock = io('http://localhost:3000/chat/ws', {
       transports: ['websocket'],
+      query: {
+        token: getCookie('accessToken'),
+      },
     });
     setSocket(sock);
 
@@ -30,17 +43,26 @@ export default function Chat({ id }: { id: string }) {
 
   const sendMessage = (): void => {
     if (socket && input.trim()) {
-      const msg: PMessage = { msg: input, room: id };
+      const msg: PMessage = { msg: input, room: id, user, role: 'user' };
       socket.emit('message', msg);
       setInput('');
     }
   };
 
+  const select = () => {};
+
   return (
     <Col border={1} flexGrow={1}>
+      <Button onClick={select}>{roomid}</Button>
+
       <Col flexGrow={1} overflow={'scroll'}>
         {messages.map((v, i) => (
-          <span key={i}>{v.msg}</span>
+          <div>
+            <Link to={'/u/' + v.user}>
+              <span>{v.user}</span>
+            </Link>
+            : <span key={i}>{v.msg}</span>
+          </div>
         ))}
       </Col>
       <Row>
