@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AuthService } from './auth.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { FourTwoService } from './fourtwo.service';
+import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { UserService } from 'src/user/user.service';
 
@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   jwtService: any;
   constructor(
     private configService: ConfigService,
-    private readonly authService: AuthService,
+    private readonly authService: FourTwoService,
     private readonly userService: UserService,
   ) {
     super({

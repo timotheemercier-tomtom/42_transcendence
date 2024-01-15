@@ -2,7 +2,7 @@
  * ? UserModule
  * Manages the user-related functionalities in the application.
  * It includes services and controllers related to user operations.
- * 
+ *
  * Integrates TypeOrmModule for database interaction specific to the User entity.
  * Configures JwtModule for handling JSON Web Tokens in user-related operations.
  *
@@ -33,12 +33,18 @@ import { UserController } from './user.controller';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
-import { AuthService } from 'src/auth/auth.service';
+import { FourTwoService } from 'src/auth/fourtwo.service';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), JwtModule],
-  providers: [UserService, JwtStrategy, JwtAuthGuard, ConfigService, AuthService],
+  providers: [
+    UserService,
+    JwtStrategy,
+    JwtAuthGuard,
+    ConfigService,
+    FourTwoService,
+  ],
   exports: [UserService],
   controllers: [UserController],
 })

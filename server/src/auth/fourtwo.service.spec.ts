@@ -10,19 +10,18 @@
  * The test case checks if the AuthService is defined.
  */
 
-
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
+import { FourTwoService } from './fourtwo.service';
 
-describe('AuthService', () => {
-  let service: AuthService;
+describe('FourTwoService', () => {
+  let service: FourTwoService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService],
+      providers: [FourTwoService],
     }).compile();
 
-    service = module.get<AuthService>(AuthService);
+    service = module.get<FourTwoService>(FourTwoService);
   });
 
   it('should be defined', () => {

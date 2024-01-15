@@ -19,22 +19,14 @@ user data after successful authentication and setting an HTTP-only cookie with
     protect the routes and manage the authentication flow.
  */
 
-import {
-  Post,
-  Get,
-  Req,
-  Res,
-  UseGuards,
-  HttpStatus,
-  Controller,
-} from '@nestjs/common';
+import { Get, Req, Res, UseGuards, Controller } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from './auth.service';
+import { FourTwoService } from './fourtwo.service';
 import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: FourTwoService) {}
 
   @Get('42')
   @UseGuards(AuthGuard('42'))

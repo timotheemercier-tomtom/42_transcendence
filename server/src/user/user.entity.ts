@@ -24,13 +24,6 @@ export class User {
   @Column({ unique: true })
   username: string;
 
-  @Column({ unique: true })
-  firstname: string;
-
-  @Column({ unique: true })
-  lastname: string;
-
   @Column({ nullable: true })
   picture: string;
-
 }
