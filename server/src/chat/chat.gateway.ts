@@ -18,8 +18,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
   @WebSocketServer()
   server: Server;
-
   idmap = new Map<string, string>();
+  admins = new Map<string, Set<string>>();
 
   async handleConnection(client: Socket) {
     try {
@@ -46,15 +46,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('join')
   join(client: Socket, payload: string): void {
+    const room = this.server.sockets.adapter.rooms.get(payload);
+    if (!room) {
+      this.admins.set(payload, new Set([client.id]));
+    }
     client.join(payload);
     client.emit('join', payload);
   }
 
   @SubscribeMessage('leave')
   leave(client: Socket, payload: string): void {
+    const room = this.server.sockets.adapter.rooms.get(payload);
+    if (room) {
+      if (this.admins.get(payload)?.has(client.id)) {
+        this.admins.get(payload)?.delete(client.id);
+      }
+    }
     client.leave(payload);
+
     client.emit('leave', payload);
   }
+
+  isAdmin(client: Socket, user: string) {}
 
   @SubscribeMessage('message')
   handleMessage(client: Socket, payload: PMessage): void {
