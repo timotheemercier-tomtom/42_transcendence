@@ -11,17 +11,17 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { FourTwoService } from './fourtwo.service';
+import { FourTwoStrategy } from './fourtwo.strategy';
 
-describe('FourTwoService', () => {
-  let service: FourTwoService;
+describe('FourTwoStrategy', () => {
+  let service: FourTwoStrategy;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FourTwoService],
+      providers: [FourTwoStrategy],
     }).compile();
 
-    service = module.get<FourTwoService>(FourTwoService);
+    service = module.get<FourTwoStrategy>(FourTwoStrategy);
   });
 
   it('should be defined', () => {

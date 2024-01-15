@@ -19,7 +19,7 @@
  */
 
 import { PassportModule } from '@nestjs/passport';
-import { FourTwoService } from './fourtwo.service';
+import { FourTwoStrategy } from './fourtwo.strategy';
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -41,7 +41,7 @@ import { JwtModule } from '@nestjs/jwt';
       }),
     }),
   ],
-  providers: [FourTwoService],
+  providers: [FourTwoStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

@@ -37,7 +37,7 @@ import { JwtService } from '@nestjs/jwt';
 const FortyTwoStrategy = require('passport-42').Strategy;
 
 @Injectable()
-export class FourTwoService extends PassportStrategy(FortyTwoStrategy, '42') {
+export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
   constructor(
     private userService: UserService,
     private configService: ConfigService,
