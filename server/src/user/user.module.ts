@@ -33,7 +33,7 @@ import { UserController } from './user.controller';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
-import { FourTwoService } from 'src/auth/fourtwo.service';
+import { FourTwoStrategy } from 'src/auth/fourtwo.strategy';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
@@ -43,7 +43,7 @@ import { JwtModule } from '@nestjs/jwt';
     JwtStrategy,
     JwtAuthGuard,
     ConfigService,
-    FourTwoService,
+    FourTwoStrategy,
   ],
   exports: [UserService],
   controllers: [UserController],

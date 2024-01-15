@@ -8,15 +8,36 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { PMessage } from 'common';
+import { AuthService } from 'src/auth/auth.service';
 
 @WebSocketGateway({ namespace: '/chat/ws', transports: ['websocket'] })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private service: ChatService) {}
+  constructor(
+    private service: ChatService,
+    private auth: AuthService,
+  ) {}
   @WebSocketServer()
   server: Server;
 
+  idmap = new Map<string, string>();
+
   async handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    try {
+      const token: any = client.handshake.query.token; // Extract the token from the handshake query
+      const user = await this.auth.validateUser(token);
+
+      if (!user) {
+        client.disconnect();
+        return;
+      }
+
+      // Optionally, attach user information to the client object for future reference
+      this.idmap.set(client.id, user.username);
+    } catch (error) {
+      client.disconnect();
+    }
+
+    console.log(`Client connected: ${client.id} ${this.idmap.get(client.id)}`);
   }
 
   handleDisconnect(client: Socket) {

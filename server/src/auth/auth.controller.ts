@@ -21,12 +21,12 @@ user data after successful authentication and setting an HTTP-only cookie with
 
 import { Get, Req, Res, UseGuards, Controller } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { FourTwoService } from './fourtwo.service';
+import { FourTwoStrategy } from './fourtwo.strategy';
 import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: FourTwoService) {}
+  constructor(private authService: FourTwoStrategy) {}
 
   @Get('42')
   @UseGuards(AuthGuard('42'))
@@ -39,7 +39,6 @@ export class AuthController {
     // accessToken est directement extraits de req.user.
 
     res.cookie('accessToken', accessToken, {
-      httpOnly: true,
       secure: true,
     });
     res.redirect('http://localhost:5173/login');

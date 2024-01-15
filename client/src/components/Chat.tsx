@@ -5,13 +5,23 @@ import { Button, TextField } from '@mui/material';
 import Col from './Col';
 import Row from './Row';
 
+function getCookie(name: string) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
 export default function Chat({ id }: { id: string }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<PMessage[]>([]);
   const [input, setInput] = useState<string>('');
+
   useEffect(() => {
     const sock = io('http://localhost:3000/chat/ws', {
       transports: ['websocket'],
+      query: {
+        token: getCookie('accessToken'),
+      },
     });
     setSocket(sock);
 
