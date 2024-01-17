@@ -1,58 +1,60 @@
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import Error404 from './pages/Error404';
+import React from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import { UserProvider } from './components/User';
+import AppLayout from './AppLayout';
 import Home from './pages/Home';
 import Room from './pages/Room';
 import LoginResult from './pages/LoginResult';
-import UserProfile from './components/Profile';
-import AppLayout from './AppLayout';
-import ButtonLogin from './components/ButtonLogin';
-import { UserProvider } from './pages/User';
-
-import { Container } from '@mui/material';
-import Col from './components/Col';
+import User from './components/User';
+import Error404 from './pages/Error404';
+import theme from './theme';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
+    element: (
+      <AppLayout>
+        <Home />
+      </AppLayout>
+    ),
     errorElement: <Error404 />,
   },
   {
     path: '/r/:id',
-    element: <Room />,
+    element: (
+      <AppLayout>
+        <Room />
+      </AppLayout>
+    ),
   },
   {
-    element: <LoginResult />,
+    element: (
+      <AppLayout>
+        <LoginResult />
+      </AppLayout>
+    ),
+
     path: '/login',
   },
   {
-    element: <UserProfile />,
-    path: '/p/:id',
+    element: (
+      <AppLayout>
+        <User />
+      </AppLayout>
+    ),
+    path: '/u/:id',
   },
 ]);
 
 const App: React.FC = () => {
   return (
-    <AppLayout>
-      <RouterProvider router={router} />
-    </AppLayout>
+    <ThemeProvider theme={theme}>
+      <UserProvider>
+        <RouterProvider router={router} />
+      </UserProvider>
+    </ThemeProvider>
   );
 };
 
 export default App;
-// export default function App() {
-//   return (
-//     <Container className="root">
-//       <Col className="app">
-//         <header>
-//           <ButtonLogin />
-//         </header>
-//         <Col flexGrow={1} className="page">
-//           <UserProfile />
-//           <RouterProvider router={router} />
-//         </Col>
-//         <footer>i love feet</footer>
-//       </Col>
-//     </Container>
-//   );
-// }

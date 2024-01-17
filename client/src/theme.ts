@@ -44,7 +44,7 @@ const fontHeader = {
   textTransform: 'uppercase',
 };
 
-const theme = {
+const theme: any = {
   ...rawTheme,
   palette: {
     ...rawTheme.palette,

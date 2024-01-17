@@ -54,11 +54,13 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
   async validate(
     accessToken: string,
     refreshToken: string,
-    profile: any,
+    account: any,
   ): Promise<{ user: any; accessToken: string }> {
-    const username = profile.username;
+    const username = account.username;
     let user = await this.userService.findUser(username);
-    console.log(profile);
+    console.log(account);
+    console.log('TRIGGER 42strategy.tsx');
+
     if (!user) {
       user = await this.userService.createUser({ username });
     }
@@ -67,7 +69,3 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     return { user, accessToken };
   }
 }
-
-/*
-
-  */
