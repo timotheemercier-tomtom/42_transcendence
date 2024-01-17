@@ -11,5 +11,5 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  readonly profilePicture?: string;
+  readonly picture?: string;
 }

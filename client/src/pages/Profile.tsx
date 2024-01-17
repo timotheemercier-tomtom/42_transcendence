@@ -1,15 +1,19 @@
+import { useUser } from '../components/User';
+// const { username } = useParams<{ username: string }>();
 
-import User from '../components/User';
+export const Profile = () => {
+  const { user } = useUser();
 
-const Profile = () => {
-  // You can add more profile-specific content or logic here
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <h1>User Profile</h1>
-      <User />
-      {/* Other profile-related components */}
+      <p>Name: {user.name}</p>
+      <p>Username: {user.username}</p>
+      <img src={user.picture} alt="User" />
     </div>
   );
 };
-
-export default Profile;

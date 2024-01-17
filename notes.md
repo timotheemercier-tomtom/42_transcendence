@@ -159,3 +159,29 @@ _Ce sont de expressions spéciales qui permettent d'annoter et de modifier les c
 
     @Injectable(): Indique qu'une classe peut être injectée comme dépendance dans d'autres classes.
 
+
+const useUsers = (): UsersState => {
+  const [state, setState] = useState<UsersState>({
+    users: null,
+    loading: true,
+    error: null,
+  });
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+        const users = await response.json();
+        setState({ users, loading: false, error: null });
+      } catch (error) {
+        setState({ users: null, loading: false, error: error.message });
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  return state;
+};

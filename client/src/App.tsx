@@ -1,60 +1,70 @@
-import React from 'react';
+import React, { ReactNode, useContext, useState } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import { UserProvider } from './components/User';
-import AppLayout from './AppLayout';
+import { UserContext, UserProvider } from './components/User';
 import Home from './pages/Home';
 import Room from './pages/Room';
 import LoginResult from './pages/LoginResult';
-import User from './components/User';
+import { Profile } from './pages/Profile';
 import Error404 from './pages/Error404';
-import theme from './theme';
+import { Container, Button } from '@mui/material';
+import Col from './components/Col';
+// import LoginModule from './components/Login';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <AppLayout>
-        <Home />
-      </AppLayout>
-    ),
+    element: <Home />,
     errorElement: <Error404 />,
   },
   {
     path: '/r/:id',
-    element: (
-      <AppLayout>
-        <Room />
-      </AppLayout>
-    ),
+    element: <Room />,
   },
   {
-    element: (
-      <AppLayout>
-        <LoginResult />
-      </AppLayout>
-    ),
+    element: <LoginResult />,
 
     path: '/login',
   },
   {
-    element: (
-      <AppLayout>
-        <User />
-      </AppLayout>
-    ),
+    element: <Profile />,
     path: '/u/:id',
   },
 ]);
 
+
 const App: React.FC = () => {
+  //   const navigate = useNavigate();
+  //   const userContext = useContext(UserContext); // Utiliser useContext pour accéder au UserContext
+  //   const user = userContext ? userContext.user : null; // Accéder à l'utilisateur
+
+  const handle42Login = () => {
+    window.location.href = 'http://localhost:3000/auth/42';
+  };
+
+    const handleAccount = () => {
+  //     // let username = sessionStorage.getItem('login');
+//       if (user) {
+//   //         navigate(`/u/${user.username}`);
+//   //     } else {
+//   //         handleLoginDialogOpen();
+//       }
+    };
   return (
-    <ThemeProvider theme={theme}>
-      <UserProvider>
-        <RouterProvider router={router} />
-      </UserProvider>
-    </ThemeProvider>
+    <UserProvider>
+      <Container className="root">
+        <Col className="app">
+          <header>
+            <Button onClick={handle42Login}>Log In</Button>
+            <Button onClick={handle42Login}>Account</Button>
+
+          </header>
+          <Col flexGrow={1} className="page">
+            <RouterProvider router={router} />
+          </Col>
+          <footer>i love feet because i'm a weirdo</footer>
+        </Col>
+      </Container>
+    </UserProvider>
   );
 };
-
 export default App;

@@ -33,14 +33,15 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  async findUser(username: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { username } });
-  }
-
   async createUser(userData: Partial<User>): Promise<User> {
     const user = this.userRepository.create(userData);
     return await this.userRepository.save(user);
   }
+  
+  async findUser(username: string): Promise<User | null> {
+    return await this.userRepository.findOne({ where: { username } });
+  }
+
 
   async updateUser(
     username: string,
