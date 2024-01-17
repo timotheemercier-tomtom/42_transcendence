@@ -9,16 +9,26 @@ export type ChatEventType =
   | 'leave'
   | 'join';
 
-// type ChatEventData = {
-//   [K in ChatEventType]: any;
-// };
+type ChatEventData = {
+  pass: ChatPass;
+  owner: ChatOwner;
+  admin: ChatAdmin;
+  ban: ChatBan;
+  kick: ChatKick;
+  mute: ChatMute;
+};
 
-// export type ChatEventData = {
-//   message: ChatServerMessage;
-//   pass: ChatPass;
-//   owner: ChatOwner;
-//   admin: ChatAdmin;
-// };
+export type ChatServerEventData = {
+  message: ChatServerMessage;
+  leave: ChatServerLeave;
+  join: ChatServerJoin;
+} & ChatEventData;
+
+export type ChatClientEventData = {
+  message: ChatClientMessage;
+  leave: string;
+  join: string;
+} & ChatEventData;
 
 export type ChatRole = 'user' | 'admin' | 'owner';
 
@@ -30,6 +40,7 @@ export type ChatClientMessage = {
 export type ChatServerMessage = ChatClientMessage & {
   user: string;
   role: ChatRole;
+  date: number;
 };
 
 export type ChatPass = {

@@ -175,6 +175,7 @@ export class ChatGateway
         : this.isAdmin(client, payload.room)
           ? 'admin'
           : 'user',
+      date: new Date().getTime(),
     };
     const mutes = this.mutes.get(payload.room);
     const muted =
@@ -187,6 +188,6 @@ export class ChatGateway
         false,
       );
 
-    this.server.to(msg.room).emit('message', msg);
+    if (!muted) this.server.to(msg.room).emit('message', msg);
   }
 }
