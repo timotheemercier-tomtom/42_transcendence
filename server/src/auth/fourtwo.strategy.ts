@@ -51,9 +51,9 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     super({
       clientID: configService.get('AUTH_ID'),
       clientSecret: configService.get('AUTH_SECRET'),
-      callbackURL: 'http://127.0.0.1:3000/auth/42/callback',
+      callbackURL: 'http://localhost:3000/auth/42/callback',
       profileFields: {
-        // 'id': function (obj: any) { return String(obj.id); }, 
+        'id': function (obj: any) { return String(obj.id); }, 
         'username': 'login',
         'displayName': 'displayname',
         'name.familyName': 'last_name',

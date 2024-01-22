@@ -44,11 +44,11 @@ import { AuthGuard } from '@nestjs/passport';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get(':username')
-  @UseGuards(JwtAuthGuard)
-  async findUser(@Param('username') username: string): Promise<User | null> {
-    return await this.userService.findUser(username);
-  }
+//   @Get(':username')
+//   @UseGuards(JwtAuthGuard)
+//   async findUser(@Param('username') username: string): Promise<User | null> {
+//     return await this.userService.findUser(username);
+//   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -56,17 +56,15 @@ export class UserController {
     return await this.userService.findUser(req.user.username);
   }
 
-  /////
-  @Get(':me')
-  @UseGuards(AuthGuard('jwt'))
-  async findById(@Req() req: any): Promise<User> {
-    const user = await this.userService.findById(req.user.id);
+  @Get(':username')
+  @UseGuards(JwtAuthGuard)
+  async findUser(@Req() req: any): Promise<User | null> {
+    const user = await this.userService.findUser(req.user.username);
     if (!user) {
       throw new NotFoundException('User not found');
     }
     return user;
   }
-////
 
   @Patch(':username')
   async updateUser(

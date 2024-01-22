@@ -15,10 +15,10 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post('login')
-  login(): any {
-    return {};
-  }
+//   @Post('login')
+//   login(): any {
+//     return {};
+//   }
 
   // set up to protected in order to protect access for non log user 
 

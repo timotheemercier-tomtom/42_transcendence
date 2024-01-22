@@ -23,6 +23,7 @@ import { Get, Req, Res, UseGuards, Controller } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FourTwoStrategy } from './fourtwo.strategy';
 import { Response } from 'express';
+import { log } from 'console';
 
 @Controller('auth')
 export class AuthController {

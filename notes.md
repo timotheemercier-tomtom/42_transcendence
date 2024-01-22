@@ -20,4 +20,3 @@ class User {
 
 * UPDATE USER 
 `async updateUser(username: string, updateUserDto: UpdateUserDto): Promise<User>`
-
