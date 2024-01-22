@@ -43,16 +43,39 @@ export class ChatGateway
   mutes = new Map<string, ChatMute[]>();
   rooms = new Map<string, Set<string>>();
 
+  dump() {
+    console.log(
+      'idmap',
+      this.idmap,
+      'admins',
+      this.admins,
+      'owners',
+      this.owners,
+      'pass',
+      this.pass,
+      'banned',
+      this.banned,
+      'mutes',
+      this.mutes,
+      'rooms',
+      this.rooms,
+    );
+  }
+
   afterInit(server: Server) {
     server.use(async (client: Socket, next) => {
       try {
+        const anon: any = client.handshake.query.anon;
         const token: any = client.handshake.query.token;
-        const user = await this.auth.validateUser(token);
+        const user = anon
+          ? { username: '$anon' + anon }
+          : await this.auth.validateUser(token);
 
         if (!user) {
           return next(new Error('user does not exist'));
         }
         this.userToClient.set(user.username, client);
+
         this.idmap.set(client.id, user.username);
       } catch (error) {
         return next(error);
@@ -71,18 +94,20 @@ export class ChatGateway
 
   @SubscribeMessage('join')
   join(client: Socket, payload: string): void {
-    client.join(payload);
     const user = this.idmap.get(client.id)!;
+    if (this.banned.get(payload)?.has(user)) return;
+    client.join(payload);
     const room = this.rooms.get(payload) ?? new Set();
-    room.add(user);
-    if (room.size == 1) {
+    if (room.size == 0) {
       const t = {
         room: payload,
         user,
+        on: true,
       };
       this._setOwner(t);
       this.setAdmin(client, t);
     }
+    room.add(user);
     this.rooms.set(payload, room);
     this.server.to(payload).emit('join', { room: payload, user });
   }
@@ -134,7 +159,9 @@ export class ChatGateway
     if (admins.has(payload.user)) admins.delete(payload.user);
     else admins.add(payload.user);
     this.admins.set(payload.room, admins);
-    this.server.to(payload.room).emit('admin', payload);
+    this.server
+      .to(payload.room)
+      .emit('admin', { ...payload, on: admins.has(payload.user) });
   }
 
   @SubscribeMessage('ban')
@@ -144,14 +171,18 @@ export class ChatGateway
     if (bans.has(payload.user)) bans.delete(payload.user);
     else bans.add(payload.user);
     this.banned.set(payload.room, bans);
-    this.server.to(payload.room).emit('ban', payload);
+    this.server
+      .to(payload.room)
+      .emit('ban', { ...payload, on: bans.has(payload.user) });
   }
 
   @SubscribeMessage('kick')
   kick(client: Socket, payload: ChatKick) {
+    this.dump();
     if (!this.isAdmin(client, payload.room)) return;
     const uclient = this.userToClient.get(payload.user);
-    if (uclient) this.leave(uclient, payload.room);
+    if (!uclient) return;
+    this.leave(uclient, payload.room);
     this.server.to(payload.room).emit('kick', payload);
   }
 

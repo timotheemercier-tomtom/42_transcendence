@@ -22,6 +22,8 @@ export type ChatServerEventData = {
   message: ChatServerMessage;
   leave: ChatServerLeave;
   join: ChatServerJoin;
+  admin: ChatServerAdmin;
+  ban: ChatServerBan;
 } & ChatEventData;
 
 export type ChatClientEventData = {
@@ -30,7 +32,7 @@ export type ChatClientEventData = {
   join: string;
 } & ChatEventData;
 
-export type ChatRole = 'user' | 'admin' | 'owner';
+export type ChatRole = 'user' | 'admin' | 'owner' | 'server';
 
 export type ChatClientMessage = {
   room: string;
@@ -58,9 +60,17 @@ export type ChatAdmin = {
   user: string;
 };
 
+export type ChatServerAdmin = ChatAdmin & {
+  on: boolean;
+};
+
 export type ChatBan = {
   room: string;
   user: string;
+};
+
+export type ChatServerBan = ChatBan & {
+  on: boolean;
 };
 
 export type ChatKick = {

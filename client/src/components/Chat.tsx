@@ -6,60 +6,85 @@ import {
   ChatServerEventData,
   ChatServerMessage,
 } from 'common';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Socket, io } from 'socket.io-client';
+import { socket } from '../chat.socket';
 import Col from './Col';
 import Row from './Row';
-import { getCookie } from '../util';
-
-class State {
-  constructor() {}
-}
 
 export default function Chat({ id }: { id: string }) {
-  const socket = useRef<Socket | null>(null);
   const [msgs, setMsgs] = useState(new Map<string, ChatServerMessage[]>());
   const [input, setInput] = useState<string>('');
   const [rooms, setRooms] = useState(new Set<string>());
   const [room, setRoom] = useState(id);
   const user = sessionStorage.getItem('user') ?? '';
+  const [sev, setSev] = useState<[string, never][]>([]);
+
+  useEffect(() => {
+    socket.connect();
+    socket.on('connect', recvs);
+    setMsgs(new Map());
+
+    return () => {
+      socket.disconnect();
+      socket.off('connect', recvs);
+      console.log(sev);
+      sev.forEach((v) => socket.off(v[0], v[1]));
+    };
+  }, []);
 
   const send = <EventType extends ChatEventType>(
     ev: EventType,
     data: ChatClientEventData[EventType],
   ) => {
-    socket.current!.emit(ev, data);
+    socket.emit(ev, data);
   };
 
   const recv = <EventType extends ChatEventType>(
     ev: EventType,
     cb: (data: ChatServerEventData[EventType]) => void,
   ) => {
-    socket.current!.on(ev, cb as never);
+    setSev((v) => [...v, [ev, cb as never]]);
+    socket.on(ev, cb as never);
   };
 
   useEffect(() => {
     setRoom(id);
   }, [id]);
 
-  useEffect(() => {
-    const sock = io('http://localhost:3000/chat/ws', {
-      transports: ['websocket'],
-      query: {
-        // TODO : get from context?
-        token: getCookie('accessToken'),
-      },
+  const pushmsg = (e: ChatServerMessage) => {
+    console.log('push', e);
+
+    setMsgs((v) => {
+      const a = [...(v.get(e.room) || []), e as never];
+      v.set(e.room, a);
+      return new Map(v);
     });
-    socket.current = sock;
-    const user = sessionStorage.getItem('user') ?? '';
+  };
+
+  const pushServerMsg = (room: string, msg: string) => {
+    pushmsg({
+      room: room,
+      date: new Date().getTime(),
+      role: 'server',
+      user: '$server',
+      msg: msg,
+    });
+  };
+
+  const recvs = () => {
+    console.log('recvs');
+
+    socket.emit('join', room);
 
     recv('message', (e) => {
-      setMsgs((v) => new Map(v.set(e.room, [...(v.get(e.room) ?? []), e])));
+      pushmsg(e);
     });
 
     recv('join', (e) => {
       if (e.user == user) setRooms((v) => new Set(v.add(e.room)));
+      pushServerMsg(e.room, `+ ${e.user}`);
+      console.log('joined');
     });
 
     recv('leave', (e) => {
@@ -69,26 +94,32 @@ export default function Chat({ id }: { id: string }) {
         }
         setRooms((v) => (v.delete(e.room), new Set(v)));
       }
+      pushServerMsg(e.room, `- ${e.user}`);
     });
 
-    return () => {
-      sock.disconnect();
-    };
-  }, []);
+    recv('kick', (e) => {
+      pushServerMsg(e.room, `kicked ${e.user}`);
+    });
 
-  useEffect(() => {
-    if (!socket.current) return;
-    console.log('UGLY HACK');
+    recv('ban', (e) => {
+      pushServerMsg(e.room, `${e.on ? 'banned' : 'unbanned'} ${e.user}`);
+    });
 
-    const sock = socket.current;
-    const f = () => {
-      sock.emit('join', room);
-    };
-    sock.on('connect', f);
-    return () => {
-      sock.off('connect', f);
-    };
-  }, [room]);
+    recv('mute', (e) => {
+      pushServerMsg(
+        e.room,
+        `muted ${e.user} until ${new Date(e.date).toLocaleString()}`,
+      );
+    });
+
+    recv('admin', (e) => {
+      pushServerMsg(e.room, `${e.user} ${e.on ? 'gained' : 'lost'} adminship`);
+    });
+
+    recv('owner', (e) => {
+      pushServerMsg(e.room, `${e.user} became owner`);
+    });
+  };
 
   const cmdre = /^\/(owner|admin|pass|ban|kick|mute|join|leave)(.*)/;
 
@@ -122,6 +153,7 @@ export default function Chat({ id }: { id: string }) {
         send(m[1], room);
         break;
     }
+    setInput('');
     return true;
   };
 
@@ -134,6 +166,27 @@ export default function Chat({ id }: { id: string }) {
     }
   };
 
+  const getcolor = (v: ChatServerMessage): string => {
+    return { admin: 'red', owner: 'purple', server: 'grey', user: 'white' }[
+      v.role
+    ];
+  };
+
+  const Message = ({ v }: { v: ChatServerMessage }) => {
+    return (
+      <Row color={getcolor(v)}>
+        {v.role == 'server' ? (
+          <span>{v.user}</span>
+        ) : (
+          <Link to={'/u/' + v.user}>
+            <span>{v.user}</span>
+          </Link>
+        )}
+        <span>: {v.msg}</span>
+      </Row>
+    );
+  };
+
   return (
     <Row border={1} flexGrow={1}>
       <Col flexGrow={1}>
@@ -141,14 +194,7 @@ export default function Chat({ id }: { id: string }) {
           {user}@{room}
         </h3>
         <Col flexGrow={1} overflow={'scroll'}>
-          {msgs.get(room)?.map((v, i) => (
-            <div key={i}>
-              <Link to={'/u/' + v.user}>
-                <span>{v.user}</span>
-              </Link>
-              : <span key={i}>{v.msg}</span>
-            </div>
-          ))}
+          {msgs.get(room)?.map((v, i) => <Message key={i} v={v} />)}
         </Col>
         <Row>
           <TextField
