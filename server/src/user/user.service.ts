@@ -37,11 +37,14 @@ export class UserService {
     const user = this.userRepository.create(userData);
     return await this.userRepository.save(user);
   }
-  
+
   async findUser(username: string): Promise<User | null> {
     return await this.userRepository.findOne({ where: { username } });
   }
 
+  async findById(id: number): Promise<User | null> {
+    return this.userRepository.findOneBy({ id });
+  }
 
   async updateUser(
     username: string,

@@ -23,26 +23,19 @@ or private, or protected by a password.
 
 
 ### USER
-- [ ] **OAuth System Integration**
-  - Integrate OAuth login using the 42 intranet system.
+- [ ] **OAuth Login** Users must log in using the OAuth system of the 42 intranet.
 
-- [ ] **Unique Usernames**
-  - Allow users to choose a unique name for display on the website.
+- [ ] **Unique Usernames** Users should be able to choose a unique name that will be displayed on the website.
 
-- [ ] **Avatar Upload**
-  - Enable users to upload an avatar, with a default avatar set for those who do not upload one.
+- [ ] **Avatar Upload** Users should be able to upload an avatar. A default avatar must be set if the user does not upload one.
 
-- [ ] **Two-Factor Authentication**
-  - Provide an option for two-factor authentication using methods like Google Authenticator or SMS.
+- [ ] **Two-Factor Authentication** Users should be able to enable two-factor authentication, for example, using Google Authenticator or text messages to their phone.
 
-- [ ] **Friend System**
-  - Allow users to add other users as friends and view their current status (online, offline, in a game, etc.).
+- [ ] **Friend System** Users should be able to add other users as friends and view their current status (online, offline, in a game, etc.).
 
-- [ ] **User Profile Statistics**
-  - Display statistics on user profiles (wins, losses, ladder level, achievements, etc.).
+- [ ] **User Stats Display** Display stUser profiles need to display stats like wins, losses, ladder level, achievements, etc.atistics on user profiles (wins, losses, ladder level, achievements, etc.).
 
-- [ ] **Match History Feature**
-  - Include a Match History section in user profiles showing 1v1 games, ladder, and other relevant information.
+- [ ] **Match History Feature** Each user should have a Match History, including details of 1v1 games, ladder rankings, and other relevant information. This should be accessible to all logged-in users​​.
 
 
 ### GAME

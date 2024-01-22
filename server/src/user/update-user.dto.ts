@@ -13,3 +13,6 @@ export class UpdateUserDto {
   @IsString()
   readonly picture?: string;
 }
+
+// Add any additional properties you need to send to the frontend
+// Make sure to exclude sensitive information like passwords

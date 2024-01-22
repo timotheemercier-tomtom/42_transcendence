@@ -6,89 +6,79 @@ import React, {
   ReactNode,
 } from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, Avatar } from '@material-ui/core';
+import { CircularProgress, Card, Avatar } from '@mui/material';
+import Typography from './Typography';
 
-type UserData = {
-  name: string;
-  username: string;
-  //   email: string;
-  picture: string;
-  //   image: {
-  //     link: string;
-  //   };
-};
+// type UserData = {
+//   name: string;
+//   username: string;
+//   //   email: string;
+//   picture: string;
+//   //   image: {
+//   //     link: string;
+//   //   };
+// };
 
 type UserContextType = {
   user: UserData | null;
   setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
 };
 
-// userContext -> To stock data
-export const UserContext = createContext<UserContextType | null>(null);
+interface UserData {
+    name: string;
+    username: string;
+    //   email: string;
+    picture: string;
+    //   image: {
+    //     link: string;
+    //   };
+}
 
-// useEffect -> to get user data and store them into the context
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  let username = sessionStorage.getItem('user');
-  
-  useEffect(() => {
-      const fetchUserData = async () => {
-          setLoading(true);
-          try {
-            //   console.log('USER', username);
-        const response = await fetch(`http://localhost:3000/user/${username}`, {
-          method: 'GET',
-          credentials: 'include',
-        });
-        // console.log('Response status:', response.status); // Log pour débogage
-        // console.log('Response headers:', response.headers.get('body')); // Vérifier le type de contenu
 
-        if (!response.ok) {
-            throw new Error(`Error: ${response.statusText}`);
-          }
-    
-          const text = await response.text(); // Récupérer le texte brut de la réponse
-          console.log('Response body:', text); // Log du corps de la réponse
-    
-          try {
-            const data = JSON.parse(text); // Essayer de parser le texte en JSON
-            setUser(data);
-          } catch (e) {
-            console.error('Error parsing JSON:', e);
-            setError('Failed to parse user data');
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          setError('Failed to fetch user data');
-        } 
-        finally {
-          setLoading(false);
-        }    
+function AccountPage() {
+    const [userData, setUserData] = useState<UserData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        fetchUserData();
+    }, []);
+
+    const fetchUserData = async () => {
+        try {
+            const response = await fetch('/api/user/username', {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json() as UserData;
+            setUserData(data);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    fetchUserData();
-  }, [username]); 
-  
-//   if (loading) return <Typography>Loading...</Typography>;
-//   if (error) return <Typography>Error: {error}</Typography>;
-//   if (!user) return <Typography>No user data available.</Typography>;
+    if (loading) return <CircularProgress />;
+    if (error) return <Typography color="error">{error}</Typography>;
 
-  return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
-    </UserContext.Provider>
-  );
-};
+    if (!userData)
+        return null;
+    return (
+        <Card>
+            <Typography variant="h5">Account Details</Typography>
+            {/* <Typography variant="h6">Name: {userData.name}</Typography> */}
+            <Typography>Name: {userData.name}</Typography>
+            <Avatar src={userData.picture} alt="Profile Picture" />
+            {/* Add more user details as needed */}
+        </Card>
+    );
+}
 
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
-};
+export default AccountPage;
+
 
 
 // // Utiliser cette fonction pour récupérer et afficher les données de l'utilisateur

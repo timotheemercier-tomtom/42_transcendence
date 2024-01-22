@@ -27,6 +27,7 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Req,
@@ -37,6 +38,7 @@ import { UserService } from './user.service';
 import { User } from './user.entity';
 import { UpdateUserDto } from './update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
@@ -53,6 +55,18 @@ export class UserController {
   async getUser(@Req() req: any): Promise<User | null> {
     return await this.userService.findUser(req.user.username);
   }
+
+  /////
+  @Get(':me')
+  @UseGuards(AuthGuard('jwt'))
+  async findById(@Req() req: any): Promise<User> {
+    const user = await this.userService.findById(req.user.id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+////
 
   @Patch(':username')
   async updateUser(
