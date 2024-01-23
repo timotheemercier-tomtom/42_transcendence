@@ -21,77 +21,73 @@ class User {
 * UPDATE USER 
 `async updateUser(username: string, updateUserDto: UpdateUserDto): Promise<User>`
 
-
-import { User } from "./entity/User"
-
-const userRepository = dataSource.getRepository(User)
-const user = await userRepository.findOneBy({
-    id: 1,
-})
-user.name = "Umed"
-await userRepository.save(user)
-
-
-import { Photo } from "./entity/Photo"
-import { AppDataSource } from "./index"
-
-const photo = new Photo()
-photo.name = "Me and Bears"
-photo.description = "I am near polar bears"
-photo.filename = "photo-with-bears.jpg"
-photo.views = 1
-photo.isPublished = true
-
-const photoRepository = AppDataSource.getRepository(Photo)
-
-await photoRepository.save(photo)
-console.log("Photo has been saved")
-
-const savedPhotos = await photoRepository.find()
-console.log("All photos from the db: ", savedPhotos)
-
-
-
-
-const userRepository = MyDataSource.getRepository(User)
-
-const user = new User()
-user.firstName = "Timber"
-user.lastName = "Saw"
-user.age = 25
-await userRepository.save(user)
-
-const allUsers = await userRepository.find()
-const firstUser = await userRepository.findOneBy({
-    id: 1,
-}) // find by id
-const timber = await userRepository.findOneBy({
-    firstName: "Timber",
-    lastName: "Saw",
-}) // find by firstName and lastName
-
-await userRepository.remove(timber)
-
-
-
-
-
-@Injectable()
-export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-  ) {}
-
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  /**
+   * Post decorator represents method of request as we have used post decorator the method
+   * of this API will be post.
+   * so the API URL to create User will be
+   * POST http://localhost:3000/user
+   */
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.createUser(createUserDto);
   }
 
-  findOne(id: number): Promise<User | null> {
-    return this.usersRepository.findOneBy({ id });
+  /**
+   * we have used get decorator to get all the user's list
+   * so the API URL will be
+   * GET http://localhost:3000/user
+   */
+  @Get()
+  findAll() {
+    return this.userService.findAllUser();
   }
 
-  async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+  /**
+   * we have used get decorator with id param to get id from request
+   * so the API URL will be
+   * GET http://localhost:3000/user/:id
+   */
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.userService.viewUser(+id);
   }
+
+  /**
+   * we have used patch decorator with id param to get id from request
+   * so the API URL will be
+   * PATCH http://localhost:3000/user/:id
+   */
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.updateUser(+id, updateUserDto);
+  }
+
+
+  // src/users/users.controller.ts
+@Put('profile')
+@UseGuards(AuthGuard('jwt'))
+async updateProfile(@Req() req, @Body() updateProfileDto: UpdateProfileDto): Promise<User> {
+    return this.userService.updateProfile(req.user.id, updateProfileDto);
+}
+
+// src/users/dto/update-profile.dto.ts
+export class UpdateProfileDto {
+    // define properties to be updated
+    readonly name?: string;
+    readonly email?: string;
+    // ... other fields
+}
+
+// src/users/users.service.ts
+async updateProfile(userId: number, updateProfileDto: UpdateProfileDto): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) {
+        throw new NotFoundException('User not found');
+    }
+
+    // update the user properties
+    Object.assign(user, updateProfileDto);
+    
+    // save the updated user
+    return this.userRepository.save(user);
 }

@@ -1,42 +1,14 @@
-import React, {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
-// import { useParams } from 'react-router-dom';
-import { Avatar, Card, CircularProgress } from '@mui/material';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import {
+  Avatar,
+  Card,
+  CircularProgress,
+  TextField,
+  Button,
+} from '@mui/material';
 import Typography from './Typography';
-
-// type UserContextType = {
-//   user: UserData | null;
-//   setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
-// };
-
-// Define the type for the context value
-type UserContextType = {
-  user: any; // Replace 'any' with a more specific type as per your user object
-  setUser: React.Dispatch<React.SetStateAction<UserData | null>>; // Same here for the specific type
-};
-
-// Create context with a default value of type UserContextType
-const UserContext = createContext<UserContextType | null>(null);
-
-export const UserProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [user, setUser] = useState<UserContextType['user']>(null);
-
-  return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
-    </UserContext.Provider>
-  );
-};
-
-export const useUser = () => useContext(UserContext);
+import { getCookie } from '../utils';
 
 type UserData = {
   login: string;
@@ -44,12 +16,15 @@ type UserData = {
   picture: string;
 };
 
+const user = sessionStorage.getItem('user') ?? '';
+
 function User() {
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [newUsername, setNewUsername] = useState('');
+  const [newPicture, setNewPicture] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { login = '' } = useParams();
-  //   const { login } = useParams<{ login: string }>();
 
   useEffect(() => {
     fetchUserData();
@@ -64,6 +39,7 @@ function User() {
       if (!response.ok) throw new Error('Network response error');
       const data = (await response.json()) as UserData;
       setUserData(data);
+      setNewUsername(data.username); // Initialize with current username
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -71,24 +47,67 @@ function User() {
     }
   };
 
+  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewUsername(event.target.value);
+  };
+
+  const handlePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setNewPicture(event.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async () => {
+    const tokenJWT = getCookie('accessToken');
+    if (!tokenJWT) {
+      console.error('Error:JWT token not found');
+      return;
+    }
+
+    const formData = new FormData();
+    if (newPicture) {
+      formData.append('picture', newPicture);
+    }
+    formData.append('username', newUsername);
+
+    try {
+      const response = await fetch(`http://localhost:3000/user/${login}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${tokenJWT}`, // Remplacer avec votre token JWT
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour du profil');
+      }
+
+      const updatedUser = await response.json();
+      setUserData(updatedUser);
+      alert('Profil mis à jour avec succès');
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
-
   if (!userData) return null;
+
   return (
     <Card>
       <Typography variant="h5">Account Details</Typography>
-      {/* <Typography> URL {userData.picture.link} </Typography>; */}
-
-      {/* <Typography variant="h6">Name: {userData.name}</Typography> */}
-      <Typography>Name: {userData.username}</Typography>
-      {/* <img
-        src={userData.picture.link}
-        alt={userData.username}
-      /> */}
       <Avatar src={userData.picture} alt="Profile Picture" />
-      {/* Add more user details as needed */}
+      <TextField
+        label="Nom d'utilisateur"
+        value={newUsername}
+        onChange={handleUsernameChange}
+      />
+      <input type="file" onChange={handlePictureChange} />
+      <Button onClick={handleSubmit}>Mettre à jour</Button>
     </Card>
   );
 }
+
 export default User;

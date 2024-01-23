@@ -22,5 +22,5 @@ export class UserDto {
   readonly picture?: string;
 }
 
-// Add any additional properties you need to send to the frontend
+// Add any additional properties you need to send to the frontendlUser
 // Make sure to exclude sensitive information like passwords

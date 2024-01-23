@@ -30,6 +30,8 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Post,
+  Put,
   Req,
   UnauthorizedException,
   UseGuards,
@@ -43,10 +45,20 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private userService: UserService) {}
 
+  //   @Post()
+  //   create(@Body() createUser: User) {
+  //     return this.userService.create(createUser);
+  //   }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   async getUser(@Req() req: any): Promise<User | null> {
     return await this.userService.findOne(req.user.login);
+  }
+
+  @Get()
+  findAll() {
+    return this.userService.findAll();
   }
 
   @Get(':login')
@@ -62,16 +74,25 @@ export class UserController {
     return user;
   }
 
-  @Patch(':login')
-  async updateUser(
-    @Param('login') login: string,
-    @Body() updateUserDto: UserDto,
-    @Req() request: Request & any,
+  @Put(':login')
+  @UseGuards(JwtAuthGuard)
+  async updateProfile(
+    @Req() req: any,
+    @Body() updateProfileDto: UserDto,
   ): Promise<User> {
-    const user = request.user;
-    if (user.login !== login) {
-      throw new UnauthorizedException();
-    }
-    return await this.userService.update(login, updateUserDto);
+    return this.userService.update(req.user.login, updateProfileDto);
   }
+
+//   @Patch(':login')
+//   async updateUser(
+//     @Param('login') login: string,
+//     @Body() updateUserDto: UserDto,
+//     @Req() request: Request & any,
+//   ): Promise<User> {
+//     const user = request.user;
+//     if (user.login !== login) {
+//       throw new UnauthorizedException();
+//     }
+//     return await this.userService.update(login, updateUserDto);
+//   }
 }
