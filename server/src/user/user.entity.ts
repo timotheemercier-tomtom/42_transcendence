@@ -21,12 +21,21 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: true  })
+  @Column({ unique: true })
   login: string;
 
-  @Column({ unique: true, nullable: true  })
+  @Column({length: 42})
   username: string;
 
   @Column({ nullable: true })
   picture: string;
+
+  @Column({ default: 0 })
+  won: number;
+
+  @Column({ default: 0 })
+  lost: number;
+
+  @Column({ default: 0 })
+  rank: number;
 }

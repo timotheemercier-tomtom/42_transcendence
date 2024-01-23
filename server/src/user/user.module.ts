@@ -45,7 +45,7 @@ import { JwtModule } from '@nestjs/jwt';
     ConfigService,
     FourTwoStrategy,
   ],
-  exports: [UserService],
+  exports: [UserService, TypeOrmModule],
   controllers: [UserController],
 })
 export class UserModule {}

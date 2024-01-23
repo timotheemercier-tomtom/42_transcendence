@@ -52,8 +52,8 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     database: configService.get('DB_NAME'),
     entities: [User],
     synchronize: configService.get<boolean>('TYPEORM_SYNC', false),
-    // Additional configuration options can be uncommented as needed
-  }),
+    logging: true,
+    migrations: [],  }),
 });
 
 @Module({

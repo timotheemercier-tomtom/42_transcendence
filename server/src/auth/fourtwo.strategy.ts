@@ -36,8 +36,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as passport from 'passport';
 import { User } from 'src/user/user.entity'; // Adjust the import based on your project structure
 
-// import { Strategy as FortyTwoStrategy } from 'passport-42';
 import { InjectRepository } from '@nestjs/typeorm';
+import { log } from 'console';
 
 const FortyTwoStrategy = require('passport-42').Strategy;
 
@@ -52,39 +52,8 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
       clientID: configService.get('AUTH_ID'),
       clientSecret: configService.get('AUTH_SECRET'),
       callbackURL: 'http://localhost:3000/auth/42/callback',
-      profileFields: {
-        'id': function (obj: any) { return String(obj.id); }, 
-        'username': 'login',
-        'displayName': 'displayname',
-        'name.familyName': 'last_name',
-        'name.givenName': 'first_name',
-        'profileUrl': 'url',
-        'emails.0.value': 'email',
-        'phoneNumbers.0.value': 'phone',
-        'photos.0.value': 'image_url'
-      }
-      //   scope: ['public'],
     });
   }
-
-  // passport.use(new FortyTwoStrategy({
-  //     clientID: configService.get('AUTH_ID'),
-  //     clientSecret: configService.get('AUTH_SECRET'),
-  //     callbackURL: "http://127.0.0.1:3000/auth/42/callback"
-  //   },
-//   function(
-//     accessToken: string,
-//     refreshToken: string,
-//     profile: any,
-//     cb: (err: any, user?: any) => void,
-//   ) {
-//     this.this.userService.findUser(
-//       { fortytwoId: profile.id },
-//       function (err: any, user: any) {
-//         return cb(err, user);
-//       },
-//     );
-//   }
 
   async validate(
     accessToken: string,
@@ -92,15 +61,12 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     profile: any,
   ): Promise<{ user: any; accessToken: string }> {
     const username = profile.username;
-    let user = await this.userService.findUser(username);
-    console.log(profile);
-
+    let user = await this.userService.findOne(username);
     if (!user) {
-      user = await this.userService.createUser({ username });
+      user = await this.userService.create({ login:username, username, picture: profile._json.image.link });
     }
-    const payload = { username: user.username };
+    const payload = { login: user.login };
     accessToken = this.jwtService.sign(payload);
     return { user, accessToken };
   }
 }
-

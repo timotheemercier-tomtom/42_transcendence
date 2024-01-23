@@ -16,45 +16,57 @@
  * Updates an existing user's details in the database. It first finds the user by username,
  * then updates their details with the provided UpdateUserDto, and finally saves the updated user.
  * @param {string} username - The username of the user to update.
- * @param {UpdateUserDto} updateUserDto - The DTO containing the updated user data.
+ * @param {UserDto} updateUserDto - The DTO containing the updated user data.
  * @return {Promise<User>} - The updated user object.
  */
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UserDto } from './user.dto';
 import { User } from './user.entity';
-import { UpdateUserDto } from './update-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private usersRepository: Repository<User>,
   ) {}
 
-  async createUser(userData: Partial<User>): Promise<User> {
-    const user = this.userRepository.create(userData);
-    return await this.userRepository.save(user);
-  }
 
-  async findUser(username: string): Promise<User | null> {
-    return await this.userRepository.findOneBy({ username });
-  }
+//   createUser(userData: Partial<User>, userDto: UserDto): Promise<User> {
+//     const user: User = new User();
+//     user.username = userDto.username;
+//     user.password = createUserDto.password;
+//     user.gender = createUserDto.gender;
+//     return this.userRepository.save(user);
+//   }
+  
 
-  async findById(id: number): Promise<User | null> {
-    return this.userRepository.findOneBy({ id });
-  }
-
-  async updateUser(
-    username: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { username } });
+  async update(username: string, updateUserDto: UserDto): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { username } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
     Object.assign(user, updateUserDto);
-    return await this.userRepository.save(user);
+    return await this.usersRepository.save(user);
+  }
+
+
+  async create(userData: Partial<User>): Promise<User> {
+    const user = this.usersRepository.create(userData);
+    return await this.usersRepository.save(user);
+  }
+
+  async findOne(username: string): Promise<User | null> {
+    return await this.usersRepository.findOneBy({ username });
+  }
+
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find();
+  }
+
+  async removeOne(id: number): Promise<void> {
+    await this.usersRepository.delete(id);
   }
 }
