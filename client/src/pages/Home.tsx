@@ -18,7 +18,7 @@ export default function Home() {
 
 //     this.state = {
 //       content: ""
-//     };
+//     };string
 //   }
 
 //   componentDidMount() {

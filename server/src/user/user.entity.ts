@@ -22,8 +22,20 @@ export class User {
   id: number;
 
   @Column({ unique: true })
+  login: string;
+
+  @Column({length: 42})
   username: string;
 
   @Column({ nullable: true })
   picture: string;
+
+  @Column({ default: 0 })
+  won: number;
+
+  @Column({ default: 0 })
+  lost: number;
+
+  @Column({ default: 0 })
+  rank: number;
 }

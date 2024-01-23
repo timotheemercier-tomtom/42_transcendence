@@ -1,15 +1,17 @@
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import Error404 from './pages/Error404';
+import React, { ReactNode, useContext, useState } from 'react';
+import { createBrowserRouter, Link, RouterProvider } from 'react-router-dom';
+// import User, { UserProvider } from './components/User';
 import Home from './pages/Home';
 import Room from './pages/Room';
 import LoginResult from './pages/LoginResult';
-import UserProfile from './components/Profile';
-import AppLayout from './AppLayout';
-import ButtonLogin from './components/ButtonLogin';
-import { UserProvider } from './pages/User';
-
-import { Container } from '@mui/material';
+import Error404 from './pages/Error404';
+import { Container, Button } from '@mui/material';
 import Col from './components/Col';
+import User from './components/User';
+import Profile from './pages/Profile';
+import ButtonLogin from './components/ButtonLogin';
+
+// import LoginModule from './components/Login';
 
 const router = createBrowserRouter([
   {
@@ -26,33 +28,42 @@ const router = createBrowserRouter([
     path: '/login',
   },
   {
-    element: <UserProfile />,
-    path: '/p/:id',
+    element: <User />,
+    path: '/u/:login',
   },
 ]);
 
+// const App: React.FC = () => {
+//   const navigate = useNavigate();
+//   const userContext = useContext(UserContext); // Utiliser useContext pour accéder au UserContext
+//   const user = userContext ? userContext.user : null; // Accéder à l'utilisateur
+
 const App: React.FC = () => {
+  const handle42Login = () => {
+    window.location.href = 'http://localhost:3000/auth/42';
+  };
+
+//   const handleAccountClick = () => {};
+
   return (
-    <AppLayout>
-      <RouterProvider router={router} />
-    </AppLayout>
+    // <UserProvider>
+    <Container className="root">
+      <Col className="app">
+        <header>
+          {/* <Button onClick={handle42Login}>Log In</Button> */}
+          <ButtonLogin onClick={handle42Login} text="Log In" />
+
+          {/* <Button onClick={handleAccountClick}>Account</Button>{' '} */}
+          {/* <Link to="/u/@self">Account</Link> */}
+          {/* Updated this button */}
+        </header>
+        <Col flexGrow={1} className="page">
+          <RouterProvider router={router} />
+        </Col>
+        <footer>i love feet because i'm a weirdo</footer>
+      </Col>
+    </Container>
+    // </UserProvider>
   );
 };
-
 export default App;
-// export default function App() {
-//   return (
-//     <Container className="root">
-//       <Col className="app">
-//         <header>
-//           <ButtonLogin />
-//         </header>
-//         <Col flexGrow={1} className="page">
-//           <UserProfile />
-//           <RouterProvider router={router} />
-//         </Col>
-//         <footer>i love feet</footer>
-//       </Col>
-//     </Container>
-//   );
-// }

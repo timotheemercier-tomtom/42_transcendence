@@ -18,7 +18,7 @@
  * Handles PATCH requests for updating a user's details based on their username.
  * Checks if the authenticated user matches the user being updated.
  * @param {string} username - The username of the user to update.
- * @param {UpdateUserDto} updateUserDto - The DTO containing the updated user data.
+ * @param {UserDto} updateUserDto - The DTO containing the updated user data.
  * @param {Request & any} request - The request object containing user authentication details.
  * @return {Promise<User>} - The updated user object.
  */
@@ -27,43 +27,51 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { User } from './user.entity';
-import { UpdateUserDto } from './update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { UserDto } from './user.dto';
+import { User } from './user.entity';
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
-
-  @Get(':username')
-  @UseGuards(JwtAuthGuard)
-  async findUser(@Param('username') username: string): Promise<User | null> {
-    return await this.userService.findUser(username);
-  }
+  constructor(private userService: UserService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard)
   async getUser(@Req() req: any): Promise<User | null> {
-    return await this.userService.findUser(req.user.username);
+    return await this.userService.findOne(req.user.login);
   }
 
-  @Patch(':username')
+  @Get(':login')
+  @UseGuards(JwtAuthGuard)
+  async findUser(
+    @Req() request: Request & any,
+    @Param('login') login: string,
+  ): Promise<User | null> {
+    const user = await this.userService.findOne(login);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  @Patch(':login')
   async updateUser(
-    @Param('username') username: string,
-    @Body() updateUserDto: UpdateUserDto,
+    @Param('login') login: string,
+    @Body() updateUserDto: UserDto,
     @Req() request: Request & any,
   ): Promise<User> {
     const user = request.user;
-    if (user.username !== username) {
+    if (user.login !== login) {
       throw new UnauthorizedException();
     }
-    return await this.userService.updateUser(username, updateUserDto);
+    return await this.userService.update(login, updateUserDto);
   }
 }
