@@ -6,7 +6,7 @@ const wsurl = 'http://localhost:3000/chat/ws';
 const user = sessionStorage.getItem('user') ?? '';
 
 const query = user.startsWith('$')
-  ? { anon: user }
+  ? { anon: '$anon' + user }
   : { token: getCookie('accessToken') ?? '' };
 
 export const socket = io(wsurl, {

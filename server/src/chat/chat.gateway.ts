@@ -12,6 +12,7 @@ import {
   ChatAdmin,
   ChatBan,
   ChatClientMessage,
+  ChatJoin,
   ChatKick,
   ChatMute,
   ChatOwner,
@@ -42,6 +43,7 @@ export class ChatGateway
   banned = new Map<string, Set<string>>();
   mutes = new Map<string, ChatMute[]>();
   rooms = new Map<string, Set<string>>();
+  public = new Set<string>();
 
   dump() {
     console.log(
@@ -68,7 +70,7 @@ export class ChatGateway
         const anon: any = client.handshake.query.anon;
         const token: any = client.handshake.query.token;
         const user = anon
-          ? { username: '$anon' + anon }
+          ? { username: anon }
           : await this.auth.validateUser(token);
 
         if (!user) {
@@ -86,21 +88,42 @@ export class ChatGateway
 
   handleConnection(client: Socket) {
     console.log(`chat connected: ${client.id} ${this.idmap.get(client.id)}`);
+    this.list(client);
   }
 
   handleDisconnect(client: Socket) {
     console.log(`chat disconnected: ${client.id}`);
   }
 
+  @SubscribeMessage('public')
+  spublic(client: Socket, e: string) {
+    if (!this.isOwner(client, e)) return;
+    if (this.public.has(e)) this.public.delete(e);
+    else this.public.add(e);
+    this._message(
+      e,
+      `room became ${this.public.has(e) ? 'public' : 'private'}`,
+    );
+  }
+
   @SubscribeMessage('join')
-  join(client: Socket, payload: string): void {
+  join(client: Socket, e: ChatJoin): void {
     const user = this.idmap.get(client.id)!;
-    if (this.banned.get(payload)?.has(user)) return;
-    client.join(payload);
-    const room = this.rooms.get(payload) ?? new Set();
+    if (this.banned.get(e.room)?.has(user)) {
+      client.emit('error', 'you are banned');
+      return;
+    }
+    if ((this.pass.get(e.room) ?? '') != e.pass) {
+      console.log(this.pass.get(e.room), '!=', e.pass);
+
+      client.emit('error', 'incorrect password');
+      return;
+    }
+    client.join(e.room);
+    const room = this.rooms.get(e.room) ?? new Set();
     if (room.size == 0) {
       const t = {
-        room: payload,
+        room: e.room,
         user,
         on: true,
       };
@@ -108,22 +131,24 @@ export class ChatGateway
       this.setAdmin(client, t);
     }
     room.add(user);
-    this.rooms.set(payload, room);
-    this.server.to(payload).emit('join', { room: payload, user });
+    this.rooms.set(e.room, room);
+    client.emit('join', e.room);
+    this._message(e.room, `+ ${user}`);
   }
 
   @SubscribeMessage('leave')
-  leave(client: Socket, payload: string): void {
-    const room = this.rooms.get(payload) ?? new Set();
+  leave(client: Socket, e: string): void {
+    const room = this.rooms.get(e) ?? new Set();
     const user = this.idmap.get(client.id)!;
     room.delete(user);
     if (room.size == 0) {
-      if (this.isAdmin(client, payload)) this.admins.get(payload)?.delete(user);
-      if (this.isOwner(client, payload)) this.owners.delete(payload);
+      if (this.isAdmin(client, e)) this.admins.get(e)?.delete(user);
+      if (this.isOwner(client, e)) this.owners.delete(e);
     }
-    this.rooms.set(payload, room);
-    this.server.to(payload).emit('leave', { room: payload, user });
-    client.leave(payload);
+    this.rooms.set(e, room);
+    client.emit('leave', e);
+    this._message(e, `- ${user}`);
+    client.leave(e);
   }
 
   isAdmin(client: Socket, room: string) {
@@ -134,81 +159,105 @@ export class ChatGateway
     return this.owners.get(room) == this.idmap.get(client.id);
   }
 
-  _setOwner(payload: ChatOwner) {
-    this.owners.set(payload.room, payload.user);
-    this.server.to(payload.room).emit('owner', payload);
+  _setOwner(e: ChatOwner) {
+    this.owners.set(e.room, e.user);
+    this._message(e.room, `${e.user} became owner`);
+  }
+
+  @SubscribeMessage('list')
+  list(client: Socket) {
+    client.emit('list', Array.from(this.public.values()));
   }
 
   @SubscribeMessage('owner')
-  setOwner(client: Socket, payload: ChatOwner) {
-    if (!this.isOwner(client, payload.room)) return;
-    this._setOwner(payload);
+  setOwner(client: Socket, e: ChatOwner) {
+    if (!this.isOwner(client, e.room)) return;
+    this._setOwner(e);
   }
 
   @SubscribeMessage('pass')
-  setPassword(client: Socket, payload: ChatPass) {
-    if (!this.isOwner(client, payload.room)) return;
-    this.pass.set(payload.room, payload.pass);
-    this.server.to(payload.room).emit('pass', payload);
+  setPassword(client: Socket, e: ChatPass) {
+    if (!this.isOwner(client, e.room)) return;
+    this.pass.set(e.room, e.pass);
+    this._message(e.room, `password is '${e.pass}'`);
   }
 
   @SubscribeMessage('admin')
-  setAdmin(client: Socket, payload: ChatAdmin) {
-    if (!this.isOwner(client, payload.room)) return;
-    const admins = this.admins.get(payload.room) ?? new Set();
-    if (admins.has(payload.user)) admins.delete(payload.user);
-    else admins.add(payload.user);
-    this.admins.set(payload.room, admins);
-    this.server
-      .to(payload.room)
-      .emit('admin', { ...payload, on: admins.has(payload.user) });
+  setAdmin(client: Socket, e: ChatAdmin) {
+    if (!this.isOwner(client, e.room)) return;
+    const admins = this.admins.get(e.room) ?? new Set();
+    if (admins.has(e.user)) admins.delete(e.user);
+    else admins.add(e.user);
+    this.admins.set(e.room, admins);
+    this._message(
+      e.room,
+      `${e.user} ${admins.has(e.user) ? 'gained' : 'lost'} adminship`,
+    );
   }
 
   @SubscribeMessage('ban')
-  ban(client: Socket, payload: ChatBan) {
-    if (!this.isAdmin(client, payload.room)) return;
-    const bans = this.banned.get(payload.room) ?? new Set();
-    if (bans.has(payload.user)) bans.delete(payload.user);
-    else bans.add(payload.user);
-    this.banned.set(payload.room, bans);
-    this.server
-      .to(payload.room)
-      .emit('ban', { ...payload, on: bans.has(payload.user) });
+  ban(client: Socket, e: ChatBan) {
+    if (!this.isAdmin(client, e.room)) return;
+    const bans = this.banned.get(e.room) ?? new Set();
+    if (bans.has(e.user)) bans.delete(e.user);
+    else bans.add(e.user);
+    this.banned.set(e.room, bans);
+    this._message(
+      e.room,
+      `${bans.has(e.user) ? 'banned' : 'unbanned'} ${e.user}`,
+    );
   }
 
   @SubscribeMessage('kick')
-  kick(client: Socket, payload: ChatKick) {
+  kick(client: Socket, e: ChatKick) {
     this.dump();
-    if (!this.isAdmin(client, payload.room)) return;
-    const uclient = this.userToClient.get(payload.user);
+    if (!this.isAdmin(client, e.room)) return;
+    const uclient = this.userToClient.get(e.user);
     if (!uclient) return;
-    this.leave(uclient, payload.room);
-    this.server.to(payload.room).emit('kick', payload);
+    this.leave(uclient, e.room);
+    this._message(e.room, `kicked ${e.user}`);
   }
 
   @SubscribeMessage('mute')
-  mute(client: Socket, payload: ChatMute) {
-    if (!this.isAdmin(client, payload.room)) return;
-    const mutes = this.mutes.get(payload.room) ?? [];
-    mutes.push(payload);
+  mute(client: Socket, e: ChatMute) {
+    if (!this.isAdmin(client, e.room)) return;
+    const mutes = this.mutes.get(e.room) ?? [];
+    mutes.push(e);
     //TODO: clear old mutes
-    this.mutes.set(payload.room, mutes);
-    this.server.to(payload.room).emit('mute', payload);
+    this.mutes.set(e.room, mutes);
+    this._message(
+      e.room,
+      `muted ${e.user} until ${new Date(e.date).toLocaleString()}`,
+    );
+  }
+
+  _message(room: string, msg: string) {
+    const m: ChatServerMessage = {
+      room,
+      msg,
+      date: new Date().getTime(),
+      role: 'server',
+      user: '$server',
+    };
+
+    this.server.to(m.room).emit('message', m);
   }
 
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: ChatClientMessage): void {
+  message(client: Socket, e: ChatClientMessage): void {
+    const user = this.idmap.get(client.id)!;
+    if (!this.rooms.get(e.room)?.has(user)) return;
     const msg: ChatServerMessage = {
-      ...payload,
-      user: this.idmap.get(client.id)!,
-      role: this.isOwner(client, payload.room)
+      ...e,
+      user,
+      role: this.isOwner(client, e.room)
         ? 'owner'
-        : this.isAdmin(client, payload.room)
+        : this.isAdmin(client, e.room)
           ? 'admin'
           : 'user',
       date: new Date().getTime(),
     };
-    const mutes = this.mutes.get(payload.room);
+    const mutes = this.mutes.get(e.room);
     const muted =
       mutes &&
       mutes.reduce(

@@ -19,7 +19,7 @@ export class AuthService {
       });
 
       // 'decoded' contains the payload of the JWT. Use this to validate the user.
-      const user = await this.userService.findOne(decoded.username);
+      const user = await this.userService.findOne(decoded.login);
       if (!user) {
         return null;
       }

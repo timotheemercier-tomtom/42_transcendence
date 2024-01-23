@@ -11,27 +11,40 @@ import { Link } from 'react-router-dom';
 import { socket } from '../chat.socket';
 import Col from './Col';
 import Row from './Row';
+import React from 'react';
 
 export default function Chat({ id }: { id: string }) {
   const [msgs, setMsgs] = useState(new Map<string, ChatServerMessage[]>());
   const [input, setInput] = useState<string>('');
   const [rooms, setRooms] = useState(new Set<string>());
+  const [public_, setPublic] = useState<string[]>([]);
   const [room, setRoom] = useState(id);
-  const user = sessionStorage.getItem('user') ?? '';
+  const [badd, setBadd] = useState(false);
+  const [pass, setPass] = useState('');
+  let user = sessionStorage.getItem('user') ?? '';
+  if (user.startsWith('$')) user = '$anon' + user;
   const [sev, setSev] = useState<[string, never][]>([]);
+
+  const unload = () => {
+    sev.forEach((v) => socket.off(v[0], v[1]));
+  };
 
   useEffect(() => {
     socket.connect();
-    socket.on('connect', recvs);
-    setMsgs(new Map());
 
     return () => {
       socket.disconnect();
-      socket.off('connect', recvs);
-      console.log(sev);
-      sev.forEach((v) => socket.off(v[0], v[1]));
+      // console.log(sev);
+      unload();
     };
   }, []);
+
+  useEffect(() => {
+    socket.on('connect', recvs);
+    return () => {
+      socket.off('connect', recvs);
+    };
+  });
 
   const send = <EventType extends ChatEventType>(
     ev: EventType,
@@ -56,72 +69,43 @@ export default function Chat({ id }: { id: string }) {
     console.log('push', e);
 
     setMsgs((v) => {
-      const a = [...(v.get(e.room) || []), e as never];
-      v.set(e.room, a);
-      return new Map(v);
+      const n = new Map(v);
+      const a = [...(n.get(e.room) || []), e as never];
+      n.set(e.room, a);
+      return n;
     });
-  };
-
-  const pushServerMsg = (room: string, msg: string) => {
-    pushmsg({
-      room: room,
-      date: new Date().getTime(),
-      role: 'server',
-      user: '$server',
-      msg: msg,
-    });
+    console.log(msgs);
   };
 
   const recvs = () => {
     console.log('recvs');
 
-    socket.emit('join', room);
+    send('join', { room, pass: '' });
 
     recv('message', (e) => {
       pushmsg(e);
     });
 
+    recv('list', (e) => {
+      setPublic(e);
+    });
+
     recv('join', (e) => {
-      if (e.user == user) setRooms((v) => new Set(v.add(e.room)));
-      pushServerMsg(e.room, `+ ${e.user}`);
-      console.log('joined');
+      setRooms((v) => new Set(v).add(e));
+      console.log(rooms);
     });
 
     recv('leave', (e) => {
-      if (e.user == user) {
-        if (e.room == room) {
-          setRoom('');
-        }
-        setRooms((v) => (v.delete(e.room), new Set(v)));
-      }
-      pushServerMsg(e.room, `- ${e.user}`);
-    });
-
-    recv('kick', (e) => {
-      pushServerMsg(e.room, `kicked ${e.user}`);
-    });
-
-    recv('ban', (e) => {
-      pushServerMsg(e.room, `${e.on ? 'banned' : 'unbanned'} ${e.user}`);
-    });
-
-    recv('mute', (e) => {
-      pushServerMsg(
-        e.room,
-        `muted ${e.user} until ${new Date(e.date).toLocaleString()}`,
-      );
-    });
-
-    recv('admin', (e) => {
-      pushServerMsg(e.room, `${e.user} ${e.on ? 'gained' : 'lost'} adminship`);
-    });
-
-    recv('owner', (e) => {
-      pushServerMsg(e.room, `${e.user} became owner`);
+      if (e == room) setRoom('');
+      setRooms((v) => {
+        const n = new Set(v);
+        n.delete(e);
+        return n;
+      });
     });
   };
 
-  const cmdre = /^\/(owner|admin|pass|ban|kick|mute|join|leave)(.*)/;
+  const cmdre = /^\/(owner|admin|pass|ban|kick|mute|join|leave|public)(.*)/;
 
   const handleCommand = (input: string) => {
     const m = input.match(cmdre);
@@ -147,9 +131,12 @@ export default function Chat({ id }: { id: string }) {
           });
         break;
       case 'join':
-        if (arg1) send(m[1], arg1);
+        if (arg1) send(m[1], { pass: args[1], room: arg1 });
         break;
       case 'leave':
+        send(m[1], room);
+        break;
+      case 'public':
         send(m[1], room);
         break;
     }
@@ -166,15 +153,29 @@ export default function Chat({ id }: { id: string }) {
     }
   };
 
+  const tbad = () => {
+    setBadd(!badd);
+    if (badd) {
+      send('list', []);
+    }
+  };
+
   const getcolor = (v: ChatServerMessage): string => {
     return { admin: 'red', owner: 'purple', server: 'grey', user: 'white' }[
       v.role
     ];
   };
 
+  const joinRoom = (e: string) => {
+    send('join', { room: e, pass: '' });
+  };
+
+  console.log(public_);
+
   const Message = ({ v }: { v: ChatServerMessage }) => {
     return (
-      <Row color={getcolor(v)}>
+      <Row color={getcolor(v)} gap={'.5rem'}>
+        <span color="grey">{new Date(v.date).toLocaleTimeString()}</span>
         {v.role == 'server' ? (
           <span>{v.user}</span>
         ) : (
@@ -182,7 +183,7 @@ export default function Chat({ id }: { id: string }) {
             <span>{v.user}</span>
           </Link>
         )}
-        <span>: {v.msg}</span>
+        <span>{v.msg}</span>
       </Row>
     );
   };
@@ -208,11 +209,30 @@ export default function Chat({ id }: { id: string }) {
         </Row>
       </Col>
       <Col borderLeft={1}>
-        {Array.from(rooms.values()).map((v) => (
-          <Button key={v} onClick={() => setRoom(v)}>
-            {v}
-          </Button>
-        ))}
+        {!badd ? (
+          <Button onClick={tbad}>+ ADD +</Button>
+        ) : (
+          <React.Fragment>
+            <Button onClick={tbad}>BACK</Button>
+            <TextField
+              fullWidth
+              variant="standard"
+              placeholder="password"
+              onChange={(e) => setPass(e.target.value)}
+            ></TextField>
+          </React.Fragment>
+        )}
+        {!badd
+          ? Array.from(rooms.values()).map((v, i) => (
+              <Button key={i} onClick={() => setRoom(v)}>
+                {v}
+              </Button>
+            ))
+          : public_.map((v, i) => (
+              <Button key={i} onClick={() => joinRoom(v)}>
+                {v}
+              </Button>
+            ))}
       </Col>
     </Row>
   );

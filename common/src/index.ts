@@ -7,7 +7,9 @@ export type ChatEventType =
   | 'kick'
   | 'mute'
   | 'leave'
-  | 'join';
+  | 'join'
+  | 'public'
+  | 'list';
 
 type ChatEventData = {
   pass: ChatPass;
@@ -16,20 +18,19 @@ type ChatEventData = {
   ban: ChatBan;
   kick: ChatKick;
   mute: ChatMute;
+  leave: string;
+  public: string;
+  list: string[];
 };
 
 export type ChatServerEventData = {
   message: ChatServerMessage;
-  leave: ChatServerLeave;
-  join: ChatServerJoin;
-  admin: ChatServerAdmin;
-  ban: ChatServerBan;
+  join: string;
 } & ChatEventData;
 
 export type ChatClientEventData = {
   message: ChatClientMessage;
-  leave: string;
-  join: string;
+  join: ChatJoin;
 } & ChatEventData;
 
 export type ChatRole = 'user' | 'admin' | 'owner' | 'server';
@@ -60,17 +61,9 @@ export type ChatAdmin = {
   user: string;
 };
 
-export type ChatServerAdmin = ChatAdmin & {
-  on: boolean;
-};
-
 export type ChatBan = {
   room: string;
   user: string;
-};
-
-export type ChatServerBan = ChatBan & {
-  on: boolean;
 };
 
 export type ChatKick = {
@@ -89,7 +82,7 @@ export type ChatServerLeave = {
   user: string;
 };
 
-export type ChatServerJoin = {
+export type ChatJoin = {
   room: string;
-  user: string;
+  pass: string;
 };
