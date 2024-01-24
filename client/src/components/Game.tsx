@@ -1,5 +1,11 @@
+import Col from './Col';
+
 const Game = () => {
-  return <canvas></canvas>;
+  return (
+    <Col>
+      <canvas></canvas>
+    </Col>
+  );
 };
 
 export default Game;

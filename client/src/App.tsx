@@ -43,7 +43,7 @@ const App: React.FC = () => {
     window.location.href = 'http://localhost:3000/auth/42';
   };
 
-//   const handleAccountClick = () => {};
+  //   const handleAccountClick = () => {};
 
   return (
     // <UserProvider>
@@ -60,7 +60,11 @@ const App: React.FC = () => {
         <Col flexGrow={1} className="page">
           <RouterProvider router={router} />
         </Col>
-        <footer>i love feet because i'm a weirdo</footer>
+        <footer>
+          <a href="https://stallman.org/photos/rms-working/dsc00367.jpg">
+            average gnome user
+          </a>
+        </footer>
       </Col>
     </Container>
     // </UserProvider>
