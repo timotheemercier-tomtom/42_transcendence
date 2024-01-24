@@ -5,23 +5,18 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-// import { useParams } from 'react-router-dom';
 import { Avatar, Card, CircularProgress } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import Typography from './Typography';
+import Picture from './Picture';
+import FormWithValidation from './Form';
 
-// type UserContextType = {
-//   user: UserData | null;
-//   setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
-// };
-
-// Define the type for the context value
 type UserContextType = {
-  user: any; // Replace 'any' with a more specific type as per your user object
-  setUser: React.Dispatch<React.SetStateAction<UserData | null>>; // Same here for the specific type
+  user: any;
+  setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
 };
 
-// Create context with a default value of type UserContextType
+// Creates context with a default value of type UserContextType
 const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({
@@ -38,18 +33,37 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
 export const useUser = () => useContext(UserContext);
 
-type UserData = {
+export type UserData = {
   login: string;
   username: string;
   picture: string;
 };
+
+export async function updateUserImage(
+  login: string,
+  base64Image: string,
+): Promise<UserData> {
+  const response = await fetch(`http://localhost:3000/user/${login}/image`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ picture: base64Image }),
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update user image');
+  }
+
+  return response.json();
+}
 
 function User() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { login = '' } = useParams();
-  //   const { login } = useParams<{ login: string }>();
 
   useEffect(() => {
     fetchUserData();
@@ -75,18 +89,44 @@ function User() {
   if (error) return <Typography color="error">{error}</Typography>;
 
   if (!userData) return null;
+
+  const updateUserData = (newPicture: string) => {
+    if (userData) {
+      setUserData({ ...userData, picture: newPicture });
+    }
+  };
+
   return (
     <Card>
-      <Typography variant="h5">Account Details</Typography>
-      {/* <Typography> URL {userData.picture.link} </Typography>; */}
+      <Picture
+        username={userData.username}
+        picture={userData.picture}
+        onUpdate={async (newPictureUrl: string) => {
+          try {
+            const updatedUser = await updateUserImage(
+              userData.login,
+              newPictureUrl,
+            );
+            // Mettez à jour l'état de l'utilisateur avec les nouvelles informations
+            setUserData(updatedUser);
+          } catch (error) {
+            console.error('Error updating user image:', error);
+          }
+        }}
+      />
 
-      {/* <Typography variant="h6">Name: {userData.name}</Typography> */}
-      <Typography>Name: {userData.username}</Typography>
+      <Typography variant="h5">Account Details</Typography>
+      <Typography variant="h6">42 Login: {userData.username}</Typography>
+      <FormWithValidation
+        initialFormData={userData}
+        onImageUpdate={updateUserData} // Ajout de la prop onImageUpdate
+      />
+
       {/* <img
-        src={userData.picture.link}
+        src={userData.picture}
         alt={userData.username}
       /> */}
-      <Avatar src={userData.picture} alt="Profile Picture" />
+
       {/* Add more user details as needed */}
     </Card>
   );

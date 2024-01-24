@@ -22,76 +22,43 @@ class User {
 `async updateUser(username: string, updateUserDto: UpdateUserDto): Promise<User>`
 
 
-import { User } from "./entity/User"
+  ## USER IMAGE
 
-const userRepository = dataSource.getRepository(User)
-const user = await userRepository.findOneBy({
-    id: 1,
-})
-user.name = "Umed"
-await userRepository.save(user)
+    const supabaseUrl = this.configService.get('SUPABASE_URL');
+    const supabaseKey = this.configService.get('SUPABASE_KEY');
 
+    this.supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-import { Photo } from "./entity/Photo"
-import { AppDataSource } from "./index"
+  async uploadImage(file: Express.Multer.File): Promise<string> {
+    const { data, error } = await supabase.storage
+      .from('user-images')
+      .upload(`path/to/store/${file.originalname}`, file.buffer, {
+        cacheControl: '3600',
+        upsert: false,
+      });
 
-const photo = new Photo()
-photo.name = "Me and Bears"
-photo.description = "I am near polar bears"
-photo.filename = "photo-with-bears.jpg"
-photo.views = 1
-photo.isPublished = true
+    if (error) {
+      throw new Error('Error uploading to Supabase');
+    }
 
-const photoRepository = AppDataSource.getRepository(Photo)
-
-await photoRepository.save(photo)
-console.log("Photo has been saved")
-
-const savedPhotos = await photoRepository.find()
-console.log("All photos from the db: ", savedPhotos)
-
-
-
-
-const userRepository = MyDataSource.getRepository(User)
-
-const user = new User()
-user.firstName = "Timber"
-user.lastName = "Saw"
-user.age = 25
-await userRepository.save(user)
-
-const allUsers = await userRepository.find()
-const firstUser = await userRepository.findOneBy({
-    id: 1,
-}) // find by id
-const timber = await userRepository.findOneBy({
-    firstName: "Timber",
-    lastName: "Saw",
-}) // find by firstName and lastName
-
-await userRepository.remove(timber)
-
-
-
-
-
-@Injectable()
-export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-  ) {}
-
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    return `your-supabase-url/storage/v1/object/public/${data.Key}`;
   }
 
-  findOne(id: number): Promise<User | null> {
-    return this.usersRepository.findOneBy({ id });
+  async updateImage(username: string, imageUrl: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ username });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    user.picture = imageUrl;
+    return this.usersRepository.save(user);
   }
 
-  async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+    @Post('upload/:login')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadUserImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('login') login: string,
+  ) {
+    const imageUrl = await this.userService.uploadImage(file);
+    return this.userService.updateImage(login, imageUrl);
   }
-}
