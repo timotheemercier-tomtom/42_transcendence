@@ -1,27 +1,66 @@
-import React, { useState, useEffect } from 'react';
+import React, {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { Avatar, Card, CircularProgress } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import {
-  Avatar,
-  Card,
-  CircularProgress,
-  TextField,
-  Button,
-} from '@mui/material';
 import Typography from './Typography';
-import { getCookie } from '../utils';
+import Picture from './Picture';
+import FormWithValidation from './Form';
 
-type UserData = {
+type UserContextType = {
+  user: any;
+  setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
+};
+
+// Creates context with a default value of type UserContextType
+const UserContext = createContext<UserContextType | null>(null);
+
+export const UserProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [user, setUser] = useState<UserContextType['user']>(null);
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  );
+};
+
+export const useUser = () => useContext(UserContext);
+
+export type UserData = {
   login: string;
   username: string;
   picture: string;
 };
 
-const user = sessionStorage.getItem('user') ?? '';
+export async function updateUserImage(
+  login: string,
+  base64Image: string,
+): Promise<UserData> {
+  const response = await fetch(`http://localhost:3000/user/${login}/image`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ picture: base64Image }),
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update user image');
+  }
+
+  return response.json();
+}
 
 function User() {
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [newUsername, setNewUsername] = useState('');
-  const [newPicture, setNewPicture] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { login = '' } = useParams();
@@ -39,7 +78,6 @@ function User() {
       if (!response.ok) throw new Error('Network response error');
       const data = (await response.json()) as UserData;
       setUserData(data);
-      setNewUsername(data.username); // Initialize with current username
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -47,67 +85,50 @@ function User() {
     }
   };
 
-  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewUsername(event.target.value);
-  };
-
-  const handlePictureChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setNewPicture(event.target.files[0]);
-    }
-  };
-
-  const handleSubmit = async () => {
-    const tokenJWT = getCookie('accessToken');
-    if (!tokenJWT) {
-      console.error('Error:JWT token not found');
-      return;
-    }
-
-    const formData = new FormData();
-    if (newPicture) {
-      formData.append('picture', newPicture);
-    }
-    formData.append('username', newUsername);
-
-    try {
-      const response = await fetch(`http://localhost:3000/user/${login}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${tokenJWT}`, // Remplacer avec votre token JWT
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors de la mise à jour du profil');
-      }
-
-      const updatedUser = await response.json();
-      setUserData(updatedUser);
-      alert('Profil mis à jour avec succès');
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
+
   if (!userData) return null;
+
+  const updateUserData = (newPicture: string) => {
+    if (userData) {
+      setUserData({ ...userData, picture: newPicture });
+    }
+  };
 
   return (
     <Card>
-      <Typography variant="h5">Account Details</Typography>
-      <Avatar src={userData.picture} alt="Profile Picture" />
-      <TextField
-        label="Nom d'utilisateur"
-        value={newUsername}
-        onChange={handleUsernameChange}
+      <Picture
+        username={userData.username}
+        picture={userData.picture}
+        onUpdate={async (newPictureUrl: string) => {
+          try {
+            const updatedUser = await updateUserImage(
+              userData.login,
+              newPictureUrl,
+            );
+            // Mettez à jour l'état de l'utilisateur avec les nouvelles informations
+            setUserData(updatedUser);
+          } catch (error) {
+            console.error('Error updating user image:', error);
+          }
+        }}
       />
-      <input type="file" onChange={handlePictureChange} />
-      <Button onClick={handleSubmit}>Mettre à jour</Button>
+
+      <Typography variant="h5">Account Details</Typography>
+      <Typography variant="h6">42 Login: {userData.username}</Typography>
+      <FormWithValidation
+        initialFormData={userData}
+        onImageUpdate={updateUserData} // Ajout de la prop onImageUpdate
+      />
+
+      {/* <img
+        src={userData.picture}
+        alt={userData.username}
+      /> */}
+
+      {/* Add more user details as needed */}
     </Card>
   );
 }
-
 export default User;

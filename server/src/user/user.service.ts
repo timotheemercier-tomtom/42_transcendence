@@ -33,28 +33,13 @@ export class UserService {
     private usersRepository: Repository<User>,
   ) {}
 
-  //   createUser(userData: Partial<User>, userDto: UserDto): Promise<User> {
-  //     const user: User = new User();
-  //     user.username = userDto.username;
-  //     user.password = createUserDto.password;
-  //     user.gender = createUserDto.gender;
-  //     return this.userRepository.save(user);
-  //   }
-
-  async create(userData: Partial<User>): Promise<User> {
-    const newuser = this.usersRepository.create(userData);
-    return await this.usersRepository.save(newuser);
-  }
-
-  async findOne(username: string): Promise<User | null> {
-    return await this.usersRepository.findOneBy({ username });
-  }
-  async findById(id: number): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { id } });
-  }
-
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  async updateImage(username: string, base64Image: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ username });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    user.picture = base64Image;
+    return this.usersRepository.save(user);
   }
 
   async update(username: string, updateUserDto: UserDto): Promise<User> {
@@ -62,19 +47,35 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    if (updateUserDto.username) {
-      user.username = updateUserDto.username;
-    }
-    if (updateUserDto.picture) {
-      user.picture = updateUserDto.picture;
-    }
-
     Object.assign(user, updateUserDto);
     return await this.usersRepository.save(user);
   }
-  
-  async delete(username: string): Promise<void> {
-    await this.usersRepository.delete(username);
+
+  async create(userData: Partial<User>): Promise<User> {
+    const user = this.usersRepository.create(userData);
+    return await this.usersRepository.save(user);
+  }
+
+  async findOne(username: string): Promise<User | null> {
+    return await this.usersRepository.findOneBy({ username });
+  }
+
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find();
+  }
+
+  async removeOne(id: number): Promise<void> {
+    await this.usersRepository.delete(id);
   }
 }
+
+// function createClient(arg0: string, arg1: string) {
+//     throw new Error('Function not implemented.');
+// }
+// //   createUser(userData: Partial<User>, userDto: UserDto): Promise<User> {
+// //     const user: User = new User();
+// //     user.username = userDto.username;
+// //     user.password = createUserDto.password;
+// //     user.gender = createUserDto.gender;
+// //     return this.userRepository.save(user);
+// //   }
