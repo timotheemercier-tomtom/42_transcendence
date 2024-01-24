@@ -13,12 +13,13 @@ interface IFormErrors {
 }
 
 interface FormWithValidationProps {
-    initialFormData: IFormData;
-    onImageUpdate: (newPicture: string) => void; // Nouvelle prop pour la mise à jour de l'image
-  }
+  initialFormData: IFormData;
+  onImageUpdate: (newPicture: string) => void; // Nouvelle prop pour la mise à jour de l'image
+}
 
 const FormWithValidation: React.FC<FormWithValidationProps> = ({
-  initialFormData, onImageUpdate,
+  initialFormData,
+  onImageUpdate,
 }) => {
   const [formData, setFormData] = useState<IFormData>(initialFormData);
   const [file, setFile] = useState<File | null>(null);
@@ -87,7 +88,7 @@ const FormWithValidation: React.FC<FormWithValidationProps> = ({
     } else {
       console.log('Form validation failed. Please check the errors.');
     }
-};
+  };
 
   return (
     <form onSubmit={handleSubmit}>

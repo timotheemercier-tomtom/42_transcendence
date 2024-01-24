@@ -26,8 +26,8 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '5mb' }));
   app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 
-  //   app.enableCors({
-  //     // origin: ['http://f1r6s3.codam.nl:5173'],
+    app.enableCors({
+      origin: ['http://localhost:5173'],
 
   //     origin: (origin, callback) => {
   //       // Autoriser les requêtes sans origine (comme les requêtes mobiles ou postman)
@@ -43,18 +43,18 @@ async function bootstrap() {
   //     credentials: true,
   //   });
 
-  app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || /.*\.codam\.nl(:5173)?$/.test(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+//   app.enableCors({
+//     origin: (origin, callback) => {
+//       if (!origin || /.*\.codam\.nl(:5173)?$/.test(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error('Not allowed by CORS'));
+//       }
+//     },
     credentials: true,
   });
 
   app.use(cookieParser());
-  await app.listen(3000, '0.0.0.0');
+  await app.listen(3000);
 }
 bootstrap();
