@@ -9,18 +9,22 @@ export type ChatEventType =
   | 'leave'
   | 'join'
   | 'public'
-  | 'list';
+  | 'list'
+  | 'dm'
+  | 'dms';
 
 type ChatEventData = {
   pass: ChatPass;
-  owner: ChatOwner;
-  admin: ChatAdmin;
-  ban: ChatBan;
-  kick: ChatKick;
+  owner: ChatRoomUser;
+  admin: ChatRoomUser;
+  ban: ChatRoomUser;
+  kick: ChatRoomUser;
   mute: ChatMute;
   leave: string;
   public: string;
   list: string[];
+  dm: string;
+  dms: string[];
 };
 
 export type ChatServerEventData = {
@@ -46,40 +50,20 @@ export type ChatServerMessage = ChatClientMessage & {
   date: number;
 };
 
+export type ChatRoomUser = {
+  room: string;
+  user: string;
+};
+
 export type ChatPass = {
   room: string;
   pass: string;
-};
-
-export type ChatOwner = {
-  room: string;
-  user: string;
-};
-
-export type ChatAdmin = {
-  room: string;
-  user: string;
-};
-
-export type ChatBan = {
-  room: string;
-  user: string;
-};
-
-export type ChatKick = {
-  room: string;
-  user: string;
 };
 
 export type ChatMute = {
   room: string;
   user: string;
   date: number;
-};
-
-export type ChatServerLeave = {
-  room: string;
-  user: string;
 };
 
 export type ChatJoin = {

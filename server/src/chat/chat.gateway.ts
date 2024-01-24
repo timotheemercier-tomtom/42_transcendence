@@ -9,14 +9,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import {
-  ChatAdmin,
-  ChatBan,
   ChatClientMessage,
   ChatJoin,
-  ChatKick,
   ChatMute,
-  ChatOwner,
   ChatPass,
+  ChatRoomUser,
   ChatServerMessage,
 } from 'common';
 import { AuthService } from 'src/auth/auth.service';
@@ -44,6 +41,7 @@ export class ChatGateway
   mutes = new Map<string, ChatMute[]>();
   rooms = new Map<string, Set<string>>();
   public = new Set<string>();
+  dms = new Set<string>();
 
   dump() {
     console.log(
@@ -89,6 +87,7 @@ export class ChatGateway
   handleConnection(client: Socket) {
     console.log(`chat connected: ${client.id} ${this.idmap.get(client.id)}`);
     this.list(client);
+    this.sdms(client);
   }
 
   handleDisconnect(client: Socket) {
@@ -97,6 +96,7 @@ export class ChatGateway
 
   @SubscribeMessage('public')
   spublic(client: Socket, e: string) {
+    if (!this.rooms.has(e)) return;
     if (!this.isOwner(client, e)) return;
     if (this.public.has(e)) this.public.delete(e);
     else this.public.add(e);
@@ -151,6 +151,26 @@ export class ChatGateway
     client.leave(e);
   }
 
+  sdms(client: Socket) {
+    const user = this.idmap.get(client.id)!;
+    client.emit(
+      'dms',
+      Array.from(this.dms)
+        .filter((v) => v.split('+').includes(user))
+        .map((v) => v.split('+').filter((v) => v != user)[0]),
+    );
+  }
+
+  @SubscribeMessage('dm')
+  dm(client: Socket, e: string) {
+    const user = this.idmap.get(client.id)!;
+    const uclient = this.userToClient.get(e);
+    if (!uclient) return;
+    this.dms.add([user, e].sort().join('+'));
+    this.sdms(client);
+    this.sdms(uclient);
+  }
+
   isAdmin(client: Socket, room: string) {
     return this.admins.get(room)?.has(this.idmap.get(client.id)!);
   }
@@ -159,7 +179,7 @@ export class ChatGateway
     return this.owners.get(room) == this.idmap.get(client.id);
   }
 
-  _setOwner(e: ChatOwner) {
+  _setOwner(e: ChatRoomUser) {
     this.owners.set(e.room, e.user);
     this._message(e.room, `${e.user} became owner`);
   }
@@ -170,20 +190,23 @@ export class ChatGateway
   }
 
   @SubscribeMessage('owner')
-  setOwner(client: Socket, e: ChatOwner) {
+  setOwner(client: Socket, e: ChatRoomUser) {
+    if (!this.rooms.has(e.room)) return;
     if (!this.isOwner(client, e.room)) return;
     this._setOwner(e);
   }
 
   @SubscribeMessage('pass')
   setPassword(client: Socket, e: ChatPass) {
+    if (!this.rooms.has(e.room)) return;
     if (!this.isOwner(client, e.room)) return;
     this.pass.set(e.room, e.pass);
     this._message(e.room, `password is '${e.pass}'`);
   }
 
   @SubscribeMessage('admin')
-  setAdmin(client: Socket, e: ChatAdmin) {
+  setAdmin(client: Socket, e: ChatRoomUser) {
+    if (!this.rooms.has(e.room)) return;
     if (!this.isOwner(client, e.room)) return;
     const admins = this.admins.get(e.room) ?? new Set();
     if (admins.has(e.user)) admins.delete(e.user);
@@ -196,7 +219,8 @@ export class ChatGateway
   }
 
   @SubscribeMessage('ban')
-  ban(client: Socket, e: ChatBan) {
+  ban(client: Socket, e: ChatRoomUser) {
+    if (!this.rooms.has(e.room)) return;
     if (!this.isAdmin(client, e.room)) return;
     const bans = this.banned.get(e.room) ?? new Set();
     if (bans.has(e.user)) bans.delete(e.user);
@@ -209,8 +233,9 @@ export class ChatGateway
   }
 
   @SubscribeMessage('kick')
-  kick(client: Socket, e: ChatKick) {
+  kick(client: Socket, e: ChatRoomUser) {
     this.dump();
+    if (!this.rooms.has(e.room)) return;
     if (!this.isAdmin(client, e.room)) return;
     const uclient = this.userToClient.get(e.user);
     if (!uclient) return;
@@ -220,6 +245,7 @@ export class ChatGateway
 
   @SubscribeMessage('mute')
   mute(client: Socket, e: ChatMute) {
+    if (!this.rooms.has(e.room)) return;
     if (!this.isAdmin(client, e.room)) return;
     const mutes = this.mutes.get(e.room) ?? [];
     mutes.push(e);
@@ -246,6 +272,20 @@ export class ChatGateway
   @SubscribeMessage('message')
   message(client: Socket, e: ChatClientMessage): void {
     const user = this.idmap.get(client.id)!;
+    if (e.room.startsWith('+')) {
+      const uuser = e.room.slice(1);
+      const uclient = this.userToClient.get(uuser);
+      const msg: ChatServerMessage = {
+        ...e,
+        user,
+        role: 'user',
+        date: new Date().getTime(),
+      };
+      client.emit('message', msg);
+      msg.room = '+' + user;
+      uclient?.emit('message', msg);
+      return;
+    }
     if (!this.rooms.get(e.room)?.has(user)) return;
     const msg: ChatServerMessage = {
       ...e,

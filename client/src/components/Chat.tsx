@@ -6,12 +6,11 @@ import {
   ChatServerEventData,
   ChatServerMessage,
 } from 'common';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { socket } from '../chat.socket';
 import Col from './Col';
 import Row from './Row';
-import React from 'react';
 
 export default function Chat({ id }: { id: string }) {
   const [msgs, setMsgs] = useState(new Map<string, ChatServerMessage[]>());
@@ -21,10 +20,12 @@ export default function Chat({ id }: { id: string }) {
   const [room, setRoom] = useState(id);
   const [badd, setBadd] = useState(false);
   const [pass, setPass] = useState('');
+  const [dms, setDms] = useState<string[]>([]);
+  const [block, setBlock] = useState(new Set<string>());
+
   let user = sessionStorage.getItem('user') ?? '';
   if (user.startsWith('$')) user = '$anon' + user;
   const [sev, setSev] = useState<[string, never][]>([]);
-
   const unload = () => {
     sev.forEach((v) => socket.off(v[0], v[1]));
   };
@@ -77,6 +78,14 @@ export default function Chat({ id }: { id: string }) {
     console.log(msgs);
   };
 
+  useEffect(() => {
+    const msgsEl = document.querySelector('#msgs');
+
+    Array.from(msgsEl?.children ?? [])
+      .at(-1)
+      ?.scrollIntoView();
+  });
+
   const recvs = () => {
     console.log('recvs');
 
@@ -88,6 +97,10 @@ export default function Chat({ id }: { id: string }) {
 
     recv('list', (e) => {
       setPublic(e);
+    });
+
+    recv('dms', (e) => {
+      setDms(e);
     });
 
     recv('join', (e) => {
@@ -105,7 +118,8 @@ export default function Chat({ id }: { id: string }) {
     });
   };
 
-  const cmdre = /^\/(owner|admin|pass|ban|kick|mute|join|leave|public)(.*)/;
+  const cmdre =
+    /^\/(owner|admin|pass|ban|kick|mute|join|leave|public|dm|block)(.*)/;
 
   const handleCommand = (input: string) => {
     const m = input.match(cmdre);
@@ -133,11 +147,15 @@ export default function Chat({ id }: { id: string }) {
       case 'join':
         if (arg1) send(m[1], { pass: args[1], room: arg1 });
         break;
+      case 'public':
       case 'leave':
         send(m[1], room);
         break;
-      case 'public':
-        send(m[1], room);
+      case 'dm':
+        if (arg1) send(m[1], arg1);
+        break;
+      case 'block':
+        if (arg1) setBlock((v) => new Set(v).add(arg1));
         break;
     }
     setInput('');
@@ -167,10 +185,8 @@ export default function Chat({ id }: { id: string }) {
   };
 
   const joinRoom = (e: string) => {
-    send('join', { room: e, pass: '' });
+    send('join', { room: e, pass });
   };
-
-  console.log(public_);
 
   const Message = ({ v }: { v: ChatServerMessage }) => {
     return (
@@ -190,12 +206,15 @@ export default function Chat({ id }: { id: string }) {
 
   return (
     <Row border={1} flexGrow={1}>
-      <Col flexGrow={1}>
+      <Col flexGrow={1} padding={'.5rem'}>
         <h3>
           {user}@{room}
         </h3>
-        <Col flexGrow={1} overflow={'scroll'}>
-          {msgs.get(room)?.map((v, i) => <Message key={i} v={v} />)}
+        <Col flexGrow={1} overflow={'scroll'} id="msgs">
+          {msgs
+            .get(room)
+            ?.filter((v) => !block.has(v.user))
+            .map((v, i) => <Message key={i} v={v} />)}
         </Col>
         <Row>
           <TextField
@@ -222,17 +241,26 @@ export default function Chat({ id }: { id: string }) {
             ></TextField>
           </React.Fragment>
         )}
-        {!badd
-          ? Array.from(rooms.values()).map((v, i) => (
-              <Button key={i} onClick={() => setRoom(v)}>
-                {v}
-              </Button>
-            ))
-          : public_.map((v, i) => (
-              <Button key={i} onClick={() => joinRoom(v)}>
+        {!badd ? (
+          <Col>
+            {dms.map((v, i) => (
+              <Button key={i} onClick={() => setRoom('+' + v)}>
                 {v}
               </Button>
             ))}
+            {Array.from(rooms.values()).map((v, i) => (
+              <Button key={i} onClick={() => setRoom(v)}>
+                {v}
+              </Button>
+            ))}
+          </Col>
+        ) : (
+          public_.map((v, i) => (
+            <Button key={i} onClick={() => joinRoom(v)}>
+              {v}
+            </Button>
+          ))
+        )}
       </Col>
     </Row>
   );
