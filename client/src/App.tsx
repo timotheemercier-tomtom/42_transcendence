@@ -11,7 +11,6 @@ import User from './components/User';
 import ButtonLogin from './components/ButtonLogin';
 import MenuAppBar from './components/AppBar';
 
-
 const router = createBrowserRouter([
   {
     path: '/',
@@ -32,7 +31,6 @@ const router = createBrowserRouter([
   },
 ]);
 
-
 const App: React.FC = () => {
   const handle42Login = () => {
     window.location.href = 'http://localhost:3000/auth/42';
@@ -42,7 +40,7 @@ const App: React.FC = () => {
     <Container className="root">
       <Col className="app">
         <header>
-        <MenuAppBar onLogin={handle42Login} /> 
+          {/* <MenuAppBar onLogin={handle42Login} />  */}
           <br />
           <ButtonLogin onClick={handle42Login} text="Log In" />
         </header>
