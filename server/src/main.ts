@@ -26,31 +26,8 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '5mb' }));
   app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 
-    app.enableCors({
-      origin: ['http://localhost:5173'],
-
-  //     origin: (origin, callback) => {
-  //       // Autoriser les requêtes sans origine (comme les requêtes mobiles ou postman)
-  //       if (!origin) return callback(null, true);
-
-  //       // Vérifier si l'origine se termine par '.codam.nl' et utilise le port 5173
-  //       if (origin.endsWith('.codam.nl:5173')) {
-  //         callback(null, true);
-  //       } else {
-  //         callback(new Error('Not allowed by CORS'));
-  //       }
-  //     },
-  //     credentials: true,
-  //   });
-
-//   app.enableCors({
-//     origin: (origin, callback) => {
-//       if (!origin || /.*\.codam\.nl(:5173)?$/.test(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error('Not allowed by CORS'));
-//       }
-//     },
+  app.enableCors({
+    origin: ['http://localhost:5173'],
     credentials: true,
   });
 

@@ -33,13 +33,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import * as passport from 'passport';
-import { User } from 'src/user/user.entity'; // Adjust the import based on your project structure
-
-import { InjectRepository } from '@nestjs/typeorm';
-import { log } from 'console';
-
-const FortyTwoStrategy = require('passport-42').Strategy;
+import FortyTwoStrategy from 'passport-42';
 
 @Injectable()
 export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
@@ -63,7 +57,11 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     const username = profile.username;
     let user = await this.userService.findOne(username);
     if (!user) {
-      user = await this.userService.create({ login:username, username, picture: profile._json.image.link });
+      user = await this.userService.create({
+        login: username,
+        username,
+        picture: profile._json.image.link,
+      });
     }
     const payload = { login: user.login };
     accessToken = this.jwtService.sign(payload);

@@ -31,7 +31,7 @@ export class UserController {
   @Get(':login')
   @UseGuards(JwtAuthGuard)
   async findUser(
-    @Req() request: Request & any,
+    @Req() req: Request & any,
     @Param('login') login: string,
   ): Promise<User | null> {
     const user = await this.userService.findOne(login);
@@ -45,9 +45,9 @@ export class UserController {
   async updateUser(
     @Param('login') login: string,
     @Body() updateUserDto: UserDto,
-    @Req() request: Request & any,
+    @Req() req: Request & any,
   ): Promise<User> {
-    const user = request.user;
+    const user = req.user;
     if (user.login !== login) {
       throw new UnauthorizedException();
     }

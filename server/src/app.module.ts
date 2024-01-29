@@ -53,7 +53,8 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     entities: [User],
     synchronize: configService.get<boolean>('TYPEORM_SYNC', false),
     logging: true,
-    migrations: [],  }),
+    
+    migrations: [],}),
 });
 
 @Module({
@@ -61,6 +62,7 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    TypeOrmModule.forFeature([User]),
     ChatModule,
     AuthModule,
     typeOrmModule,

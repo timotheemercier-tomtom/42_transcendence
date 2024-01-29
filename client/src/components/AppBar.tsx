@@ -12,12 +12,24 @@ import FormGroup from '@mui/material/FormGroup';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 
-export default function MenuAppBar() {
-  const [auth, setAuth] = React.useState(true);
+interface MenuAppBarProps {
+    onLogin: () => void; 
+  }
+  
+export default function MenuAppBar({ onLogin }) {
+  const [auth, setAuth] = React.useState(false);
+  //   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const handle42Login = () => {
+    window.location.href = 'http://localhost:3000/auth/42';
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAuth(event.target.checked);
+    if (event.target.checked) {
+      onLogin();
+    }
   };
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {

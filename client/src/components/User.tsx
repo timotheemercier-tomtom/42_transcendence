@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import { Avatar, Card, CircularProgress } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Typography from './Typography';
 import Picture from './Picture';
 import FormWithValidation from './Form';
@@ -16,7 +16,6 @@ type UserContextType = {
   setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
 };
 
-// Creates context with a default value of type UserContextType
 const UserContext = createContext<UserContextType | null>(null);
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({
@@ -37,6 +36,7 @@ export type UserData = {
   login: string;
   username: string;
   picture: string;
+  twoFA: string;
 };
 
 export async function updateUserImage(
@@ -67,7 +67,7 @@ function User() {
 
   useEffect(() => {
     fetchUserData();
-  }, []);
+  });
 
   const fetchUserData = async () => {
     try {
@@ -107,16 +107,17 @@ function User() {
               userData.login,
               newPictureUrl,
             );
-            // Mettez à jour l'état de l'utilisateur avec les nouvelles informations
             setUserData(updatedUser);
           } catch (error) {
             console.error('Error updating user image:', error);
           }
         }}
       />
-
       <Typography variant="h5">Account Details</Typography>
-      <Typography variant="h6">42 Login: {userData.username}</Typography>
+      <Typography variant="h5">Intra Login: {userData.username}</Typography>
+      <Link to={'/u/asaijers'}>Alfa Profile</Link><br />
+      <Link to={'/u/tmercier'}>Tim Profile</Link>
+
       <FormWithValidation
         initialFormData={userData}
         onImageUpdate={updateUserData} // Ajout de la prop onImageUpdate

@@ -10,8 +10,8 @@ const markClassesMapping: {
     h2: 'OnePirateTypography-markedH2Center',
     h3: 'OnePirateTypography-markedH3Center',
     h4: 'OnePirateTypography-markedH4Center',
-    h5: '',
-    h6: '',
+    h5: 'OnePirateTypography-markedH5Center',
+    h6: 'OnePirateTypography-markedH6Center',
   },
   left: {
     h1: '',
@@ -68,11 +68,11 @@ interface ExtraTypographyProps {
 
 const variantMapping = {
   h1: 'h1',
-  h2: 'h1',
-  h3: 'h1',
-  h4: 'h1',
-  h5: 'h3',
-  h6: 'h2',
+  h2: 'h2',
+  h3: 'h3',
+  h4: 'h4',
+  h5: 'h5',
+  h6: 'h6',
   subtitle1: 'h3',
 };
 

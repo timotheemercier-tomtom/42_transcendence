@@ -14,7 +14,7 @@
  suppression (CRUD) des utilisateurs.
  */
 
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -24,11 +24,26 @@ export class User {
   @Column({ unique: true })
   login: string;
 
-  @Column({length: 42})
+  @Column({unique: true, length: 42})
   username: string;
+
+//   @Column({unique:true})
+//   email: string;
 
   @Column({ nullable: true })
   picture: string;
+
+//   @Column({length: 10, nullable: true })
+//   phone: number;
+
+//   @Column({ select: false, nullable: true })
+//   authConfirmToken: String
+
+//   @Column({ default: false, nullable: true })
+//   isVerified: Boolean;
+
+//   @CreateDateColumn()
+//   createdAt: Date;
 
   @Column({ default: 0 })
   won: number;

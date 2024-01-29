@@ -33,8 +33,8 @@ export class UserService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async updateImage(username: string, base64Image: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({ username });
+  async updateImage(login: string, base64Image: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ username: login });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -42,8 +42,8 @@ export class UserService {
     return this.usersRepository.save(user);
   }
 
-  async update(username: string, updateUserDto: UserDto): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { username } });
+  async update(login: string, updateUserDto: UserDto): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { username: login } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -56,8 +56,8 @@ export class UserService {
     return await this.usersRepository.save(user);
   }
 
-  async findOne(username: string): Promise<User | null> {
-    return await this.usersRepository.findOneBy({ username });
+  async findOne(login: string): Promise<User | null> {
+    return await this.usersRepository.findOneBy({ username: login });
   }
 
   async findAll(): Promise<User[]> {
@@ -68,14 +68,3 @@ export class UserService {
     await this.usersRepository.delete(id);
   }
 }
-
-// function createClient(arg0: string, arg1: string) {
-//     throw new Error('Function not implemented.');
-// }
-// //   createUser(userData: Partial<User>, userDto: UserDto): Promise<User> {
-// //     const user: User = new User();
-// //     user.username = userDto.username;
-// //     user.password = createUserDto.password;
-// //     user.gender = createUserDto.gender;
-// //     return this.userRepository.save(user);
-// //   }

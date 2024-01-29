@@ -6,7 +6,7 @@ or private, or protected by a password.
 - [x] **Direct Messaging Capability**
 <br>_Enable users to send direct messages to other users on the platform._
 
-- [ ] **User Blocking Functionality**
+- [x] **User Blocking Functionality**
   : Implement a feature for users to block other users, preventing them from seeing messages from the blocked account.
 
 - [x] **Channel Ownership and Management**
@@ -23,17 +23,17 @@ or private, or protected by a password.
 
 
 ### USER
-- [ ] **OAuth Login** Users must log in using the OAuth system of the 42 intranet.
+- [x] **OAuth Login** Users must log in using the OAuth system of the 42 intranet.
 
-- [ ] **Unique Usernames** Users should be able to choose a unique name that will be displayed on the website.
+- [x] **Unique Usernames** Users should be able to choose a unique name that will be displayed on the website.
 
-- [ ] **Avatar Upload** Users should be able to upload an avatar. A default avatar must be set if the user does not upload one.
+- [x] **Avatar Upload** Users should be able to upload an avatar. A default avatar must be set if the user does not upload one.
 
 - [ ] **Two-Factor Authentication** Users should be able to enable two-factor authentication, for example, using Google Authenticator or text messages to their phone.
 
 - [ ] **Friend System** Users should be able to add other users as friends and view their current status (online, offline, in a game, etc.).
 
-- [ ] **User Stats Display** Display stUser profiles need to display stats like wins, losses, ladder level, achievements, etc.atistics on user profiles (wins, losses, ladder level, achievements, etc.).
+- [x] **User Stats Display** Display stUser profiles need to display stats like wins, losses, ladder level, achievements, etc.atistics on user profiles (wins, losses, ladder level, achievements, etc.).
 
 - [ ] **Match History Feature** Each user should have a Match History, including details of 1v1 games, ladder rankings, and other relevant information. This should be accessible to all logged-in users​​.
 

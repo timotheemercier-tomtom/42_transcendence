@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { updateUserImage } from './User';
+import Typography from './Typography';
 
 interface IFormData {
   login: string;
@@ -94,11 +95,6 @@ const FormWithValidation: React.FC<FormWithValidationProps> = ({
     <form onSubmit={handleSubmit}>
       Profile Picture:
       <input type="file" name="picture" onChange={handleFileChange} />
-      <p />
-      <label>
-        Login:
-        <input type="text" value={formData.login} readOnly />
-      </label>
       <p />
       <label>
         <span className="error">{formErrors.picture}</span>

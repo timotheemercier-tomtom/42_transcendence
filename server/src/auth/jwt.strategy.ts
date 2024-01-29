@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { FourTwoStrategy } from './fourtwo.strategy';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { UserService } from 'src/user/user.service';
+import * as speakeasy from 'speakeasy';
 
 const extractJwtFromCookie = (req: Request): string | null => {
   return req.cookies?.['accessToken'] || null;
@@ -24,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    return { username: payload.username };
+  async validate(payload: any, req: any) {
+    return { login: payload.username };
   }
 }

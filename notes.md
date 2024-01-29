@@ -22,43 +22,52 @@ class User {
 `async updateUser(username: string, updateUserDto: UpdateUserDto): Promise<User>`
 
 
-  ## USER IMAGE
+const { Injectable, UnauthorizedException } = require('@nestjs/common');
+const { PassportStrategy } = require('@nestjs/passport');
+const { Strategy } = require('passport-custom');
+const speakeasy = require('speakeasy');
 
-    const supabaseUrl = this.configService.get('SUPABASE_URL');
-    const supabaseKey = this.configService.get('SUPABASE_KEY');
-
-    this.supabaseClient = createClient(supabaseUrl, supabaseKey);
-
-  async uploadImage(file: Express.Multer.File): Promise<string> {
-    const { data, error } = await supabase.storage
-      .from('user-images')
-      .upload(`path/to/store/${file.originalname}`, file.buffer, {
-        cacheControl: '3600',
-        upsert: false,
-      });
-
-    if (error) {
-      throw new Error('Error uploading to Supabase');
-    }
-
-    return `your-supabase-url/storage/v1/object/public/${data.Key}`;
+@Injectable()
+class GoogleAuthenticatorStrategy extends PassportStrategy(Strategy, 'google-authenticator') {
+  constructor() {
+    super();
   }
 
-  async updateImage(username: string, imageUrl: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({ username });
+  async validate(req) {
+
+    const user = req.user;
+
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException('User not authenticated');
     }
-    user.picture = imageUrl;
-    return this.usersRepository.save(user);
+
+
+    if (!user.isTwoFactorAuthenticationEnabled) {
+      throw new UnauthorizedException('2FA not enabled');
+    }
+
+
+    const token = req.body.token; 
+
+
+    const isValidToken = this.validateTwoFactorToken(token, user.twoFactorAuthenticationSecret);
+
+    if (!isValidToken) {
+      throw new UnauthorizedException('Invalid 2FA token');
+    }
+
+    return user;
   }
 
-    @Post('upload/:login')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadUserImage(
-    @UploadedFile() file: Express.Multer.File,
-    @Param('login') login: string,
-  ) {
-    const imageUrl = await this.userService.uploadImage(file);
-    return this.userService.updateImage(login, imageUrl);
+  validateTwoFactorToken(token, secret) {
+
+    return speakeasy.totp.verify({
+      secret,
+      encoding: 'base32',
+      token,
+      window: 1, 
+    });
   }
+}
+
+module.exports = GoogleAuthenticatorStrategy;

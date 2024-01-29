@@ -1,7 +1,5 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, MinLength } from 'class-validator';
 
-const passwordRegEx =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[@$!%*?&])[A-Za-zd@$!%*?&]{8,20}$/;
 
 export class UserDto {
 
@@ -15,7 +13,11 @@ export class UserDto {
 
   @IsOptional()
   @IsString()
-  readonly picture?: string;
+  picture?: string;
+
+  @IsOptional()
+  @IsNumber()
+  phone?: number;
 }
 
 
