@@ -43,14 +43,17 @@ export async function updateUserImage(
   login: string,
   base64Image: string,
 ): Promise<UserData> {
-  const response = await fetch(`http://localhost:3000/user/${login}/image`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await fetch(
+    `http://${location.hostname}:3000/user/${login}/image`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ picture: base64Image }),
+      credentials: 'include',
     },
-    body: JSON.stringify({ picture: base64Image }),
-    credentials: 'include',
-  });
+  );
 
   if (!response.ok) {
     throw new Error('Failed to update user image');
@@ -71,10 +74,13 @@ function User() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch('http://localhost:3000/user/' + login, {
-        method: 'GET',
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `http://${location.hostname}:3000/user/` + login,
+        {
+          method: 'GET',
+          credentials: 'include',
+        },
+      );
       if (!response.ok) throw new Error('Network response error');
       const data = (await response.json()) as UserData;
       setUserData(data);

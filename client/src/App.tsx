@@ -9,6 +9,8 @@ import Home from './pages/Home';
 import LoginResult from './pages/LoginResult';
 import Profile from './pages/Profile';
 import Room from './pages/Room';
+import Status from './components/Status';
+import Row from './components/Row';
 
 // import LoginModule from './components/Login';
 
@@ -49,12 +51,16 @@ const App: React.FC = () => {
     <Container className="root">
       <Col className="app">
         <header>
-          {/* <Button onClick={handle42Login}>Log In</Button> */}
-          <ButtonLogin onClick={handle42Login} text="Log In" />
+          <Row>
+            <ButtonLogin onClick={handle42Login} text="Log In" />
+            <Status />
 
-          {/* <Button onClick={handleAccountClick}>Account</Button>{' '} */}
-          {/* <Link to="/u/@self">Account</Link> */}
-          {/* Updated this button */}
+            {/* <Button onClick={handle42Login}>Log In</Button> */}
+
+            {/* <Button onClick={handleAccountClick}>Account</Button>{' '} */}
+            {/* <Link to="/u/@self">Account</Link> */}
+            {/* Updated this button */}
+          </Row>
         </header>
         <Col flexGrow={1} className="page">
           <RouterProvider router={router} />

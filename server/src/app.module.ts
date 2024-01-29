@@ -40,6 +40,7 @@ import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { Friend } from './user/friend.entity';
+import { StatusModule } from './status/status.module';
 
 const typeOrmModule = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
@@ -69,6 +70,7 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     TerminusModule,
     UserModule,
     JwtModule,
+    StatusModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],

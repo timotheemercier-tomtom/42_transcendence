@@ -23,7 +23,6 @@ import { Get, Req, Res, UseGuards, Controller } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FourTwoStrategy } from './fourtwo.strategy';
 import { Response } from 'express';
-import { log } from 'console';
 
 @Controller('auth')
 export class AuthController {
@@ -38,10 +37,9 @@ export class AuthController {
   async fortyTwoAuthRedirect(@Req() req: Request | any, @Res() res: Response) {
     const { accessToken, user } = req.user;
     // accessToken est directement extraits de req.user.
-
-    res.cookie('accessToken', accessToken, {
-      secure: true,
-    });
-    res.redirect('http://localhost:5173/login?u=' + user.username);
+    const host = new URL(req.headers.referer).hostname;
+    res.redirect(
+      `http://${host}:5173/login?token=${accessToken}&u=` + user.username,
+    );
   }
 }

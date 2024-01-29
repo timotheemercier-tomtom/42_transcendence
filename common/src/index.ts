@@ -88,3 +88,12 @@ export type User = {
 
   friends: User[];
 };
+
+export type StatusEventType = 'status' | 'list';
+export type StatusType = 'offline' | 'online' | 'in-game';
+export type StatusData = [string, StatusType][];
+
+export type StatusStatus = {
+  user: string;
+  status: StatusType;
+};
