@@ -1,6 +1,6 @@
+import Friends from '../components/Friends';
 import User from '../components/User';
 // import User from '../components/User';
-
 
 const Profile = () => {
   // You can add more profile-specific content or logic here
@@ -8,6 +8,7 @@ const Profile = () => {
     <div>
       <h1>User Profile</h1>
       <User />
+      <Friends />
       {/* Other profile-related components */}
     </div>
   );

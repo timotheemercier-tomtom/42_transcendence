@@ -35,17 +35,20 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import { FourTwoStrategy } from 'src/auth/fourtwo.strategy';
 import { JwtModule } from '@nestjs/jwt';
+import { Friend } from './friend.entity';
+import { FriendService } from './friend.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), JwtModule],
+  imports: [TypeOrmModule.forFeature([User, Friend]), JwtModule],
   providers: [
     UserService,
     JwtStrategy,
     JwtAuthGuard,
     ConfigService,
     FourTwoStrategy,
+    FriendService,
   ],
-  exports: [UserService, TypeOrmModule],
+  exports: [UserService, TypeOrmModule, FriendService],
   controllers: [UserController],
 })
 export class UserModule {}

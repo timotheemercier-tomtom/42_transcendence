@@ -2,7 +2,7 @@
  * ? AppModule
  * The root module of the application. It integrates various feature modules and configures
  * global settings, database connections, and other core functionalities.
- * 
+ *
  ** ConfigModule
  * Configures global settings for the application.
  ** ChatModule, AuthModule, UserModule
@@ -16,7 +16,7 @@
  *
  * The AppModule uses dependency injection to incorporate these modules and configures TypeORM with
  * the PostgreSQL database. It sets up a global configuration accessible throughout the application.
- * 
+ *
  * ? typeOrmModule
  * Configures TypeORM asynchronously, enabling the use of external configuration sources like the ConfigService.
  * This approach allows setting database connection parameters through environment variables or other config mechanisms.
@@ -24,7 +24,7 @@
  * ? useFactory
  * A factory function used by TypeOrmModule.forRootAsync() to configure the TypeORM connection.
  * It receives an instance of ConfigService to access environment-specific configurations.
- * 
+ *
  */
 
 import { Module } from '@nestjs/common';
@@ -39,6 +39,7 @@ import { HealthController } from './health/health.controller';
 import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { Friend } from './user/friend.entity';
 
 const typeOrmModule = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
@@ -50,11 +51,11 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    entities: [User],
+    entities: [User, Friend],
     synchronize: configService.get<boolean>('TYPEORM_SYNC', false),
     logging: true,
-    
-    migrations: [],}),
+    migrations: [],
+  }),
 });
 
 @Module({
@@ -62,7 +63,6 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forFeature([User]),
     ChatModule,
     AuthModule,
     typeOrmModule,

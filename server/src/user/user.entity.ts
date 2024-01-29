@@ -14,7 +14,8 @@
  suppression (CRUD) des utilisateurs.
  */
 
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Friend } from './friend.entity';
 
 @Entity()
 export class User {
@@ -24,7 +25,7 @@ export class User {
   @Column({ unique: true })
   login: string;
 
-  @Column({unique: true, length: 42})
+  @Column({ length: 42 })
   username: string;
 
 //   @Column({unique:true})
@@ -53,4 +54,7 @@ export class User {
 
   @Column({ default: 0 })
   rank: number;
+
+  @OneToMany(() => Friend, (friend) => friend.friend)
+  friends: Friend[];
 }
