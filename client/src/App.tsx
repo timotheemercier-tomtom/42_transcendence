@@ -1,15 +1,14 @@
-import React, { ReactNode, useContext, useState } from 'react';
-import { createBrowserRouter, Link, RouterProvider } from 'react-router-dom';
+import React from 'react';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 // import User, { UserProvider } from './components/User';
-import Home from './pages/Home';
-import Room from './pages/Room';
-import LoginResult from './pages/LoginResult';
-import Error404 from './pages/Error404';
-import { Container, Button } from '@mui/material';
-import Col from './components/Col';
-import User from './components/User';
-import Profile from './pages/Profile';
+import { Container } from '@mui/material';
 import ButtonLogin from './components/ButtonLogin';
+import Col from './components/Col';
+import Error404 from './pages/Error404';
+import Home from './pages/Home';
+import LoginResult from './pages/LoginResult';
+import Profile from './pages/Profile';
+import Room from './pages/Room';
 
 // import LoginModule from './components/Login';
 
@@ -28,7 +27,7 @@ const router = createBrowserRouter([
     path: '/login',
   },
   {
-    element: <User />,
+    element: <Profile />,
     path: '/u/:login',
   },
 ]);

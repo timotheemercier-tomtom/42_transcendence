@@ -30,6 +30,7 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Post,
   Req,
   UnauthorizedException,
   UseGuards,
@@ -38,10 +39,15 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UserDto } from './user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
+import { FriendService } from './friend.service';
+import { Friend } from './friend.entity';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private friendService: FriendService,
+  ) {}
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -73,5 +79,24 @@ export class UserController {
       throw new UnauthorizedException();
     }
     return await this.userService.update(login, updateUserDto);
+  }
+
+  @Post(':login/friend/:friend')
+  async toggleFriend(
+    @Param('login') login: string,
+    @Param('friend') friendId: string,
+  ): Promise<any> {
+    if (await this.friendService.isFriend(login, friendId)) {
+      this.friendService.removeFriend(login, friendId);
+      return { message: 'Friend removed successfully' };
+    } else {
+      this.friendService.addFriend(login, friendId);
+      return { message: 'Friend added successfully' };
+    }
+  }
+
+  @Get(':login/friends')
+  async listAllFriends(@Param('login') login: string): Promise<User[]> {
+    return this.friendService.getFriends(login);
   }
 }

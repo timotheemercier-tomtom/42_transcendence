@@ -70,3 +70,21 @@ export type ChatJoin = {
   room: string;
   pass: string;
 };
+
+export type User = {
+  id: number;
+
+  login: string;
+
+  username: string;
+
+  picture: string;
+
+  won: number;
+
+  lost: number;
+
+  rank: number;
+
+  friends: User[];
+};

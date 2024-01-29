@@ -33,15 +33,13 @@ export class UserService {
     private usersRepository: Repository<User>,
   ) {}
 
-
-//   createUser(userData: Partial<User>, userDto: UserDto): Promise<User> {
-//     const user: User = new User();
-//     user.username = userDto.username;
-//     user.password = createUserDto.password;
-//     user.gender = createUserDto.gender;
-//     return this.userRepository.save(user);
-//   }
-  
+  //   createUser(userData: Partial<User>, userDto: UserDto): Promise<User> {
+  //     const user: User = new User();
+  //     user.username = userDto.username;
+  //     user.password = createUserDto.password;
+  //     user.gender = createUserDto.gender;
+  //     return this.userRepository.save(user);
+  //   }
 
   async update(username: string, updateUserDto: UserDto): Promise<User> {
     const user = await this.usersRepository.findOne({ where: { username } });
@@ -51,7 +49,6 @@ export class UserService {
     Object.assign(user, updateUserDto);
     return await this.usersRepository.save(user);
   }
-
 
   async create(userData: Partial<User>): Promise<User> {
     const user = this.usersRepository.create(userData);
