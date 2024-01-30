@@ -1,11 +1,17 @@
-import React, { ReactNode, useContext } from 'react';
-import { createBrowserRouter, Link, RouterProvider } from 'react-router-dom';
+import React from 'react';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 // import User, { UserProvider } from './components/User';
-import Home from './pages/Home';
-import Room from './pages/Room';
-import Status from './components/Status';
+import ButtonLogin from './components/ButtonLogin';
+import Col from './components/Col';
 import Row from './components/Row';
+import Status from './components/Status';
+import User from './components/User';
+import Error404 from './pages/Error404';
+import Home from './pages/Home';
+import LoginResult from './pages/LoginResult';
+import Room from './pages/Room';
 import { API } from './util';
+import { Container } from '@mui/material';
 
 // import LoginModule from './components/Login';
 
