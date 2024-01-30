@@ -11,6 +11,7 @@ import Profile from './pages/Profile';
 import Room from './pages/Room';
 import Status from './components/Status';
 import Row from './components/Row';
+import { API } from './util';
 
 // import LoginModule from './components/Login';
 
@@ -41,7 +42,11 @@ const router = createBrowserRouter([
 
 const App: React.FC = () => {
   const handle42Login = () => {
-    window.location.href = 'http://localhost:3000/auth/42';
+    window.location.href = API + '/auth/42';
+  };
+
+  const anonlogin = () => {
+    location.href = API + `/auth/anon`;
   };
 
   //   const handleAccountClick = () => {};
@@ -53,6 +58,7 @@ const App: React.FC = () => {
         <header>
           <Row>
             <ButtonLogin onClick={handle42Login} text="Log In" />
+            <ButtonLogin onClick={anonlogin} text="anon Log In" />
             <Status />
 
             {/* <Button onClick={handle42Login}>Log In</Button> */}

@@ -1,13 +1,9 @@
 import { io } from 'socket.io-client';
-import { getCookie } from './util';
+import { API, getCookie } from './util';
 
-const wsurl = 'http://localhost:3000/chat/ws';
+const wsurl = API + '/chat/ws';
 
-const user = sessionStorage.getItem('user') ?? '';
-
-const query = user.startsWith('$')
-  ? { anon: '$anon' + user }
-  : { token: getCookie('accessToken') ?? '' };
+const query = { token: getCookie('accessToken') ?? '' };
 
 export const socket = io(wsurl, {
   query,

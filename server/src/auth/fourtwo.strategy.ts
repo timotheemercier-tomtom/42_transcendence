@@ -30,14 +30,9 @@
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { UserService } from 'src/user/user.service';
-import { JwtService } from '@nestjs/jwt';
-import * as passport from 'passport';
-import { User } from 'src/user/user.entity'; // Adjust the import based on your project structure
-
-import { InjectRepository } from '@nestjs/typeorm';
-import { log } from 'console';
 
 const FortyTwoStrategy = require('passport-42').Strategy;
 
@@ -51,7 +46,7 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     super({
       clientID: configService.get('AUTH_ID'),
       clientSecret: configService.get('AUTH_SECRET'),
-      callbackURL: 'http://localhost:3000/auth/42/callback',
+      callbackURL: `http://${configService.get('HOST')}:3000/auth/42/callback`,
     });
   }
 
@@ -63,7 +58,11 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     const username = profile.username;
     let user = await this.userService.findOne(username);
     if (!user) {
-      user = await this.userService.create({ login:username, username, picture: profile._json.image.link });
+      user = await this.userService.create({
+        login: username,
+        username,
+        picture: profile._json.image.link,
+      });
     }
     const payload = { login: user.login };
     accessToken = this.jwtService.sign(payload);

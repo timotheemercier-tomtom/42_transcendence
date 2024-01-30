@@ -1,12 +1,10 @@
-import { StatusData } from 'common';
 import { useEffect, useState } from 'react';
 import { socket } from '../status.socket';
 import Row from './Row';
+import { StatusType, StatusList, StatusState } from 'common';
 
 const Status = () => {
-  const [status, setStatus] = useState<StatusData>([]);
-  let user = sessionStorage.getItem('user') ?? '';
-  if (user.startsWith('$')) user = '$anon' + user;
+  const [status, setStatus] = useState(new Map<string, StatusType>());
 
   useEffect(() => {
     socket.connect();
@@ -17,15 +15,23 @@ const Status = () => {
   }, []);
 
   useEffect(() => {
-    socket.on('list', setStatus);
+    const onlist = (e: StatusList) => {
+      setStatus(new Map(e));
+    };
+    const onstate = (e: StatusState) => {
+      setStatus((v) => new Map(v).set(e[0], e[1]));
+    };
+    socket.on('list', onlist);
+    socket.on('state', onstate);
     return () => {
-      socket.off('list', setStatus);
+      socket.off('list', onlist);
+      socket.off('state', onstate);
     };
   }, []);
 
   return (
-    <Row>
-      {status.map((v, i) => (
+    <Row gap={'.5rem'}>
+      {Array.from(status.entries()).map((v, i) => (
         <span key={i}>
           {v[0]}: {v[1]}
         </span>

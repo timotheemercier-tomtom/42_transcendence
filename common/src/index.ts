@@ -89,11 +89,7 @@ export type User = {
   friends: User[];
 };
 
-export type StatusEventType = 'status' | 'list';
+export type StatusEventType = 'state' | 'list';
 export type StatusType = 'offline' | 'online' | 'in-game';
-export type StatusData = [string, StatusType][];
-
-export type StatusStatus = {
-  user: string;
-  status: StatusType;
-};
+export type StatusState = [string, StatusType];
+export type StatusList = StatusState[];

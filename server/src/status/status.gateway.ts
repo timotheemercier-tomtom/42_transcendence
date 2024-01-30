@@ -17,11 +17,8 @@ export class StatusGateway {
   afterInit(server: Server) {
     server.use(async (client: Socket, next) => {
       try {
-        const anon: any = client.handshake.query.anon;
         const token: any = client.handshake.query.token;
-        const user = anon
-          ? { username: anon }
-          : await this.auth.validateUser(token);
+        const user = await this.auth.validateUser(token);
 
         if (!user) {
           return next(new Error('user does not exist'));
@@ -36,14 +33,17 @@ export class StatusGateway {
     });
   }
 
-  state(user: string, state: StatusType) {
+  async state(user: string, state: StatusType) {
     this.status.set(user, state);
+    const friends = await this.friends.getUsersWhoAddedAsFriend(user);
+    console.log(friends);
+
+    friends.forEach(
+      (v) => this.userToClient.get(v.login)?.emit('state', [user, state]),
+    );
   }
 
-  async handleConnection(client: Socket) {
-    const user = this.idmap.get(client.id)!;
-    console.log(`status connected: ${client.id} ${user}`);
-    this.state(user, 'online');
+  async list(client: Socket, user: string) {
     const friends = await this.friends.getFriends(user);
     const status = friends.map((v) => [
       v.login,
@@ -52,14 +52,17 @@ export class StatusGateway {
     client.emit('list', status);
   }
 
+  async handleConnection(client: Socket) {
+    const user = this.idmap.get(client.id)!;
+    console.log(`status connected: ${client.id} ${user}`);
+    this.state(user, 'online');
+    this.list(client, user);
+    console.log(this.status);
+  }
+
   handleDisconnect(client: Socket) {
     const user = this.idmap.get(client.id)!;
     console.log(`status disconnected: ${client.id} ${user}`);
     this.state(user, 'offline');
-  }
-
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-    return 'Hello world!';
   }
 }
