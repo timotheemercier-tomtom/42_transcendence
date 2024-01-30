@@ -32,9 +32,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { UserService } from 'src/user/user.service';
-import { JwtService } from '@nestjs/jwt';
 import FortyTwoStrategy from 'passport-42';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
