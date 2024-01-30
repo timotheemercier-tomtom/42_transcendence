@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
+
+enum SQLErrorCode {
+  UniqueViolation = '23505',
+}
 
 @Injectable()
 export class AuthService {
@@ -13,21 +17,26 @@ export class AuthService {
 
   async validateUser(token: string): Promise<any> {
     try {
-      // Ensure this matches the secret used in JwtStrategy
       const decoded = this.jwtService.verify(token, {
         secret: this.config.get('JWT_SECRET'),
       });
-
-      // 'decoded' contains the payload of the JWT. Use this to validate the user.
-      const user = await this.userService.findOne(decoded.login);
-      if (!user) {
-        return null;
+      const user = await this.userService.findOne(decoded.username);
+      if (user) {
+        return user;
       }
-      return user;
     } catch (error) {
-      // Handle invalid token, expired token, etc.
-      return null;
+      if (error?.code === SQLErrorCode.UniqueViolation) {
+        throw new HttpException(
+          'User with that email already exists',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
+  
 }

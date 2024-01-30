@@ -19,11 +19,10 @@ user data after successful authentication and setting an HTTP-only cookie with
     protect the routes and manage the authentication flow.
  */
 
-import { Get, Req, Res, UseGuards, Controller } from '@nestjs/common';
+import { Get, Req, Res, UseGuards, Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FourTwoStrategy } from './fourtwo.strategy';
 import { Response } from 'express';
-import { log } from 'console';
 
 @Controller('auth')
 export class AuthController {
@@ -37,11 +36,25 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async fortyTwoAuthRedirect(@Req() req: Request | any, @Res() res: Response) {
     const { accessToken, user } = req.user;
-    // accessToken est directement extraits de req.user.
 
     res.cookie('accessToken', accessToken, {
       secure: true,
     });
-    res.redirect('http://localhost:5173/login?u=' + user.username);
+    res.redirect('http://localhost:5173/login?u=' + user.login);
   }
+
+    
+//   @Post('register')
+//   async register(@Body() registrationData: RegisterDto) {
+//     return this.authService.register(registrationData);
+//   }
+
+//   @HttpCode(200)
+//   @UseGuards(AuthGuard('42'))
+//   @Post('log-in')
+//   async logIn(@Req() req: Request | any) {
+//     const user = req.user;
+//     user.password = undefined;
+//     return user;
+//   }
 }

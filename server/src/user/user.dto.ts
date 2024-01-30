@@ -11,15 +11,20 @@ export class UserDto {
   @MinLength(3, { message: 'Username must have atleast 3 characters.' })
   readonly username?: string;
 
+  @IsEmail()
+  @IsOptional()
+  readonly email?: string;
+
   @IsOptional()
   @IsString()
   picture?: string;
 
-  @IsOptional()
-  @IsNumber()
-  phone?: number;
 }
 
+export class TwoFACodeDto {
+    @IsString()
+    twoFACode: string;
+  }
 
 
 // Add any additional properties you need to send to the frontend

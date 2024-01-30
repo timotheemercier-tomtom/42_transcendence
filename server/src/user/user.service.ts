@@ -2,7 +2,7 @@
  * ? `UserService`
  * Provides business logic for user operations in the Transcendance project.
  *
- * ? `findUserByUsername`
+ * ? `findUserBylogin`
  * Retrieves a user from the database by their username using TypeORM's findOne method.
  * @param {string} username - The username of the user to retrieve.
  * @return {Promise<User | null>} - The user object or null if not found.
@@ -20,7 +20,12 @@
  * @return {Promise<User>} - The updated user object.
  */
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserDto } from './user.dto';
@@ -33,17 +38,74 @@ export class UserService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async updateImage(login: string, base64Image: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({ username: login });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    user.picture = base64Image;
-    return this.usersRepository.save(user);
+  /*
+  //------------------------------------------------------------- CREATE
+  */
+  async create(userData: UserDto): Promise<User> {
+    const newUser = await this.usersRepository.create(userData);
+    await this.usersRepository.save(newUser);
+    return newUser;
   }
 
+  /*
+  //------------------------------------------------------------- 2FA
+  */
+  async setTwoFASecret(secret: string, login: string) {
+    return this.usersRepository.update(login, {
+      twoFASecret: secret,
+    });
+  }
+
+  async turnOnTwoFA(login: string) {
+    return this.usersRepository.update(login, {
+      isTwoFAEnabled: true,
+    });
+  }
+
+  async turnOffTwoFA(login: string) {
+    return this.usersRepository.update(login, {
+      isTwoFAEnabled: false,
+    });
+  }
+
+  /*
+  //------------------------------------------------------------- SEARCH 
+  */
+
+  async findOne(login: string): Promise<User | null> {
+    const user = await this.usersRepository.findOneBy({ login });
+
+    if (user) {
+      return user;
+    }
+    throw new HttpException(
+      'User with this username does not exist',
+      HttpStatus.NOT_FOUND,
+    );
+  }
+
+  async findById(id: number) {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (user) {
+      return user;
+    }
+    throw new HttpException(
+      'User with this id does not exist',
+      HttpStatus.NOT_FOUND,
+    );
+  }
+
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find();
+  }
+
+  /*
+  //------------------------------------------------------------- UPDATE 
+  */
   async update(login: string, updateUserDto: UserDto): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { username: login } });
+    const user = await this.usersRepository.findOne({
+      where: { login: login },
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -51,20 +113,22 @@ export class UserService {
     return await this.usersRepository.save(user);
   }
 
-  async create(userData: Partial<User>): Promise<User> {
-    const user = this.usersRepository.create(userData);
-    return await this.usersRepository.save(user);
+  async updateImage(login: string, base64Image: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ login });
+    if (user) {
+      user.picture = base64Image;
+      return this.usersRepository.save(user);
+    }
+    throw new HttpException(
+      'User with this login does not exist',
+      HttpStatus.NOT_FOUND,
+    );
   }
 
-  async findOne(login: string): Promise<User | null> {
-    return await this.usersRepository.findOneBy({ username: login });
-  }
-
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
-  }
-
-  async removeOne(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+  /*
+  //------------------------------------------------------------- DELETE 
+  */
+  async removeOne(login: string): Promise<void> {
+    await this.usersRepository.delete(login);
   }
 }

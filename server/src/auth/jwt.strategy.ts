@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { UserService } from 'src/user/user.service';
 import * as speakeasy from 'speakeasy';
+import { User } from 'src/user/user.entity';
 
 const extractJwtFromCookie = (req: Request): string | null => {
   return req.cookies?.['accessToken'] || null;
@@ -16,7 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   jwtService: any;
   constructor(
     private configService: ConfigService,
-    private readonly authService: FourTwoStrategy,
     private readonly userService: UserService,
   ) {
     super({
@@ -25,7 +25,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any, req: any) {
-    return { login: payload.username };
+  async validate(payload: any): Promise<User> {
+    const user = await this.userService.findOne(payload.login);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    if (user.isTwoFAEnabled && !payload.isTwoFAVerified) {
+      throw new UnauthorizedException('2FA is enabled but not verified');
+    }
+
+    return user;
   }
 }
