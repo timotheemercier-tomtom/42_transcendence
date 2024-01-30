@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 import { Friend } from './friend.entity';
 import { User } from './user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class FriendService {
@@ -34,5 +34,17 @@ export class FriendService {
       where: { userId, friendId },
     });
     return !!friend;
+  }
+
+  async getUsersWhoAddedAsFriend(userLogin: string): Promise<User[]> {
+    const friendRelationships = await this.friendRepository.find({
+      where: { friendId: userLogin },
+      relations: ['friend'],
+    });
+
+    const userIds = friendRelationships.map((friendship) => friendship.userId);
+
+    const friends = await this.userRepository.findBy({ login: In(userIds) });
+    return friends;
   }
 }

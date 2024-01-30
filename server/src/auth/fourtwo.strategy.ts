@@ -30,6 +30,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
@@ -45,7 +46,7 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     super({
       clientID: configService.get('AUTH_ID'),
       clientSecret: configService.get('AUTH_SECRET'),
-      callbackURL: 'http://localhost:3000/auth/42/callback',
+      callbackURL: `http://${configService.get('HOST')}:3000/auth/42/callback`,
     });
   }
 

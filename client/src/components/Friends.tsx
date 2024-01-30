@@ -11,7 +11,12 @@ const Friends = () => {
 
   useEffect(() => {
     const f = async () => {
-      const res = await fetch(`http://localhost:3000/user/${login}/friends`);
+      const res = await fetch(
+        `http://${location.hostname}:3000/user/${login}/friends`,
+        {
+          credentials: 'include',
+        },
+      );
       const data = await res.json();
       setFriends(data);
     };
@@ -24,7 +29,7 @@ const Friends = () => {
       <h3>Friends:</h3>
       <Col overflow={'scroll'}>
         {friends.map((v, i) => (
-          <Link to={'/u/' + v.login}>
+          <Link key={i} to={'/u/' + v.login}>
             <Row alignItems={'center'} gap={'.5rem'}>
               <Avatar src={v.picture}></Avatar>
               <span key={i}>{v.login}</span>

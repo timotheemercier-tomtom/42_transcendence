@@ -27,7 +27,9 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 
   app.enableCors({
-    origin: ['http://localhost:5173'],
+    origin: function (origin, callback) {
+      callback(null, origin);
+    },
     credentials: true,
   });
 

@@ -74,6 +74,7 @@ export class UserController {
   }
 
   @Get(':login/friends')
+  @UseGuards(JwtAuthGuard)
   async listAllFriends(@Param('login') login: string): Promise<User[]> {
     return this.friendService.getFriends(login);
   }

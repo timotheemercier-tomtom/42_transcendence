@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 import { API, getCookie } from './util';
 
-const wsurl = API + '/chat/ws';
+const wsurl = API + '/status/ws';
 
 const query = { token: getCookie('accessToken') ?? '' };
 
