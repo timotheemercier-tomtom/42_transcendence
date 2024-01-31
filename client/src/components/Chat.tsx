@@ -21,11 +21,12 @@ export default function Chat({ id }: { id: string }) {
   const [badd, setBadd] = useState(false);
   const [pass, setPass] = useState('');
   const [dms, setDms] = useState<string[]>([]);
+  const [error, setError] = useState('');
   const [block, setBlock] = useState(new Set<string>());
-
-  let user = sessionStorage.getItem('user') ?? '';
-  if (user.startsWith('$')) user = '$anon' + user;
+  const user = sessionStorage.getItem('user') ?? '';
   const [sev, setSev] = useState<[string, never][]>([]);
+
+  // fixme
   const unload = () => {
     sev.forEach((v) => socket.off(v[0], v[1]));
   };
@@ -106,6 +107,10 @@ export default function Chat({ id }: { id: string }) {
     recv('join', (e) => {
       setRooms((v) => new Set(v).add(e));
       console.log(rooms);
+    });
+
+    recv('error', (e) => {
+      setError(e);
     });
 
     recv('leave', (e) => {
@@ -216,16 +221,19 @@ export default function Chat({ id }: { id: string }) {
             ?.filter((v) => !block.has(v.user))
             .map((v, i) => <Message key={i} v={v} />)}
         </Col>
-        <Row>
-          <TextField
-            value={input}
-            fullWidth
-            variant="standard"
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleInput()}
-          />
-          <Button onClick={handleInput}>Send</Button>
-        </Row>
+        <Col>
+          <span color="red">{error}</span>
+          <Row>
+            <TextField
+              value={input}
+              fullWidth
+              variant="standard"
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleInput()}
+            />
+            <Button onClick={handleInput}>Send</Button>
+          </Row>
+        </Col>
       </Col>
       <Col borderLeft={1}>
         {!badd ? (
