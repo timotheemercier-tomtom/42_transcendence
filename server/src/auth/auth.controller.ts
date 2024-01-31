@@ -55,14 +55,14 @@ export class AuthController {
     res.redirect(this.redir(host, accessToken, user.username));
   }
 
-  anonc = 0;
+//   anonc = 0;
 
-  @Get('anon')
-  async anonSignIn(@Req() req: Request | any, @Res() res: Response) {
-    const host = new URL(req.headers.referer).hostname;
-    const name = '$anon' + this.anonc++;
-    await this.user.create({ login: name, username: name });
-    const t = this.jwt.sign({ login: name });
-    res.redirect(this.redir(host, t, name));
-  }
+//   @Get('anon')
+//   async anonSignIn(@Req() req: Request | any, @Res() res: Response) {
+//     const host = new URL(req.headers.referer).hostname;
+//     const name = '$anon' + this.anonc++;
+//     await this.user.create({ login: name, username: name });
+//     const t = this.jwt.sign({ login: name });
+//     res.redirect(this.redir(host, t, name));
+//   }
 }
