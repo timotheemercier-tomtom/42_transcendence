@@ -65,17 +65,14 @@ export class ChatGateway
   afterInit(server: Server) {
     server.use(async (client: Socket, next) => {
       try {
-        const anon: any = client.handshake.query.anon;
         const token: any = client.handshake.query.token;
-        const user = anon
-          ? { username: anon }
-          : await this.auth.validateUser(token);
+        const user = await this.auth.validateUser(token);
 
         if (!user) {
           return next(new Error('user does not exist'));
         }
-        this.userToClient.set(user.username, client);
 
+        this.userToClient.set(user.username, client);
         this.idmap.set(client.id, user.username);
       } catch (error) {
         return next(error);
