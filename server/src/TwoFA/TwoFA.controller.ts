@@ -22,9 +22,7 @@ export class TwoFAController {
       return res.status(400).json({ message: '2FA already enabled!' });
     }
 
-    const secret = this.TwoFAService.generate2FAsecret(
-      user.login,
-    );
+    const secret = this.TwoFAService.generate2FAsecret(user.login);
 
     const otpAuthUrl = speakeasy.otpauthURL({
       secret: secret,
@@ -44,13 +42,11 @@ export class TwoFAController {
 
   @Post('enable')
   async enableTwoFA(@Req() req: any, @Body() body: any, @Res() res: any) {
-
     const user = req.user;
 
     if (!user) {
       return res.status(401).json({ message: 'User not authenticated' });
     }
-
 
     if (user.isTwoFactorAuthenticationEnabled) {
       return res.status(400).json({ message: '2FA already enabled!' });
@@ -60,13 +56,12 @@ export class TwoFAController {
 
     const isValidToken = this.TwoFAService.validate2FaToken(
       token,
-      user.twoFactorAuthenticationSecret
+      user.twoFactorAuthenticationSecret,
     );
 
     if (!isValidToken) {
       return res.status(401).json({ message: 'Invalid 2FA token' });
     }
-
 
     return res.status(200).json({ message: '2FA enabled successfully' });
   }
