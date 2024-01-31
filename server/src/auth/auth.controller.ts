@@ -61,7 +61,8 @@ export class AuthController {
   async anonSignIn(@Req() req: Request | any, @Res() res: Response) {
     const host = new URL(req.headers.referer).hostname;
     const name = '$anon' + this.anonc++;
-    await this.user.create({ login: name, username: name });
+    if (!(await this.user.findOne(name)))
+      await this.user.create({ login: name, username: name });
     const t = this.jwt.sign({ login: name });
     res.redirect(this.redir(host, t, name));
   }
