@@ -11,7 +11,8 @@ export type ChatEventType =
   | 'public'
   | 'list'
   | 'dm'
-  | 'dms';
+  | 'dms'
+  | 'error';
 
 type ChatEventData = {
   pass: ChatPass;
@@ -25,6 +26,7 @@ type ChatEventData = {
   list: string[];
   dm: string;
   dms: string[];
+  error: string;
 };
 
 export type ChatServerEventData = {
