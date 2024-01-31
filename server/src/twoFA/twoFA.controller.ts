@@ -42,7 +42,8 @@ export class TwoFAController {
     const { otpAuthUrl } = await this.twoFAService.generateTwoFASecret(req.user);
     return { otpAuthUrl };
 }
-//   async turnOnTwoFA(@Req() req: any, @Body() { twoFACode }: TwoFACodeDto) {
+
+// async turnOnTwoFA(@Req() req: any, @Body() { twoFACode }: TwoFACodeDto) {
 //     const isCodeValid = this.twoFAService.isTwoFACodeValid(twoFACode, req.user);
 //     if (!isCodeValid) {
 //       throw new UnauthorizedException('Wrong authentication code');

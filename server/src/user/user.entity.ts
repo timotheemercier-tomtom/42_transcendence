@@ -19,9 +19,6 @@ import { Friend } from './friend.entity';
 
 @Entity()
 export class User {
-  user(twoFACode: any, user: any) {
-    throw new Error('Method not implemented.');
-  }
   @PrimaryGeneratedColumn()
   id: number;
 

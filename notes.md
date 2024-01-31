@@ -9,18 +9,17 @@ class User {
 }
 ```
 
-* PROPERTIES 
-`userRepository: Repository<User>`
+- PROPERTIES
+  `userRepository: Repository<User>`
 
-* FIND USER BY USER NAME
-`async findUser(username: string): Promise<User | null> `
+- FIND USER BY USER NAME
+  `async findUser(username: string): Promise<User | null> `
 
-* CREATE USER
-`async createUser(userData: Partial<User>): Promise<User>`
+- CREATE USER
+  `async createUser(userProfile: Partial<User>): Promise<User>`
 
-* UPDATE USER 
-`async updateUser(username: string, updateUserDto: UpdateUserDto): Promise<User>`
-
+- UPDATE USER
+  `async updateUser(username: string, updateUserDto: UpdateUserDto): Promise<User>`
 
 const { Injectable, UnauthorizedException } = require('@nestjs/common');
 const { PassportStrategy } = require('@nestjs/passport');
@@ -29,11 +28,11 @@ const speakeasy = require('speakeasy');
 
 @Injectable()
 class GoogleAuthenticatorStrategy extends PassportStrategy(Strategy, 'google-authenticator') {
-  constructor() {
-    super();
-  }
+constructor() {
+super();
+}
 
-  async validate(req) {
+async validate(req) {
 
     const user = req.user;
 
@@ -47,7 +46,7 @@ class GoogleAuthenticatorStrategy extends PassportStrategy(Strategy, 'google-aut
     }
 
 
-    const token = req.body.token; 
+    const token = req.body.token;
 
 
     const isValidToken = this.validateTwoFactorToken(token, user.twoFactorAuthenticationSecret);
@@ -57,17 +56,19 @@ class GoogleAuthenticatorStrategy extends PassportStrategy(Strategy, 'google-aut
     }
 
     return user;
-  }
 
-  validateTwoFactorToken(token, secret) {
+}
+
+validateTwoFactorToken(token, secret) {
 
     return speakeasy.totp.verify({
       secret,
       encoding: 'base32',
       token,
-      window: 1, 
+      window: 1,
     });
-  }
+
+}
 }
 
 module.exports = GoogleAuthenticatorStrategy;

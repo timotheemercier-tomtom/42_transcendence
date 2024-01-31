@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
@@ -24,18 +24,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any): Promise<User> {
-    const user = await this.userService.findOne(payload.login);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-
-    if (user.isTwoFAEnabled && !payload.isTwoFAVerified) {
-      throw new UnauthorizedException('2FA is enabled but not verified');
-    }
-
-    return user;
-//  async validate(payload: any, req: any) {
-//    return { login: payload.username };
-//  }
+  async validate(payload: any, req: any) {
+    return { login: payload.login };
+  }
 }
+//   async validate(payload: any): Promise<User> {
+//     const user = await this.userService.findOne(payload.login);
+//     if (!user) {
+//       throw new UnauthorizedException();
+//     }
+
+// if (user.isTwoFAEnabled && !payload.isTwoFAVerified) {
+//   throw new UnauthorizedException('2FA is enabled but not verified');
+// }
+
+// return user;

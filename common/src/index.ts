@@ -73,19 +73,14 @@ export type ChatJoin = {
 
 export type User = {
   id: number;
-
   login: string;
-
   username: string;
-
   picture: string;
-
+  twoFAsecret: string;
+  twoFAenabled: boolean;
   won: number;
-
   lost: number;
-
   rank: number;
-
   friends: User[];
 };
 
@@ -93,3 +88,4 @@ export type StatusEventType = 'state' | 'list';
 export type StatusType = 'offline' | 'online' | 'in-game';
 export type StatusState = [string, StatusType];
 export type StatusList = StatusState[];
+ 

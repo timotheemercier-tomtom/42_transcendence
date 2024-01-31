@@ -12,6 +12,7 @@ import Room from './pages/Room';
 import { API } from './util';
 import { Container } from '@mui/material';
 import Profile from './pages/Profile';
+// import { UserProvider } from './components/User/useUser';
 
 // import LoginModule from './components/Login';
 
@@ -45,8 +46,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <Container className="root">
+      <Container className="root">
       <Col className="app">
+    
         <header>
           <Row>
             <ButtonLogin onClick={handle42Login} text="Log In" />
@@ -68,6 +70,7 @@ const App: React.FC = () => {
             average gnome user
           </a>
         </footer>
+
       </Col>
     </Container>
   );
