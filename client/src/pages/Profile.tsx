@@ -1,5 +1,5 @@
 import Friends from '../components/Friends';
-import User from '../components/User';
+import User from '../components/User/Profile';
 // import User from '../components/User';
 
 const Profile = () => {

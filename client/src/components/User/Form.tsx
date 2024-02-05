@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { updateUserImage } from './User';
-import Typography from './Typography';
+import { updateUserImage } from './User/Profile';
+import Typography from './Theme/Typography';
 
 interface IFormData {
   login: string;

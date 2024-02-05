@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { Avatar, Card, CircularProgress } from '@mui/material';
 import { Link, useParams } from 'react-router-dom';
-import Typography from './Typography';
+import Typography from '../Theme/Typography';
 import Picture from './Picture';
 import FormWithValidation from './Form';
 
@@ -121,7 +121,8 @@ function User() {
       />
       <Typography variant="h5">Account Details</Typography>
       <Typography variant="h5">Intra Login: {userData.username}</Typography>
-      <Link to={'/u/asaijers'}>Alfa Profile</Link><br />
+      <Link to={'/u/asaijers'}>Alfa Profile</Link>
+      <br />
       <Link to={'/u/tmercier'}>Tim Profile</Link>
 
       <FormWithValidation

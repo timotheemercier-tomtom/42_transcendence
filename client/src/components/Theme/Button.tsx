@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { experimentalStyled as styled } from '@mui/material/styles';
 import MuiButton, { ButtonProps } from '@mui/material/Button';
+import { TextField } from '@mui/material';
 
 const ButtonRoot = styled(MuiButton)(({ theme, size }) => ({
   borderRadius: 0,
@@ -22,13 +23,37 @@ const ButtonRoot = styled(MuiButton)(({ theme, size }) => ({
   }),
 }));
 
-// See https://mui.com/guides/typescript/#usage-of-component-prop for why the types uses `C`.
-function Button<C extends React.ElementType>(
+interface ButtonLoginProps {
+  onClick: () => void;
+  text: string;
+}
+
+export default function Button<C extends React.ElementType>(
   props: ButtonProps<C, { component?: C }>,
 ) {
   return <ButtonRoot {...props} />;
 }
 
-export default Button;
+export const ButtonLogin: React.FC<ButtonLoginProps> = ({ onClick, text }) => {
+  return (
+    <ButtonRoot variant="contained" color="primary" onClick={onClick}>
+      {text}
+    </ButtonRoot>
+  );
+};
 
+export const CustomButton: React.FC<{ label: string; onClick: () => void }> = ({
+  label,
+  onClick,
+}) => {
+  return <Button onClick={onClick}>{label}</Button>;
+};
+
+export const CustomTextField: React.FC<{
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}> = ({ label, value, onChange }) => {
+  return <TextField label={label} value={value} onChange={onChange} />;
+};
 
