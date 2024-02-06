@@ -190,8 +190,6 @@ export default function Chat({ id }: { id: string }) {
     );
   };
 
-  console.log(public_);
-
   return (
     <Row border={1} flexGrow={1}>
       <Col flexGrow={1} padding={'.5rem'}>
