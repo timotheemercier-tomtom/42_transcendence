@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { socket } from '../status.socket';
 import Row from './Row';
 import { StatusType, StatusList, StatusState } from 'common';
+import { Link } from 'react-router-dom';
 
 const Status = () => {
   const [status, setStatus] = useState(new Map<string, StatusType>());
@@ -33,7 +34,7 @@ const Status = () => {
     <Row gap={'.5rem'}>
       {Array.from(status.entries()).map((v, i) => (
         <span key={i}>
-          {v[0]}: {v[1]}
+          <Link to={'/u/' + v[0]}>{v[0]}</Link> : {v[1]}
         </span>
       ))}
     </Row>

@@ -24,29 +24,66 @@ export default function Chat({ id }: { id: string }) {
   const [error, setError] = useState('');
   const [block, setBlock] = useState(new Set<string>());
   const user = sessionStorage.getItem('user') ?? '';
-  const [sev, setSev] = useState<[string, never][]>([]);
-
-  // fixme
-  const unload = () => {
-    sev.forEach((v) => socket.off(v[0], v[1]));
-  };
 
   useEffect(() => {
     socket.connect();
 
     return () => {
       socket.disconnect();
-      // console.log(sev);
-      unload();
     };
   }, []);
 
   useEffect(() => {
-    socket.on('connect', recvs);
-    return () => {
-      socket.off('connect', recvs);
+    console.log('adding listeneres');
+
+    const onmessage = (e: ChatServerEventData['message']) => {
+      console.log('push', e);
+
+      setMsgs((v) => {
+        const n = new Map(v);
+        const a = [...(n.get(e.room) || []), e as never];
+        n.set(e.room, a);
+        return n;
+      });
     };
-  });
+
+    const onconnect = () => {
+      send('join', { room, pass: '' });
+    };
+
+    const onjoin = (e: ChatServerEventData['join']) => {
+      setRooms((v) => new Set(v).add(e));
+    };
+
+    const onleave = (e: ChatServerEventData['leave']) => {
+      if (e == room) setRoom('');
+      setRooms((v) => {
+        const n = new Set(v);
+        n.delete(e);
+        return n;
+      });
+    };
+
+    socket.on('connect', onconnect);
+    socket.on('message', onmessage);
+    socket.on('list', setPublic);
+    socket.on('dms', setDms);
+    socket.on('join', onjoin);
+    socket.on('error', setError);
+    socket.on('leave', onleave);
+
+    return () => {
+      console.log('removing listeneres');
+
+      socket.off('connect', onconnect);
+      socket.off('message', onmessage);
+      socket.off('list', setPublic);
+      socket.off('dms', setDms);
+      socket.off('join', onjoin);
+      socket.off('error', setError);
+      socket.off('leave', onleave);
+    };
+  }, [room]);
 
   const send = <EventType extends ChatEventType>(
     ev: EventType,
@@ -55,29 +92,9 @@ export default function Chat({ id }: { id: string }) {
     socket.emit(ev, data);
   };
 
-  const recv = <EventType extends ChatEventType>(
-    ev: EventType,
-    cb: (data: ChatServerEventData[EventType]) => void,
-  ) => {
-    setSev((v) => [...v, [ev, cb as never]]);
-    socket.on(ev, cb as never);
-  };
-
   useEffect(() => {
     setRoom(id);
   }, [id]);
-
-  const pushmsg = (e: ChatServerMessage) => {
-    console.log('push', e);
-
-    setMsgs((v) => {
-      const n = new Map(v);
-      const a = [...(n.get(e.room) || []), e as never];
-      n.set(e.room, a);
-      return n;
-    });
-    console.log(msgs);
-  };
 
   useEffect(() => {
     const msgsEl = document.querySelector('#msgs');
@@ -86,42 +103,6 @@ export default function Chat({ id }: { id: string }) {
       .at(-1)
       ?.scrollIntoView();
   });
-
-  const recvs = () => {
-    console.log('recvs');
-
-    send('join', { room, pass: '' });
-
-    recv('message', (e) => {
-      pushmsg(e);
-    });
-
-    recv('list', (e) => {
-      setPublic(e);
-    });
-
-    recv('dms', (e) => {
-      setDms(e);
-    });
-
-    recv('join', (e) => {
-      setRooms((v) => new Set(v).add(e));
-      console.log(rooms);
-    });
-
-    recv('error', (e) => {
-      setError(e);
-    });
-
-    recv('leave', (e) => {
-      if (e == room) setRoom('');
-      setRooms((v) => {
-        const n = new Set(v);
-        n.delete(e);
-        return n;
-      });
-    });
-  };
 
   const cmdre =
     /^\/(owner|admin|pass|ban|kick|mute|join|leave|public|dm|block)(.*)/;
@@ -177,10 +158,10 @@ export default function Chat({ id }: { id: string }) {
   };
 
   const tbad = () => {
-    setBadd(!badd);
-    if (badd) {
+    if (!badd) {
       send('list', []);
     }
+    setBadd(!badd);
   };
 
   const getcolor = (v: ChatServerMessage): string => {
@@ -208,6 +189,8 @@ export default function Chat({ id }: { id: string }) {
       </Row>
     );
   };
+
+  console.log(public_);
 
   return (
     <Row border={1} flexGrow={1}>

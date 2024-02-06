@@ -68,9 +68,8 @@
 
   - Perform server-side validation for all forms and user inputs.
 
-- [ ] **Secure Storage of Credentials**
+- [x] **Secure Storage of Credentials**
   - Store all credentials, API keys, and environment variables in a local `.env` file.
   - Ensure this `.env` file is ignored by git to prevent public access.
 
-refactor chat
 add error and validations
