@@ -16,7 +16,7 @@ interface MenuAppBarProps {
     onLogin: () => void; 
   }
   
-export default function MenuAppBar({ onLogin } : MenuAppBarProps) {
+export default function MenuAppBar({ onLogin }) {
   const [auth, setAuth] = React.useState(false);
   //   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
