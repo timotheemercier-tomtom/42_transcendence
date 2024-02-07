@@ -63,7 +63,7 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
         picture: profile._json.image.link,
       });
     }
-    const payload = { login: user.login };
+    const payload = { user };
     accessToken = this.jwtService.sign(payload);
     return { user, accessToken };
   }

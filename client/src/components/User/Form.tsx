@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { updateUserImage } from './User/Profile';
-import Typography from './Theme/Typography';
+import { updateUserImage } from './User';
+// import Typography from './Typography';
 
 interface IFormData {
   login: string;
@@ -116,15 +116,3 @@ const FormWithValidation: React.FC<FormWithValidationProps> = ({
 };
 
 export default FormWithValidation;
-
-//   {/* PICTURE URL */}
-//   <label><p />
-//           Or upload an URL:
-//     <input
-//       type="text"
-//       name="picture"
-//       value={formData.picture}
-//       onChange={handleInputChange}
-//     />
-//     <span className="error">{formErrors.picture}</span>
-//   </label>
