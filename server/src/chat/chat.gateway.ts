@@ -95,19 +95,8 @@ export class ChatGateway
     this.service.guardBanned(e.room, user);
     this.service.guardPass(e.room, e.pass);
     client.join(e.room);
-    // const room = this.rooms.get(e.room) ?? new Set();
-    // if (room.size == 0) {
-    //   const t = {
-    //     room: e.room,
-    //     user,
-    //     on: true,
-    //   };
-    //   this._setOwner(t);
-    //   this.setAdmin(client, t);
-    // }
     this.service.getOrCreateRoom(e.room, user);
     this.service.addUser(e.room, user);
-    // this.rooms.set(e.room, room);
     client.emit('join', e.room);
     this._message(e.room, `+ ${user}`);
   }
@@ -116,13 +105,6 @@ export class ChatGateway
   leave(client: Socket, e: string): void {
     const user = this.idmap.get(client.id)!;
     this.service.guardExists(e);
-    // const room = this.service.getRoom(e);
-    // room.delete(user);
-    // if (room.size == 0) {
-    //   if (this.isAdmin(client, e)) this.admins.get(e)?.delete(user);
-    //   if (this.isOwner(client, e)) this.owners.delete(e);
-    // }
-    // this.rooms.set(e, room);
     this.service.delUser(e, user);
     client.emit('leave', e);
     this._message(e, `- ${user}`);
@@ -143,14 +125,6 @@ export class ChatGateway
     this.sdms(client);
     this.sdms(uclient);
   }
-
-  // isAdmin(client: Socket, room: string) {
-  //   return this.admins.get(room)?.has(this.idmap.get(client.id)!);
-  // }
-
-  // isOwner(client: Socket, room: string) {
-  //   return this.owners.get(room) == this.idmap.get(client.id);
-  // }
 
   _setOwner(e: ChatRoomUser) {
     this.service.setOwner(e.room, e.user);
@@ -209,7 +183,6 @@ export class ChatGateway
 
   @SubscribeMessage('kick')
   kick(client: Socket, e: ChatRoomUser) {
-    // this.dump();
     const user = this.idmap.get(client.id)!;
     this.service.guardExists(e.room);
     this.service.guardAdmin(e.room, user);
