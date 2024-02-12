@@ -69,27 +69,26 @@ function User() {
   const { login = '' } = useParams();
 
   useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(
+          `http://${location.hostname}:3000/user/` + login,
+          {
+            method: 'GET',
+            credentials: 'include',
+          },
+        );
+        if (!response.ok) throw new Error('Network response error');
+        const data = (await response.json()) as UserData;
+        setUserData(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchUserData();
-  });
-
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch(
-        `http://${location.hostname}:3000/user/` + login,
-        {
-          method: 'GET',
-          credentials: 'include',
-        },
-      );
-      if (!response.ok) throw new Error('Network response error');
-      const data = (await response.json()) as UserData;
-      setUserData(data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [login]);
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -121,7 +120,8 @@ function User() {
       />
       <Typography variant="h5">Account Details</Typography>
       <Typography variant="h5">Intra Login: {userData.username}</Typography>
-      <Link to={'/u/asaijers'}>Alfa Profile</Link><br />
+      <Link to={'/u/asaijers'}>Alfa Profile</Link>
+      <br />
       <Link to={'/u/tmercier'}>Tim Profile</Link>
 
       <FormWithValidation
