@@ -91,3 +91,4 @@ export type StatusType = 'offline' | 'online' | 'in-game';
 export type StatusState = [string, StatusType];
 export type StatusList = StatusState[];
  
+export const API = `http://${location.hostname}:3000`;

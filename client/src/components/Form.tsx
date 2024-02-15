@@ -1,6 +1,5 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { updateUserImage } from './User/User';
-import Typography from './Typography';
+import { updateUserImage } from './User';
 
 interface IFormData {
   login: string;
@@ -79,7 +78,7 @@ const FormWithValidation: React.FC<FormWithValidationProps> = ({
       try {
         const updatedImage = await updateUserImage(
           formData.login,
-        //   formData.username,
+          //   formData.username,
           formData.picture,
         );
         console.log('User updated successfully:', updatedImage);
