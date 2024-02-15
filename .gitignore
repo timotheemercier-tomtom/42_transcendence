@@ -38,3 +38,4 @@ lerna-debug.log*
 server/dist
 server/node_modules
 tutoAuth.md
+.notes_tim
