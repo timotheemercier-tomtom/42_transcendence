@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import Chat from '../components/Chat';
 import Game from '../components/Game';
 import Row from '../components/Row';
+import React from 'react';
 
 export default function Room() {
   const { id = '' } = useParams();

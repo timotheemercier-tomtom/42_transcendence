@@ -1,4 +1,5 @@
 import Col from './Col';
+import React from 'react';
 
 const Game = () => {
   return (

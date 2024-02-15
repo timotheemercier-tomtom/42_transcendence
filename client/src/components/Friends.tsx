@@ -4,6 +4,7 @@ import { User } from 'common';
 import { Avatar } from '@mui/material';
 import Row from './Row';
 import { Link, useParams } from 'react-router-dom';
+import React from 'react';
 
 const Friends = () => {
   const [friends, setFriends] = useState<User[]>([]);
