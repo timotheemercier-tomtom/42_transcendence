@@ -28,23 +28,14 @@ export class User {
   @Column({ length: 42 })
   username: string;
 
-//   @Column({unique:true})
-//   email: string;
-
   @Column({ nullable: true })
   picture: string;
 
-//   @Column({length: 10, nullable: true })
-//   phone: number;
+  @Column({ default: false })
+  public isTwoFAEnabled: boolean;
 
-//   @Column({ select: false, nullable: true })
-//   authConfirmToken: String
-
-//   @Column({ default: false, nullable: true })
-//   isVerified: Boolean;
-
-//   @CreateDateColumn()
-//   createdAt: Date;
+  @Column({ nullable: true })
+  public twoFASecret?: string;
 
   @Column({ default: 0 })
   won: number;

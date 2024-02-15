@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { experimentalStyled as styled } from '@mui/material/styles';
 import MuiButton, { ButtonProps } from '@mui/material/Button';
+import { TextField } from '@mui/material';
 
 const ButtonRoot = styled(MuiButton)(({ theme, size }) => ({
   borderRadius: 0,
@@ -31,4 +32,17 @@ function Button<C extends React.ElementType>(
 
 export default Button;
 
+export const CustomButton: React.FC<{ label: string; onClick: () => void }> = ({
+  label,
+  onClick,
+}) => {
+  return <Button onClick={onClick}>{label}</Button>;
+};
 
+export const CustomTextField: React.FC<{
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}> = ({ label, value, onChange }) => {
+  return <TextField label={label} value={value} onChange={onChange} />;
+};

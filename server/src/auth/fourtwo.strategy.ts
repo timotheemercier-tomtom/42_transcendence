@@ -1,32 +1,10 @@
-/**
- Handles authentication logic and integrates with external authentication providers.
- Interacts with the 42 API to authenticate users.
-
- *? Passport Strategy:
- Extends PassportStrategy with 'FortyTwoStrategy' from 'passport-42' for authenticating with 42.
- Configures the strategy with client ID, client secret, and callback URL.
- 
- *? Dependencies:
-  Relies on ConfigService to retrieve authentication-related environment variables.
-  Utilizes UserService to manage user-related operations.
-  Uses JwtService from '@nestjs/jwt' for JWT token creation and validation.
- 
-  *? Validation:
-  Implements a 'validate' method to process user profile data after authentication.
-  Validates and stores user information obtained from the external provider.
-  Generates a JWT token for the authenticated user.
-  Includes a TODO comment regarding token storage and checking for duplicates.
-  
-  *? Access Token: 
-  the token we use to authenticate the current user by sending
-  it on the Authorization header as a Bearer token. It has a small lifespan of
-  5 to 15 minutes
-
-  *? Refresh Token: 
-  this token is normally sent on a signed HTTP
-  only cookie and is used to refresh the access tokens, this is achieved since
-  the refresh token has a higher lifespan from 20 minutes to 7 days.
- */
+/*
+// 42-Strategy -> handles OAuth login with the 42 API
+*/
+// It uses our app's credentials to authenticate users at 42.
+// When a user logs in, we check if they're already in our database.
+// If not, we create a new user with their 42 profile info.
+// We then generate a JWT for the user, allowing secure access to our app.
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -54,16 +32,16 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     refreshToken: string,
     profile: any,
   ): Promise<{ user: any; accessToken: string }> {
-    const username = profile.username;
-    let user = await this.userService.findOne(username);
+    const login = profile.username;
+    let user = await this.userService.findOne(login);
     if (!user) {
       user = await this.userService.create({
-        login: username,
-        username,
+        login: login,
+        username: login,
         picture: profile._json.image.link,
       });
     }
-    const payload = { login: user.login };
+    const payload = { login };
     accessToken = this.jwtService.sign(payload);
     return { user, accessToken };
   }

@@ -38,4 +38,7 @@ lerna-debug.log*
 server/dist
 server/node_modules
 tutoAuth.md
+/common/dist/
 .notes_tim
+.vscode
+readme.md

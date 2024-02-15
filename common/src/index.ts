@@ -78,6 +78,8 @@ export type User = {
   login: string;
   username: string;
   picture: string;
+  twoFAsecret: string;
+  twoFAenabled: boolean;
   won: number;
   lost: number;
   rank: number;
@@ -88,5 +90,5 @@ export type StatusEventType = 'state' | 'list';
 export type StatusType = 'offline' | 'online' | 'in-game';
 export type StatusState = [string, StatusType];
 export type StatusList = StatusState[];
-
+ 
 export const API = `http://${location.hostname}:3000`;

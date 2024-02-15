@@ -27,6 +27,8 @@ import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
+import { TwoFAService } from '../twoFA/twoFA.service';
+import { TwoFAController } from 'src/twoFA/twoFA.controller';
 
 @Module({
   imports: [
@@ -36,14 +38,14 @@ import { AuthService } from './auth.service';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
         // signOptions: { expiresIn: '60m' },
       }),
     }),
   ],
-  providers: [FourTwoStrategy, AuthService],
-  controllers: [AuthController],
-  exports: [AuthService],
+  providers: [FourTwoStrategy, AuthService, TwoFAService],
+  controllers: [AuthController, TwoFAController],
+  exports: [AuthService, TwoFAService],
 })
 export class AuthModule {}
