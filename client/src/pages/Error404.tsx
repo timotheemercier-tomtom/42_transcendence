@@ -1,3 +1,4 @@
+import React from 'react';
 import Col from '../components/Col';
 
 export default function Error404() {

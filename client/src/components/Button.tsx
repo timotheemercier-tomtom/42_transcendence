@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { experimentalStyled as styled } from '@mui/material/styles';
 import MuiButton, { ButtonProps } from '@mui/material/Button';
 import { TextField } from '@mui/material';

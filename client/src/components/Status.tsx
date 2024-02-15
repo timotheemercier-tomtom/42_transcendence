@@ -3,6 +3,7 @@ import { socket } from '../status.socket';
 import Row from './Row';
 import { StatusType, StatusList, StatusState } from 'common';
 import { Link } from 'react-router-dom';
+import React from 'react';
 
 const Status = () => {
   const [status, setStatus] = useState(new Map<string, StatusType>());
