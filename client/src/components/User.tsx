@@ -5,11 +5,19 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { Avatar, Card, CircularProgress } from '@mui/material';
+import {
+  Avatar,
+  Button,
+  Card,
+  CircularProgress,
+  Switch,
+  TextField,
+} from '@mui/material';
 import { Link, useParams } from 'react-router-dom';
 import Typography from './Typography';
 import Picture from './Picture';
 import FormWithValidation from './Form';
+import { User as UserData } from 'common';
 
 type UserContextType = {
   user: any;
@@ -32,12 +40,12 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
 export const useUser = () => useContext(UserContext);
 
-export type UserData = {
-  login: string;
-  username: string;
-  picture: string;
-  twoFA: string;
-};
+//   export type UserData = {
+//     login: string;
+//     username: string;
+//     picture: string;
+//     twoFA: string;
+//   };
 
 export async function updateUserImage(
   login: string,
@@ -66,30 +74,34 @@ function User() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isTwoFAEnabled, setIsTwoFAEnabled] = useState(false);
+  const [otpAuthUrl, setOtpAuthUrl] = useState(null);
+  const [twoFACode, setTwoFACode] = useState('');
+  const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const { login = '' } = useParams();
 
   useEffect(() => {
     fetchUserData();
-  });
+  }), [];
 
   const fetchUserData = async () => {
-    try {
-      const response = await fetch(
-        `http://${location.hostname}:3000/user/` + login,
-        {
-          method: 'GET',
-          credentials: 'include',
-        },
-      );
-      if (!response.ok) throw new Error('Network response error');
-      const data = (await response.json()) as UserData;
-      setUserData(data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        const response = await fetch(
+          `http://${location.hostname}:3000/user/` + login,
+          {
+            method: 'GET',
+            credentials: 'include',
+          },
+        );
+        if (!response.ok) throw new Error('Network response error');
+        const data = (await response.json()) as UserData;
+        setUserData(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -102,6 +114,70 @@ function User() {
     }
   };
 
+  const handleEnable2FA = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/2fa/enable', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const data = await response.json();
+      if (data.otpAuthUrl) {
+        // Mettre à jour l'état avec l'URL du QR code
+        setQrCodeUrl(data.otpAuthUrl);
+      }
+    } catch (error) {
+      console.error('Erreur lors de l’activation de la 2FA:', error);
+    }
+  };
+
+  //   const handleToggle2FA = async () => {
+  //     const newTwoFAState = !isTwoFAEnabled;
+  //     setIsTwoFAEnabled(newTwoFAState);
+
+  //     if (newTwoFAState) {
+  //       try {
+  //         const response = await fetch(`http://localhost:3000/2fa/generate`, {
+  //           method: 'POST',
+  //           credentials: 'include',
+  //         });
+  //         if (!response.ok) throw new Error('Failed to generate 2FA secret');
+  //         const data = await response.json();
+  //         setOtpAuthUrl(data.otpAuthUrl);
+  //       } catch (error) {
+  //         console.error('Error generating 2FA secret:', error);
+  //       }
+  //     } else {
+  //       // Disable 2FA
+  //       try {
+  //         await fetch(`http://localhost:3000/2fa/disable`, {
+  //           method: 'POST',
+  //           credentials: 'include',
+  //         });
+  //         // Assuming disabling 2FA doesn't require additional verification
+  //       } catch (error) {
+  //         console.error('Error disabling 2FA:', error);
+  //       }
+  //     }
+  //   };
+
+  const handleVerify2FACode = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/2fa/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ twoFACode }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to verify 2FA code');
+      // Handle successful verification
+      setOtpAuthUrl(null); // Clear QR code
+    } catch (error) {
+      console.error('Error verifying 2FA code:', error);
+    }
+  };
   return (
     <Card>
       <Picture
@@ -121,20 +197,31 @@ function User() {
       />
       <Typography variant="h5">Account Details</Typography>
       <Typography variant="h5">Intra Login: {userData.username}</Typography>
-      <Link to={'/u/asaijers'}>Alfa Profile</Link><br />
+      <Link to={'/u/asaijers'}>Alfa Profile</Link>
+      <br />
       <Link to={'/u/tmercier'}>Tim Profile</Link>
 
       <FormWithValidation
         initialFormData={userData}
-        onImageUpdate={updateUserData} // Ajout de la prop onImageUpdate
+        onImageUpdate={updateUserData}
       />
-
-      {/* <img
-        src={userData.picture}
-        alt={userData.username}
-      /> */}
-
-      {/* Add more user details as needed */}
+      <Switch
+        checked={isTwoFAEnabled}
+        onChange={handleEnable2FA}
+        name="twoFASwitch"
+        inputProps={{ 'aria-label': 'secondary checkbox' }}
+      />
+      {otpAuthUrl && (
+        <>
+          <img src={otpAuthUrl} alt="QR Code" />
+          <TextField
+            label="2FA Code"
+            value={twoFACode}
+            onChange={(e) => setTwoFACode(e.target.value)}
+          />
+          <Button onClick={handleVerify2FACode}>Verify</Button>
+        </>
+      )}
     </Card>
   );
 }

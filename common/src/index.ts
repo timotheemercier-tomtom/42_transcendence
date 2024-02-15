@@ -75,19 +75,12 @@ export type ChatJoin = {
 
 export type User = {
   id: number;
-
   login: string;
-
   username: string;
-
   picture: string;
-
   won: number;
-
   lost: number;
-
   rank: number;
-
   friends: User[];
 };
 
