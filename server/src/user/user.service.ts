@@ -1,4 +1,3 @@
-
 import {
   HttpException,
   HttpStatus,
@@ -29,21 +28,9 @@ export class UserService {
   /*
   //------------------------------------------------------------- 2FA
   */
-  async setTwoFASecret(secret: string, login: string) {
-    return this.usersRepository.update(login, {
-      twoFASecret: secret,
-    });
-  }
-
-  async turnOnTwoFA(login: string) {
-    return this.usersRepository.update(login, {
-      isTwoFAEnabled: true,
-    });
-  }
-
-  async turnOffTwoFA(login: string) {
-    return this.usersRepository.update(login, {
-      isTwoFAEnabled: false,
+  async setTwoFA(login: string, secret: string | undefined) {
+    return this.update(login, {
+      twoFA: secret,
     });
   }
 
@@ -51,9 +38,8 @@ export class UserService {
   //------------------------------------------------------------- SEARCH 
   */
 
-  async findOne(login: string): Promise<User | null> {
+  async findOne(login: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({ login });
-
     if (user) {
       return user;
     }

@@ -13,16 +13,16 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 
 interface MenuAppBarProps {
-    onLogin: () => void; 
-  }
-  
-export default function MenuAppBar({ onLogin } : MenuAppBarProps) {
+  onLogin: () => void;
+}
+
+export default function MenuAppBar({ onLogin }: MenuAppBarProps) {
   const [auth, setAuth] = React.useState(false);
   //   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handle42Login = () => {
-    window.location.href = 'http://localhost:3000/auth/42';
+    window.location.href = API + '/auth/42';
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

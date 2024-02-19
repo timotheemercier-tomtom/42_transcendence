@@ -18,6 +18,7 @@ import Typography from './Typography';
 import Picture from './Picture';
 import FormWithValidation from './Form';
 import { User as UserData } from 'common';
+import { API } from '../util';
 
 type UserContextType = {
   user: any;
@@ -51,17 +52,14 @@ export async function updateUserImage(
   login: string,
   base64Image: string,
 ): Promise<UserData> {
-  const response = await fetch(
-    `http://${location.hostname}:3000/user/${login}/image`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ picture: base64Image }),
-      credentials: 'include',
+  const response = await fetch(API + `/user/${login}/image`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+    body: JSON.stringify({ picture: base64Image }),
+    credentials: 'include',
+  });
 
   if (!response.ok) {
     throw new Error('Failed to update user image');
@@ -81,18 +79,12 @@ function User() {
   const { login = '' } = useParams();
 
   useEffect(() => {
-    fetchUserData();
-  }), [];
-
-  const fetchUserData = async () => {
+    const fetchUserData = async () => {
       try {
-        const response = await fetch(
-          `http://${location.hostname}:3000/user/` + login,
-          {
-            method: 'GET',
-            credentials: 'include',
-          },
-        );
+        const response = await fetch(API + `/user/` + login, {
+          method: 'GET',
+          credentials: 'include',
+        });
         if (!response.ok) throw new Error('Network response error');
         const data = (await response.json()) as UserData;
         setUserData(data);
@@ -102,6 +94,8 @@ function User() {
         setLoading(false);
       }
     };
+    fetchUserData();
+  }, []);
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -116,7 +110,7 @@ function User() {
 
   const handleEnable2FA = async () => {
     try {
-      const response = await fetch('http://localhost:3000/2fa/enable', {
+      const response = await fetch(API + '/2fa/enable', {
         method: 'POST',
         credentials: 'include',
       });
@@ -178,6 +172,7 @@ function User() {
       console.error('Error verifying 2FA code:', error);
     }
   };
+
   return (
     <Card>
       <Picture

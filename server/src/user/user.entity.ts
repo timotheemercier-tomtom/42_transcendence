@@ -16,6 +16,7 @@
 
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Friend } from './friend.entity';
+import { TwoFA } from 'src/twoFA/twoFA.entity';
 
 @Entity()
 export class User {
@@ -31,11 +32,11 @@ export class User {
   @Column({ nullable: true })
   picture: string;
 
-  @Column({ default: false })
-  public isTwoFAEnabled: boolean;
+//   @Column({ nullable: true })
+//   twoFA?: string;
 
-  @Column({ nullable: true })
-  public twoFASecret?: string;
+  @OneToMany(() => TwoFA, (user) => user.secret)
+  twoFA?: TwoFA[];
 
   @Column({ default: 0 })
   won: number;
@@ -48,4 +49,5 @@ export class User {
 
   @OneToMany(() => Friend, (friend) => friend.friend)
   friends: Friend[];
+
 }

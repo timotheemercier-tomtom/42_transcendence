@@ -40,7 +40,7 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async signInWith42() {}
 
-  redir(host: string, token: string, username: string) {
+  redir(token: string, username: string) {
     return `http://${this.config.get(
       'HOST',
     )}:5173/login?token=${token}&u=${username}`;
@@ -50,9 +50,7 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async fortyTwoAuthRedirect(@Req() req: Request | any, @Res() res: Response) {
     const { accessToken, user } = req.user;
-    // accessToken est directement extraits de req.user.
-    const host = new URL(req.headers.referer).hostname;
-    res.redirect(this.redir(host, accessToken, user.username));
+    res.redirect(this.redir(accessToken, user.username));
   }
 
   anonc = 0;
@@ -64,6 +62,6 @@ export class AuthController {
     if (!(await this.user.findOne(name)))
       await this.user.create({ login: name, username: name });
     const t = this.jwt.sign({ login: name });
-    res.redirect(this.redir(host, t, name));
+    res.redirect(this.redir(t, name));
   }
 }

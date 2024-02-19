@@ -39,19 +39,23 @@ export class TwoFAService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async generateTwoFASecret(user: User) {
+  public async generateTwoFA(user: User) {
+    // generate the unique key associated to the user for auth 2fa
     const secret = authenticator.generateSecret();
     const appName = this.configService.get('TWOFA_APPNAME');
     if (!appName) {
       throw new Error("Configuration error: 'TWOFA_APPNAME' is not defined");
     }
+
+    // generates the URL requiered for the 2fa configuration
     const otpAuthUrl = authenticator.keyuri(user.login, appName, secret);
 
-    await this.userService.setTwoFASecret(secret, user.login);
+    await this.userService.setTwoFA(user.login, secret);
 
     return {
       secret,
-      otpAuthUrl: otpAuthUrl,
+      twoFA: secret,
+      TwoFACode: otpAuthUrl,
     };
   }
 
@@ -60,7 +64,7 @@ export class TwoFAService {
   }
 
   public isTwoFACodeValid(twoFACode: string, user: User) {
-    const secret = user.twoFASecret;
+    const secret = user.twoFA;
     if (secret) {
       return authenticator.verify({
         token: twoFACode,
