@@ -4,15 +4,15 @@ import { GameCommon } from './GameCommon';
 export default class GameClient extends GameCommon {
   ctx!: CanvasRenderingContext2D;
   b!: { p: V2; v: V2 };
-
-  evdown!: (e: KeyboardEvent) => void;
-  evup!: (e: KeyboardEvent) => void;
   keys = {
     w: false,
     s: false,
     i: false,
     k: false,
   };
+  evdown!: (e: KeyboardEvent) => void;
+  evup!: (e: KeyboardEvent) => void;
+
   frameid!: number;
 
   load(ctx: CanvasRenderingContext2D) {
@@ -47,58 +47,6 @@ export default class GameClient extends GameCommon {
     cancelAnimationFrame(this.frameid);
   }
 
-  get paleft() {
-    return GameClient.PPAD;
-  }
-
-  get paright() {
-    return GameClient.PPAD + GameClient.PW;
-  }
-
-  get pabottom() {
-    return this.pa + GameClient.PH;
-  }
-
-  get patop() {
-    return this.pa;
-  }
-
-  get pbleft() {
-    return this.w - (GameClient.PPAD + GameClient.PW);
-  }
-
-  get pbright() {
-    return this.w - GameClient.PPAD;
-  }
-
-  get pbbottom() {
-    return this.pb + GameClient.PH;
-  }
-
-  get pbtop() {
-    return this.pb;
-  }
-
-  get bleft() {
-    return this.b.p.x - GameClient.BRAD;
-  }
-
-  get bbottom() {
-    return this.b.p.y + GameClient.BRAD;
-  }
-
-  get bright() {
-    return this.b.p.x + GameClient.BRAD;
-  }
-
-  get btop() {
-    return this.b.p.y - GameClient.BRAD;
-  }
-
-  getv(v: number) {
-    return Math.sqrt(GameClient.BSPEED * GameClient.BSPEED - v * v);
-  }
-
   update() {
     if (this.keys.w) {
       this.pa = Math.min(
@@ -120,44 +68,6 @@ export default class GameClient extends GameCommon {
         this.h - GameClient.PH - GameClient.PPAD,
         Math.max(GameClient.PPAD, this.pb + GameClient.PSPEED),
       );
-    }
-
-    this.b.p.x += this.b.v.x;
-    this.b.p.y += this.b.v.y;
-
-    if (this.btop < 0 || this.bbottom > this.h) {
-      this.b.v.y = -this.b.v.y;
-    }
-
-    if (this.bleft < 0 || this.bleft > this.w) {
-      this.b.p = { x: this.w / 2, y: this.h / 2 };
-    }
-
-    const rvy = () => {
-      if (Math.abs(this.b.v.x) > GameClient.BSPEED - 0.1) {
-        const e =
-          Math.random() * (GameClient.BSPEED / 2) + Math.abs(this.b.v.y);
-        this.b.v.x = this.getv(e);
-        this.b.v.y = e;
-      }
-    };
-
-    if (
-      this.paright > this.bleft &&
-      this.patop < this.bbottom &&
-      this.pabottom > this.btop
-    ) {
-      this.b.v.x = -this.b.v.x;
-      rvy();
-    }
-
-    if (
-      this.pbleft < this.bright &&
-      this.pbtop < this.bbottom &&
-      this.pbbottom > this.btop
-    ) {
-      this.b.v.x = -this.b.v.x;
-      rvy();
     }
   }
 
