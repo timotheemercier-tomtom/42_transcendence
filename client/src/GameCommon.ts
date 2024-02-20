@@ -20,15 +20,15 @@ export class GameCommon {
     Array.from(cbs).forEach((f) => f(v));
   }
 
-  on<T>(e: string, cb: (e: T) => void) {
+  on<T>(e: string, cb: EvCb<T>) {
     const cbs = this.events.get(e) ?? new Set();
-    cbs.add(cb);
+    cbs.add(cb as EvCb<unknown>);
     this.events.set(e, cbs);
   }
 
-  off<T>(e: string, cb: (e: T) => void) {
+  off<T>(e: string, cb: EvCb<T>) {
     const cbs = this.events.get(e) ?? new Set();
-    cbs.delete(cb);
+    cbs.delete(cb as EvCb<unknown>);
     this.events.set(e, cbs);
   }
 }
