@@ -1,8 +1,9 @@
 import { createRef, useEffect } from 'react';
 import Col from './Col';
 import { V2 } from 'common';
+import { GameCommon } from '../game_common';
 
-class GameClient {
+class GameClient extends GameCommon {
   static PSPEED = 15;
   static BSPEED = 10;
   static BRAD = 10;
@@ -28,6 +29,8 @@ class GameClient {
   frameid!: number;
 
   load(ctx: CanvasRenderingContext2D) {
+    console.log(this.X);
+
     this.unload();
     this.ctx = ctx;
     this.w = this.ctx.canvas.width;
