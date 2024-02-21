@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
@@ -10,24 +11,19 @@ import {
 export class UserDto {
   @IsOptional()
   @IsString()
-  login?: string;
+  readonly login?: string;
 
   @IsOptional()
-  @MinLength(3, { message: 'Username must have atleast 3 characters.' })
+  @Transform(({ obj }: any) => !!obj.twoFA)
+  twoFAEnabled?: boolean;
+
+  @IsOptional()
+  @IsString()
   readonly username?: string;
 
   @IsOptional()
   @IsString()
-  twoFA?: string;
-
-  @IsOptional()
-  @IsString()
-  picture?: string;
-}
-
-export class TwoFACodeDto {
-  @IsString()
-  twoFACode: string;
+  readonly picture?: string;
 }
 
 // Add any additional properties you need to send to the frontend

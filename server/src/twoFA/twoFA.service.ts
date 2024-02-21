@@ -1,76 +1,100 @@
-// import { JwtService } from '@nestjs/jwt';
-// import { UserService } from 'src/user/user.service';
-
-// @Injectable()
-// class AuthService {
-//   constructor(private jwtService: JwtService, private userService: UserService,) {
-//     this.userService = userService;
-//     this.jwtService = jwtService;
-//   }
-
-//   async validateUser(payload: any) {
-
-//     // const user = await this.userService.findBy(payload.sub);
-//     const user = await this.userService.findOne(payload.login);
-//     return user;
-//   }
-
-//   async generateJwtToken(user: any) {
-//     // Generate a JWT token based on the user's data.
-//     const payload = { sub: user.id, username: user.username };
-//     return this.jwtService.sign(payload);
-//   }
-// }
-
-// module.exports = AuthService;
-
 import { Injectable } from '@nestjs/common';
-import { authenticator } from 'otplib';
+import { ConfigService } from '@nestjs/config';
+import { authenticator } from 'otplib'
+import QRCode from 'qrcode';
+import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
-import { ConfigService } from '@nestjs/config';
-import { toFileStream } from 'qrcode';
-import { Response } from 'express';
+import { TwoFA } from './twoFA.entity';
+
 
 @Injectable()
 export class TwoFAService {
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
+    private twoFARepository: Repository<TwoFA>,
+    private usersRepository: Repository<User>,
   ) {}
 
-  public async generateTwoFA(user: User) {
-    // generate the unique key associated to the user for auth 2fa
+  async generateTwoFA(user: User) {
     const secret = authenticator.generateSecret();
     const appName = this.configService.get('TWOFA_APPNAME');
     if (!appName) {
       throw new Error("Configuration error: 'TWOFA_APPNAME' is not defined");
     }
-
-    // generates the URL requiered for the 2fa configuration
     const otpAuthUrl = authenticator.keyuri(user.login, appName, secret);
 
-    await this.userService.setTwoFA(user.login, secret);
+    const twoFA = new TwoFA();
+    twoFA.secret = secret;
+    twoFA.otpAuthUrl = otpAuthUrl;
+    twoFA.user = user;
+    await this.twoFARepository.save(twoFA);
 
-    return {
-      secret,
-      twoFA: secret,
-      TwoFACode: otpAuthUrl,
-    };
+    // user.twoFAEnabled = true;
+    // await this.userService.save(user);
+
+    return { secret, otpAuthUrl };
   }
 
-  public async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
-    return toFileStream(stream, otpauthUrl);
-  }
-
-  public isTwoFACodeValid(twoFACode: string, user: User) {
-    const secret = user.twoFA;
-    if (secret) {
-      return authenticator.verify({
-        token: twoFACode,
-        secret,
+  async generateQRCode(otpauthUrl: string): Promise<string> {
+    try {
+      const qrCodeDataURL = await QRCode.toDataURL(otpauthUrl, {
+        type: 'image/png',
+        margin: 1,
+        width: 200,
       });
+      return qrCodeDataURL;
+    } catch (error) {
+      console.error('Failed to generate QR code', error);
+      throw new Error('Failed to generate QR code');
     }
-    throw new Error('Error: user code and 2FA secret does not match');
+  }
+
+  async verifyTwoFACode(user: User, twoFACode: string): Promise<boolean> {
+    if (!user.twoFA) {
+      throw new Error('User 2FA not set up.');
+    }
+    return authenticator.verify({
+      token: twoFACode,
+      secret: user.twoFA.secret,
+    });
+  }
+
+  async disableTwoFA(user: User): Promise<void> {
+    if (!user.twoFA) {
+      throw new Error('User 2FA not set up.');
+    }
+    await this.twoFARepository.delete({ user: user });
   }
 }
+
+//   createOtpAuthUrl(user: User): string {
+//     const appName = 'YourAppName'; // This should be your application's name
+//     const secret = user.twoFA.secret; // Assuming the user's 2FA secret is stored here
+
+//     // Ensure you have a valid secret for the user
+//     if (!secret) {
+//       throw new Error('2FA secret not set for user');
+//     }
+
+//     // Generate and return the otpAuth URL
+//     const otpAuthUrl = authenticator.keyuri(user.login, appName, secret);
+//     return otpAuthUrl;
+//   }
+
+// The QRCode.toFileStream function generates a QR code for the given
+// otpauthUrl and directly writes it to the stream, which is your HTTP
+// response objec
+//   async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
+//     try {
+//       // Generate QR code and pipe it to the response stream
+//       await QRCode.toFileStream(stream, otpauthUrl, {
+//         type: 'png',
+//         width: 200, // Set the width of the QR code here
+//         margin: 2,
+//       });
+//     } catch (error) {
+//       throw new Error(`Failed to generate QR code: ${error}`);
+//     }
+//   }

@@ -1,129 +1,135 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
+  HttpStatus,
   Post,
   Req,
-  UnauthorizedException,
+  Res,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { UserService } from '../user/user.service';
 import { TwoFAService } from './twoFA.service';
-import { TwoFACodeDto } from './twoFACode.dto';
-import { toDataURL } from 'qrcode';
 
 @Controller('2fa')
-@UseInterceptors(ClassSerializerInterceptor)
+@UseGuards(JwtAuthGuard)
 export class TwoFAController {
   constructor(
     private readonly twoFAService: TwoFAService,
-    private userService: UserService,
+    private readonly userService: UserService,
   ) {}
 
   @Get('generate')
-  async generateTwoFASecret(req: any, res: any) {
-    const user = req.user;
+  @UseGuards(JwtAuthGuard) // Assuming JWT-based authentication
+  async generateTwoFASecret(@Req() req: any, @Res() res: any) {
+    const user = await this.userService.findOneWithTwoFA(req.user.login);
 
     if (!user) {
-      return res.status(401).json({ message: 'User not authenticated' });
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: 'User not authenticated' });
     }
 
     if (user.twoFA) {
-      return res.status(400).json({ message: '2FA already enabled!' });
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: '2FA already enabled!' });
     }
 
     try {
-      const { secret, twoFA } = await this.twoFAService.generateTwoFA(user);
+      const { otpAuthUrl } = await this.twoFAService.generateTwoFA(user);
+      const qrCodeDataURL = await this.twoFAService.generateQRCode(otpAuthUrl);
 
-      const qrCodeDataURL = await toDataURL(twoFA);
-
-      return res.status(200).json({ qrCode: qrCodeDataURL });
+      return res.status(HttpStatus.OK).json({
+        qrCode: qrCodeDataURL,
+        message: '2FA secret generated successfully.',
+      });
     } catch (error) {
       console.error('Error generating QR code:', error);
-      return res.status(500).json({ message: 'Error generating QR code' });
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Error generating QR code' });
     }
   }
-  //   @Post('enable')
-  //   async enableTwoFA(@Req() req: any, @Body() body: any, @Res() res: any) {
-
-  //     const user = req.user;
-
-  //     if (!user) {
-  //       return res.status(401).json({ message: 'User not authenticated' });
-  //     }
-
-  //     if (user.isTwoFactorAuthenticationEnabled) {
-  //       return res.status(400).json({ message: '2FA already enabled!' });
-  //     }
-
-  //     const { token } = body;
-
-  //     const isValidToken = this.TwoFAService.validate2FaToken(
-  //       token,
-  //       user.twoFactorAuthenticationSecret
-  //     );
-
-  //     if (!isValidToken) {
-  //       return res.status(401).json({ message: 'Invalid 2FA token' });
-  //     }
-
-  //     return res.status(200).json({ message: '2FA enabled successfully' });
-  //   }
-  // }
 
   @Post('enable')
-  //   @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
-  async enableTwoFA(@Req() req: any): Promise<{ twoFA?: string }> {
-    const { twoFA } = await this.twoFAService.generateTwoFA(req.user);
-    return { twoFA };
-  }
+  async enableTwoFA(
+    @Req() req: any,
+    @Body() body: { twoFACode: string },
+    @Res() res: any,
+  ) {
+    const user = await this.userService.findOneWithTwoFA(req.user.login);
+    if (!user) {
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: 'User not authenticated' });
+    }
 
-  // async turnOnTwoFA(@Req() req: any, @Body() { twoFACode }: TwoFACodeDto) {
-  //     const isCodeValid = this.twoFAService.isTwoFACodeValid(twoFACode, req.user);
-  //     if (!isCodeValid) {
-  //       throw new UnauthorizedException('Wrong authentication code');
-  //     }
-  //     await this.userService.turnOnTwoFA(req.user.login);
+    // Attempt to enable 2FA
+    const isCodeValid = await this.twoFAService.verifyTwoFACode(
+      user,
+      body.twoFACode,
+    );
+    if (isCodeValid) {
+      return res
+        .status(HttpStatus.OK)
+        .json({ message: '2FA enabled successfully.' });
+    } else {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: 'Invalid 2FA code.' });
+    }
+  }
 
   @Post('disable')
-  @UseGuards(JwtAuthGuard)
-  async disableTwoFA(@Req() req: any) {
-    await this.userService.setTwoFA(req.user.login, undefined);
-    return { message: 'Two-factor authentication disabled successfully.' };
+  async disableTwoFA(@Req() req: any, @Res() res: any) {
+    const user = await this.userService.findOneWithTwoFA(req.user.login);
+    if (!user || !user.twoFA) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: '2FA is not enabled.' });
+    }
+
+    // Perform disable operation
+    await this.twoFAService.disableTwoFA(user);
+    return res
+      .status(HttpStatus.OK)
+      .json({ message: '2FA disabled successfully.' });
   }
 
-  @Post('verify')
-  @UseGuards(JwtAuthGuard)
-  async verify2FA(
+  @Post('validate')
+  async validateTwoFA(
     @Req() req: any,
-    @Body() { TwoFACode: twoFACode }: TwoFACodeDto,
+    @Body() body: { twoFACode: string },
+    @Res() res: any,
   ) {
-    const isCodeValid = this.twoFAService.isTwoFACodeValid(twoFACode, req.user);
-    if (!isCodeValid) {
-      throw new UnauthorizedException('Wrong authentication code');
+    const user = await this.userService.findOneWithTwoFA(req.user.login);
+    if (!user || !user.twoFA) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: '2FA is not enabled.' });
     }
-    return { message: 'Two-factor authentication verified successfully.' };
+
+    const isCodeValid = await this.twoFAService.verifyTwoFACode(
+      user,
+      body.twoFACode,
+    );
+    if (isCodeValid) {
+      return res
+        .status(HttpStatus.OK)
+        .json({ message: '2FA code validated successfully.' });
+    } else {
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: 'Invalid 2FA code.' });
+    }
   }
 }
 
-// import { Controller, Get, Post, Req, Res, Body } from '@nestjs/common';
-// import { TwoFAService } from './TwoFA.service';
-// import * as speakeasy from 'speakeasy';
-// import * as QRCode from 'qrcode';
+//   @Post('enable')
+//   async enableTwoFA(@Req() req: any, @Body() body: any, @Res() res: any) {
 
-// @Controller('2fa')
-// export class TwoFAController {
-//   TwoFAService: any;
-//   constructor(TwoFAService: any) {
-//     this.TwoFAService = TwoFAService;
-//   }
-
-//   @Get('generate')
-//   async generate2FAsecret(req: any, res: any) {
 //     const user = req.user;
 
 //     if (!user) {
@@ -134,22 +140,17 @@ export class TwoFAController {
 //       return res.status(400).json({ message: '2FA already enabled!' });
 //     }
 
-//     const secret = this.TwoFAService.generate2FAsecret(
-//       user.login,
-//     );.id
+//     const { token } = body;
 
-//     const otpAuthUrl = speakeasy.otpauthURL({
-//       secret: secret,
-//       label: `YourApp:${user.login}`,
-//       issuer: 'YourApp',
-//     });
+//     const isValidToken = this.TwoFAService.validate2FaToken(
+//       token,
+//       user.twoFactorAuthenticationSecret
+//     );
 
-//     try {
-//       const qrCodeDataURL = await QRCode.toDataURL(otpAuthUrl);
-
-//       return res.status(200).json({ qrCode: qrCodeDataURL });
-//     } catch (error) {
-//       console.error('Error generating QR code:', error);
-//       return res.status(500).json({ message: 'Error generating QR code' });
+//     if (!isValidToken) {
+//       return res.status(401).json({ message: 'Invalid 2FA token' });
 //     }
+
+//     return res.status(200).json({ message: '2FA enabled successfully' });
 //   }
+// }

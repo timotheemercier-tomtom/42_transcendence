@@ -1,5 +1,5 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { updateUserImage } from './User';
+import React, { ChangeEvent, FormEvent, useState } from 'react';
+import { API } from '../util';
 
 interface IFormData {
   login: string;
@@ -14,7 +14,7 @@ interface IFormErrors {
 
 interface FormWithValidationProps {
   initialFormData: IFormData;
-  onImageUpdate: (newPicture: string) => void; // Nouvelle prop pour la mise à jour de l'image
+  onImageUpdate: (newPicture: string) => void;
 }
 
 const FormWithValidation: React.FC<FormWithValidationProps> = ({
@@ -76,18 +76,26 @@ const FormWithValidation: React.FC<FormWithValidationProps> = ({
 
     if (isFormValid) {
       try {
-        const updatedImage = await updateUserImage(
-          formData.login,
-          //   formData.username,
-          formData.picture,
-        );
-        console.log('User updated successfully:', updatedImage);
-        onImageUpdate(updatedImage.picture);
+        const response = await fetch(API + `/user/${formData.login}/update`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: formData.username,
+            picture: formData.picture,
+          }),
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update profile');
+        }
+
+        const updatedUser = await response.json();
+        console.log('Profile updated successfully:', updatedUser);
+        // Update local state or context as needed
       } catch (error) {
-        console.error('Error updating user:', error);
+        console.error('Error updating profile:', error);
       }
-    } else {
-      console.log('Form validation failed. Please check the errors.');
     }
   };
 

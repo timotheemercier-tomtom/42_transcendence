@@ -1,25 +1,26 @@
-import {
-    Column,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-  } from 'typeorm';
-  import { User } from '../user/user.entity';
+// src/entity/twoFA.entity.ts
 
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
+import { User } from '../user/user.entity';
 
 @Entity()
 export class TwoFA {
   @PrimaryGeneratedColumn()
-  url: number;
+  id: number;
 
   @Column()
   secret: string;
 
   @Column()
-  friendId: string;
+  otpAuthUrl: string;
 
-  @ManyToOne(() => User, (user) => user.twoFA)
-  @JoinColumn({ name: 'secret', referencedColumnName: 'twoFA' })
-  friend: User;
+  @OneToOne(() => User, (user) => user.twoFA)
+  @JoinColumn()
+  user: User;
 }

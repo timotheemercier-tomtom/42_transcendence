@@ -46,18 +46,25 @@ export class UserController {
     return user;
   }
 
+
   @Patch(':login')
+  @UseGuards(JwtAuthGuard)
   async updateUser(
     @Param('login') login: string,
-    @Body() updateUserDto: UserDto,
+    @Body() updateUserDto: UserDto, // Adjust UserDto to include an optional picture property
     @Req() req: Request & any,
   ): Promise<User> {
-    const user = req.user;
-    if (user.login !== login) {
-      throw new UnauthorizedException();
+    // Authentication check: ensure the logged-in user is the one being updated
+    if (req.user.login !== login) {
+      throw new UnauthorizedException('You can only update your own profile.');
+    }
+
+    if (updateUserDto.picture) {
+      await this.userService.updateImage(login, updateUserDto.picture);
     }
     return await this.userService.update(login, updateUserDto);
   }
+
 
   @Post(':login/friend/:friend')
   async toggleFriend(
@@ -79,11 +86,11 @@ export class UserController {
     return this.friendService.getFriends(login);
   }
 
-  @Patch(':login/image')
-  async updateImage(
-    @Param('login') login: string,
-    @Body() body: { picture: string },
-  ): Promise<User> {
-    return this.userService.updateImage(login, body.picture);
-  }
+//   @Patch(':login/image')
+//   async updateImage(
+//     @Param('login') login: string,
+//     @Body() body: { picture: string },
+//   ): Promise<User> {
+//     return this.userService.updateImage(login, body.picture);
+//   }
 }

@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import Col from './Col';
-import { User } from 'common';
 import { Avatar } from '@mui/material';
-import Row from './Row';
+import { User } from 'common';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import React from 'react';
+import { API } from '../util';
+import Col from './Col';
+import Row from './Row';
 
 const Friends = () => {
   const [friends, setFriends] = useState<User[]>([]);

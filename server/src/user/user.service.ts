@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserDto } from './user.dto';
 import { User } from './user.entity';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -26,17 +27,19 @@ export class UserService {
   }
 
   /*
-  //------------------------------------------------------------- 2FA
-  */
-  async setTwoFA(login: string, secret: string | undefined) {
-    return this.update(login, {
-      twoFA: secret,
-    });
-  }
-
-  /*
   //------------------------------------------------------------- SEARCH 
   */
+
+  async findOneWithTwoFA(login: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { login: login },
+      relations: ['twoFA'], // This ensures the twoFA relationship is loaded
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
 
   async findOne(login: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({ login });

@@ -14,8 +14,16 @@
  suppression (CRUD) des utilisateurs.
  */
 
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Friend } from './friend.entity';
+import { TwoFA } from '../twoFA/twoFA.entity';
 
 @Entity()
 export class User {
@@ -31,8 +39,12 @@ export class User {
   @Column({ nullable: true })
   picture: string;
 
-  @Column({ nullable: true })
-  twoFA?: string;
+  @OneToOne(() => TwoFA, (twoFA) => twoFA.user, {
+    nullable: true,
+    cascade: true,
+  })
+  @JoinColumn()
+  twoFA: TwoFA | null;
 
   @Column({ default: 0 })
   won: number;
@@ -45,5 +57,5 @@ export class User {
 
   @OneToMany(() => Friend, (friend) => friend.friend)
   friends: Friend[];
-
+    user: any;
 }
