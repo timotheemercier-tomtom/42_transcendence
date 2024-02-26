@@ -56,7 +56,8 @@ export class GameGateway {
 
   @SubscribeMessage('create')
   _create(client: Socket, id: string) {
-    this.service.create(id);
+    const game = this.service.create(id);
+    game.mcb = (e, v) => this.server.to(id).emit(e, v);
     return 'ok';
   }
 
@@ -64,6 +65,31 @@ export class GameGateway {
   _join(client: Socket, id: string) {
     const user = this.idmap.get(client.id)!;
     this.service.join(id, user);
+    client.join(id);
+    return 'ok';
+  }
+
+  @SubscribeMessage('join_anon')
+  _join_anon(client: Socket, id: string) {
+    this.service.join(id, '$anon0');
+    return 'ok';
+  }
+
+  @SubscribeMessage('up')
+  _up(client: Socket, _user: string) {
+    const user = this.idmap.get(client.id)!;
+    this.service.emit(user, 'up', user);
+  }
+
+  @SubscribeMessage('down')
+  _down(client: Socket, _user: string) {
+    const user = this.idmap.get(client.id)!;
+    this.service.emit(user, 'down', user);
+  }
+
+  @SubscribeMessage('start')
+  _start(client: Socket, id: string) {
+    this.service.start(id);
     return 'ok';
   }
 }

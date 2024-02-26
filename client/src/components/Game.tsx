@@ -1,21 +1,27 @@
 import { createRef, useEffect } from 'react';
 import GameClient from '../GameClient';
 import Col from './Col';
+import { getLogin } from '../util';
+import { useParams } from 'react-router-dom';
+import { Button } from '@mui/material';
 
 const GC = new GameClient();
 
 const Game = () => {
+  const { id } = useParams();
   const cr = createRef<HTMLCanvasElement>();
 
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
     if (!ctx) return;
-    GC.load(ctx);
-  }, [cr]);
+    GC.load(ctx, getLogin(), id!);
+  }, [cr, id]);
 
   return (
     <Col>
-      <canvas ref={cr} width={800} height={600}></canvas>
+      <Button onClick={() => GC.start()}>Start</Button>
+      <Button onClick={() => GC.joinAnon()}>Join Anon</Button>
+      <canvas ref={cr} width={GameClient.W} height={GameClient.H}></canvas>
     </Col>
   );
 };

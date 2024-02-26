@@ -7,7 +7,7 @@ function LoginResult() {
   useEffect(() => {
     // Place the navigation logic inside useEffect
     // to ensure it runs after the component mounts
-    sessionStorage.setItem('user', query.get('u') ?? '');
+    // sessionStorage.setItem('user', query.get('u') ?? '');
     document.cookie = 'accessToken=' + query.get('token');
     navigate('/');
   }, [navigate, query]); // Add navigate to the dependency array
