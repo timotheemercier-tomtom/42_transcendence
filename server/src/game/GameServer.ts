@@ -1,3 +1,4 @@
+import { WsException } from '@nestjs/websockets';
 import { GameCommon, V2 } from './GameCommon';
 
 export default class GameServer extends GameCommon {
@@ -11,19 +12,18 @@ export default class GameServer extends GameCommon {
   } = {};
 
   join(user: string) {
-    if (this.users.has(user)) throw Error('user already in this game');
+    if (this.users.has(user))
+      throw new WsException('user already in this game');
     if (this.users.size < GameServer.MAXUSERS) this.users.add(user);
-    else throw Error('game is full');
+    else throw new WsException('game is full');
     this.keys[user] = { up: false, down: false };
     this.userI.set(user, this.users.size - 1);
-    this.emit('join', user);
   }
 
   leave(user: string) {
-    if (!this.users.has(user)) throw Error('user not in this game');
+    if (!this.users.has(user)) throw new WsException('user not in this game');
     this.users.delete(user);
     this.userI.delete(user);
-    this.emit('leave', user);
   }
 
   start() {

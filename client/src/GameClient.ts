@@ -17,6 +17,10 @@ export default class GameClient extends GameCommon {
   frameid!: number;
   iv!: unknown;
 
+  get ug() {
+    return { user: this.user, id: this.id };
+  }
+
   load(ctx: CanvasRenderingContext2D, user: string, id: string) {
     this.unload();
     this.ctx = ctx;
@@ -34,15 +38,14 @@ export default class GameClient extends GameCommon {
     }).bind(this);
     this.evup = ((e: KeyboardEvent) => {
       if (e.repeat) return;
-
       this.onkeychange(e.key);
       if (e.key in this.keys)
         this.keys[e.key as keyof typeof this.keys] = false;
     }).bind(this);
 
     socket.connect();
-    this.mcb = socket.emit.bind(socket);
 
+    this.onAny = socket.emit.bind(socket);
     socket.onAny((e, v) => this.emit(e, v, false));
 
     this.on('frame', (e) => {
@@ -52,14 +55,15 @@ export default class GameClient extends GameCommon {
       this.pa = e.pa;
       this.pb = e.pb;
     });
-    this.emit('create', this.id);
-    this.emit('join', this.id);
+    // this.emit('create', this.ug);
+    // this.emit('join', this.ug);
+
     this.on('join', (v) => {
-      this.users.add(v);
+      this.users.add(v.user);
     });
 
     this.on('leave', (v) => {
-      this.users.delete(v);
+      this.users.delete(v.user);
     });
 
     // this.iv = setInterval(() => {
@@ -74,8 +78,8 @@ export default class GameClient extends GameCommon {
   unload() {
     window.removeEventListener('keydown', this.evdown);
     window.removeEventListener('keyup', this.evup);
-    socket.disconnect();
     cancelAnimationFrame(this.frameid);
+    socket.disconnect();
     // clearInterval(this.iv);
   }
 
@@ -84,7 +88,7 @@ export default class GameClient extends GameCommon {
   }
 
   joinAnon() {
-    this.emit('join_anon', this.id);
+    this.emit('join_anon', this.ug);
   }
 
   onkeychange(key: string) {

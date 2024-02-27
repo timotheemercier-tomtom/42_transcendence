@@ -11,7 +11,13 @@ export type GameEventType =
   | 'leave'
   | 'up'
   | 'down'
-  | 'frame';
+  | 'frame'
+  | 'enque';
+
+export type GameUserGame = {
+  user: string;
+  id: string;
+};
 
 export type GameEventData = {
   up: string;
@@ -21,16 +27,40 @@ export type GameEventData = {
     pb: number;
     b: { p: V2; v: V2 };
   };
-  create: string;
-  join: string;
-  join_anon: string;
-  leave: string;
+  create: GameUserGame;
+  join: GameUserGame;
+  join_anon: GameUserGame;
+  leave: GameUserGame;
   start: string;
+  enque: string;
 };
 
 type EvCb<T> = (e: T) => void;
 
-export class GameCommon {
+export class Eventer {
+  onAny?: (e: string, v?: unknown) => void;
+  events = new Map<string, Set<EvCb<unknown>>>();
+
+  emit<E extends GameEventType>(e: E, v: GameEventData[E], mcb = true) {
+    const cbs = this.events.get(e) ?? new Set();
+    Array.from(cbs).forEach((f) => f(v));
+    if (mcb) this.onAny?.(e, v);
+  }
+
+  on<E extends GameEventType>(e: E, cb: EvCb<GameEventData[E]>) {
+    const cbs = this.events.get(e) ?? new Set();
+    cbs.add(cb as EvCb<unknown>);
+    this.events.set(e, cbs);
+  }
+
+  off<E extends GameEventType>(e: E, cb: EvCb<GameEventData[E]>) {
+    const cbs = this.events.get(e) ?? new Set();
+    cbs.delete(cb as EvCb<unknown>);
+    this.events.set(e, cbs);
+  }
+}
+
+export class GameCommon extends Eventer {
   static W = 800;
   static H = 600;
   static PSPEED = 15;
@@ -57,10 +87,6 @@ export class GameCommon {
   h!: number;
   users = new Set<string>();
 
-  events = new Map<string, Set<EvCb<unknown>>>();
-
-  mcb?: (e: string, v?: unknown) => void;
-
   create(w: number, h: number) {
     this.w = w;
     this.h = h;
@@ -69,22 +95,4 @@ export class GameCommon {
   }
 
   destroy() {}
-
-  emit<E extends GameEventType>(e: E, v: GameEventData[E], mcb = true) {
-    const cbs = this.events.get(e) ?? new Set();
-    Array.from(cbs).forEach((f) => f(v));
-    if (mcb) this.mcb?.(e, v);
-  }
-
-  on<E extends GameEventType>(e: E, cb: EvCb<GameEventData[E]>) {
-    const cbs = this.events.get(e) ?? new Set();
-    cbs.add(cb as EvCb<unknown>);
-    this.events.set(e, cbs);
-  }
-
-  off<E extends GameEventType>(e: E, cb: EvCb<GameEventData[E]>) {
-    const cbs = this.events.get(e) ?? new Set();
-    cbs.delete(cb as EvCb<unknown>);
-    this.events.set(e, cbs);
-  }
 }
