@@ -33,14 +33,17 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     profile: any,
   ): Promise<{ user: any; accessToken: string }> {
     const login = profile.username;
-    let user = await this.userService.findOne(login);
-    if (!user) {
+    let user;
+    try {
+      user = await this.userService.findOne(login);
+    } catch (error) {
       user = await this.userService.create({
         login: login,
         username: login,
         picture: profile._json.image.link,
       });
     }
+
     const payload = { login };
     accessToken = this.jwtService.sign(payload);
     return { user, accessToken };

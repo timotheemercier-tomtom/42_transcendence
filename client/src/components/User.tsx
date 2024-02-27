@@ -1,4 +1,4 @@
-import { Card, CircularProgress, Switch } from '@mui/material';
+import { Button, Card, CircularProgress, TextField } from '@mui/material';
 import { User as UserData } from 'common';
 import React, {
   ReactNode,
@@ -7,11 +7,12 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { API } from '../util';
-import FormWithValidation from './Form';
+import FormWithValidation from './Profile';
 import Picture from './Picture';
 import Typography from './Typography';
+import EnableTwoFA from './EnableTwoFA';
 
 type UserContextType = {
   user: any;
@@ -55,15 +56,16 @@ export async function updateUserImage(
 }
 
 function User() {
-  const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isTwoFAEnabled, setIsTwoFAEnabled] = useState<boolean>(false);
-  const [qrCodeUrl, setQrCodeUrl] = useState(null);
-  const [showVerificationInput, setShowVerificationInput] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isTwoFAEnabled, enableTwoFA] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  //   const [qrCodeUrl, setQrCodeUrl] = useState(null);
   const [userVerificationCode, setUserVerificationCode] = useState('');
+  const [showVerificationInput, setShowVerificationInput] = useState(false);
 
-  const { login = '' } = useParams();
+  const { login } = useParams();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -75,7 +77,7 @@ function User() {
         if (!response.ok) throw new Error('Network response error');
         const data = (await response.json()) as UserData;
         setUserData(data);
-        setIsTwoFAEnabled(!!data.twoFA);
+        enableTwoFA(!!data.twoFA);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -105,8 +107,8 @@ function User() {
           method: 'POST',
           credentials: 'include',
         });
-        setIsTwoFAEnabled(false);
-        setQrCodeUrl(null); // Clear QR code URL if 2FA is disabled
+        enableTwoFA(false);
+        setQrCodeUrl(''); // Clear QR code URL if 2FA is disabled
       } else {
         // Call API to generate 2FA secret and QR code
         const response = await fetch(API + `/2fa/generate`, {
@@ -129,7 +131,7 @@ function User() {
               credentials: 'include',
             });
             if (enableResponse.ok) {
-              setIsTwoFAEnabled(true);
+              enableTwoFA(true);
             } else {
               throw new Error('Failed to enable 2FA with provided code.');
             }
@@ -146,10 +148,10 @@ function User() {
     }
   };
 
-  const handleSubmitVerificationCode = async () => {
+  const handle2FAVerification = async () => {
     setLoading(true);
     try {
-      const enableResponse = await fetch(API + `/2fa/enable`, {
+      const response = await fetch(API + '/2fa/enable', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,18 +159,19 @@ function User() {
         body: JSON.stringify({ twoFACode: userVerificationCode }),
         credentials: 'include',
       });
-      if (enableResponse.ok) {
-        setIsTwoFAEnabled(true);
-        setShowVerificationInput(false); // Hide verification code input after successful submission
-        setQrCodeUrl(null); // Optionally clear QR code
+      if (!response.ok) throw new Error('2FA verification failed');
+
+      const result = await response.json();
+      if (result.success) {
+        alert('2FA enabled successfully!');
+        enableTwoFA(true); // Update state to reflect 2FA is enabled
+        setShowVerificationInput(false); // Hide verification input
+        setQrCodeUrl(''); // Clear QR code URL if necessary
       } else {
-        throw new Error('Failed to enable 2FA with provided code.');
+        alert('Invalid verification code. Please try again.');
       }
     } catch (error) {
-      console.error('Verification code submission failed:', error);
-      // Optionally handle the error, such as displaying a message to the user
-    } finally {
-      setLoading(false);
+      console.error('Error during 2FA verification:', error);
     }
   };
 
@@ -191,36 +194,32 @@ function User() {
       />
       <Typography variant="h5">Account Details</Typography>
       <Typography variant="h5">Intra Login: {userData.username}</Typography>
-      <Link to={'/u/asaijers'}>Alfa Profile</Link>
-      <br />
-      <Link to={'/u/tmercier'}>Tim Profile</Link>
-      <Switch
-        checked={isTwoFAEnabled}
-        onChange={handleToggle2FA}
-        name="toggle2FA"
-        inputProps={{ 'aria-label': 'secondary checkbox' }}
-      />
-      <Typography>Enable 2FA</Typography>
-      {qrCodeUrl && (
-        <div>
-          <img src={qrCodeUrl} alt="QR Code" />
-          {showVerificationInput && (
-            <div>
-              <input
-                type="text"
-                value={userVerificationCode}
-                onChange={(e) => setUserVerificationCode(e.target.value)}
-                placeholder="Enter verification code"
-              />
-              <button onClick={handleSubmitVerificationCode}>Verify</button>
-            </div>
-          )}
-        </div>
-      )}
+
       <FormWithValidation
         initialFormData={userData}
         onImageUpdate={updateUserData}
       />
+
+      {!isTwoFAEnabled ? (
+        <>
+          <Typography variant="h5">Enable 2FA</Typography>
+          <EnableTwoFA onQRCodeGenerated={setQrCodeUrl} />
+          {qrCodeUrl && (
+            <div>
+              <img src={qrCodeUrl} alt="QR Code for 2FA" />
+              <TextField
+                label="Verification Code"
+                value={userVerificationCode}
+                onChange={(e) => setUserVerificationCode(e.target.value)}
+                margin="normal"
+              />
+              <Button onClick={handle2FAVerification}>Verify</Button>
+            </div>
+          )}
+        </>
+      ) : (
+        <Typography variant="h6">2FA is enabled for your account.</Typography>
+      )}
     </Card>
   );
 }

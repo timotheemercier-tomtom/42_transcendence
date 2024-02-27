@@ -78,20 +78,21 @@ export type User = {
   login: string;
   username: string;
   picture: string;
-  twoFA?: TwoFADetails | null; // Adjust this line
+  twoFA?: TwoFADetails | null;
   won: number;
   lost: number;
   rank: number;
   friends: User[];
 };
 
+export type TwoFADetails = {
+    id: number;
+    secret: string;
+    otpAuthUrl: string;
+  };
+
+  
 export type StatusEventType = 'state' | 'list';
 export type StatusType = 'offline' | 'online' | 'in-game';
 export type StatusState = [string, StatusType];
 export type StatusList = StatusState[];
-
-export type TwoFADetails = {
-  id: number;
-  secret: string; // Depending on your security policies, consider not sending the secret to the frontend.
-  otpAuthUrl: string;
-};

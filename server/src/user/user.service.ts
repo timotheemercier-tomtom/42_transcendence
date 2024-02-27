@@ -8,7 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserDto } from './user.dto';
 import { User } from './user.entity';
-import { plainToInstance } from 'class-transformer';
+import * as QRCode from 'qrcode';
+import * as speakeasy from 'speakeasy';
 
 @Injectable()
 export class UserService {
@@ -41,15 +42,10 @@ export class UserService {
     return user;
   }
 
-  async findOne(login: string): Promise<User> {
+  async findOne(login: string): Promise<User | null> {
     const user = await this.usersRepository.findOneBy({ login });
-    if (user) {
-      return user;
-    }
-    throw new HttpException(
-      'User with this username does not exist',
-      HttpStatus.NOT_FOUND,
-    );
+    if (!user) throw new NotFoundException();
+    return user;
   }
 
   async findById(id: number) {
@@ -70,28 +66,50 @@ export class UserService {
   /*
   //------------------------------------------------------------- UPDATE 
   */
-  async update(login: string, updateUserDto: UserDto): Promise<User> {
-    const user = await this.usersRepository.findOne({
-      where: { login: login },
-    });
+
+  async update(
+    login: string,
+    updateUserDto: UserDto,
+    username?: string,
+    base64Image?: string,
+  ): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ login });
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    // Update image if provided
+    if (base64Image) {
+      user.picture = base64Image;
+    }
+
+    if (username) user.username = username;
+
     Object.assign(user, updateUserDto);
-    return await this.usersRepository.save(user);
+    return this.usersRepository.save(user);
   }
 
-  async updateImage(login: string, base64Image: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({ login });
-    if (user) {
-      user.picture = base64Image;
-      return this.usersRepository.save(user);
-    }
-    throw new HttpException(
-      'User with this login does not exist',
-      HttpStatus.NOT_FOUND,
-    );
+  /*
+  //------------------------------------------------------------- 2FA 
+  */
+  // method to generate a 2FA secret for a user. This method generates a secret
+  // and a QR code URL.
+  async generateTwoFASecret(user: User) {
+    const secret = speakeasy.generateSecret({ length: 20 });
+    const otpauthUrl = speakeasy.otpauthURL({
+      secret: secret.base32,
+      label: encodeURIComponent(`@Pong42:${user.login}`),
+      issuer: '@Pong42',
+    });
+
+    return { secret, otpauthUrl };
   }
+
+  // method to generate a QR code image URL from the otpauthUrl.
+  async getQRCodeDataURL(otpauthUrl: string): Promise<string> {
+    return QRCode.toDataURL(otpauthUrl);
+  }
+
 
   /*
   //------------------------------------------------------------- DELETE 
@@ -100,3 +118,28 @@ export class UserService {
     await this.usersRepository.delete(login);
   }
 }
+
+
+
+  //   async update2(login: string, updateUserDto: UserDto): Promise<User> {
+  //     const user = await this.usersRepository.findOne({
+  //       where: { login: login },
+  //     });
+  //     if (!user) {
+  //       throw new NotFoundException('User not found');
+  //     }
+  //     Object.assign(user, updateUserDto);
+  //     return await this.usersRepository.save(user);
+  //   }
+
+  //   async updateImage(login: string, base64Image: string): Promise<User> {
+  //     const user = await this.usersRepository.findOneBy({ login });
+  //     if (user) {
+  //       user.picture = base64Image;
+  //       return this.usersRepository.save(user);
+  //     }
+  //     throw new HttpException(
+  //       'User with this login does not exist',
+  //       HttpStatus.NOT_FOUND,
+  //     );
+  //   }

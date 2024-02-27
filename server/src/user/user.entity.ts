@@ -23,7 +23,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Friend } from './friend.entity';
-import { TwoFA } from '../twoFA/twoFA.entity';
 
 @Entity()
 export class User {
@@ -39,12 +38,11 @@ export class User {
   @Column({ nullable: true })
   picture: string;
 
-  @OneToOne(() => TwoFA, (twoFA) => twoFA.user, {
-    nullable: true,
-    cascade: true,
-  })
-  @JoinColumn()
-  twoFA: TwoFA | null;
+  @Column({ nullable: true })
+  secret: string;
+
+  @Column({ nullable: true })
+  otpAuthUrl: string;
 
   @Column({ default: 0 })
   won: number;

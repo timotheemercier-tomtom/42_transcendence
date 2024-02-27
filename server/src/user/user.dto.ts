@@ -19,11 +19,11 @@ export class UserDto {
 
   @IsOptional()
   @IsString()
-  readonly username?: string;
+  username?: string;
 
   @IsOptional()
   @IsString()
-  readonly picture?: string;
+  picture?: string;
 }
 
 // Add any additional properties you need to send to the frontend
