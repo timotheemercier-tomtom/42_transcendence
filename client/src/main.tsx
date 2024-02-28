@@ -12,6 +12,8 @@ import Room from './pages/Room.tsx';
 import theme from './theme.ts';
 import Home from './pages/Home.tsx';
 
+
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -34,15 +36,19 @@ const router = createBrowserRouter([
         element: <Profile />,
         path: 'u/:login',
       },
+      {
+        element: <Profile />,
+        path: 'u/',
+      },
     ],
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
+    {/* <ThemeProvider theme={theme}> */}
       <CssBaseline />
       <RouterProvider router={router} />
-    </ThemeProvider>
+    {/* </ThemeProvider> */}
   </React.StrictMode>,
 );

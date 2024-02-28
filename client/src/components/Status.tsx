@@ -7,7 +7,7 @@ import React from 'react';
 
 const Status = () => {
   const [status, setStatus] = useState(new Map<string, StatusType>());
-
+  const user = sessionStorage.getItem('user') ?? '';
   useEffect(() => {
     socket.connect();
 
@@ -33,6 +33,7 @@ const Status = () => {
 
   return (
     <Row gap={'.5rem'}>
+      <span>you: {user}</span>
       {Array.from(status.entries()).map((v, i) => (
         <span key={i}>
           <Link to={'/u/' + v[0]}>{v[0]}</Link> : {v[1]}

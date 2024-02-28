@@ -1,4 +1,4 @@
-import React from 'react';
+import AddFriend from '../components/AddFriend';
 import Friends from '../components/Friends';
 import User from '../components/User';
 
@@ -8,7 +8,7 @@ const Profile = () => {
     <div>
       <h1>User Profile</h1>
       <User />
-      {/* <UserProfile /> */}
+      <AddFriend />
       <Friends />
       {/* Other profile-related components */}
     </div>

@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { useParams } from 'react-router-dom';
-import { API } from '../util';
+import { API, getLogin } from '../util';
 import FormWithValidation from './Profile';
 import Picture from './Picture';
 import Typography from './Typography';
@@ -65,7 +65,8 @@ function User() {
   const [userVerificationCode, setUserVerificationCode] = useState('');
   const [showVerificationInput, setShowVerificationInput] = useState(false);
 
-  const { login } = useParams();
+  let { login } = useParams();
+  if (!login) login = getLogin();
 
   useEffect(() => {
     const fetchUserData = async () => {

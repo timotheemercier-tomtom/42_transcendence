@@ -20,12 +20,15 @@ import { UserDto } from './user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 import { FriendService } from './friend.service';
+import { JwtService } from '@nestjs/jwt';
+import { ValidateResult } from 'src/auth/fourtwo.strategy';
 
 @Controller('user')
 export class UserController {
   constructor(
     private userService: UserService,
     private friendService: FriendService,
+    private jwtService: JwtService,
   ) {}
 
   @Get()
@@ -82,37 +85,67 @@ export class UserController {
     return { qrCodeDataURL };
   }
 
+  
+  @Post('verify-2fa')
+  async verifyTwoFA(
+    @Body() body: { login: string; accessToken: string },
+  ): Promise<{ access: boolean; token?: string }> {
+      const { login, accessToken } = body;
+      const user = await this.userService.findOne(login);
+    if (!user?.secret) {
+      throw new UnauthorizedException('2FA not setup.');
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret: user.secret,
+      encoding: 'base32',
+      token: ,
+    });
+
+    if (verified) {
+      // Generate a new JWT token for the user
+      const payload = { login: user?.login };
+      const token = this.jwtService.sign(payload, {
+        //   const token = this.jwt.sign(payload, {
+        expiresIn: '60m',
+      });
+      return { access: true, token: token };
+    } else {
+      throw new UnauthorizedException('Invalid 2FA token.');
+    }
+  }
+
   // This endpoint checks the provided 2FA token against the user's stored secret.
   // If the verification succeeds, it generates a new JWT token for the user to
   // proceed with their authenticated session.
 
-//   @Post('verify-2fa')
-//   @UseGuards(JwtAuthGuard)
-//   async verifyTwoFA(
-//     @Req() req: any,
-//     @Body() body: { token: string },
-//   ): Promise<{ access: boolean; token?: string }> {
-//     const { token } = body;
-//     const user = await this.userService.findOne(req.user.login);
+  //   @Post('verify-2fa')
+  //   @UseGuards(JwtAuthGuard)
+  //   async verifyTwoFA(
+  //     @Req() req: any,
+  //     @Body() body: { token: string },
+  //   ): Promise<{ access: boolean; token?: string }> {
+  //     const { token } = body;
+  //     const user = await this.userService.findOne(req.user.login);
 
-//     if (!user || !user.secret) {
-//       throw new UnauthorizedException('2FA not setup or user not found.');
-//     }
+  //     if (!user || !user.secret) {
+  //       throw new UnauthorizedException('2FA not setup or user not found.');
+  //     }
 
-//     const verified = speakeasy.totp.verify({
-//       secret: user.secret,
-//       encoding: 'base32',
-//       token,
-//     });
+  //     const verified = speakeasy.totp.verify({
+  //       secret: user.secret,
+  //       encoding: 'base32',
+  //       token,
+  //     });
 
-//     if (verified) {
-//       // Assuming you have a method to generate a new JWT token
-//       const newAccessToken = this.jwt.sign({ login: user.login });
-//       return { access: true, token: newAccessToken };
-//     } else {
-//       throw new UnauthorizedException('Invalid 2FA token.');
-//     }
-//   }
+  //     if (verified) {
+  //       // Assuming you have a method to generate a new JWT token
+  //       const newAccessToken = this.jwt.sign({ login: user.login });
+  //       return { access: true, token: newAccessToken };
+  //     } else {
+  //       throw new UnauthorizedException('Invalid 2FA token.');
+  //     }
+  //   }
 
   // Add to src/user/user.controller.ts
   //   @Post('verify-2fa')
