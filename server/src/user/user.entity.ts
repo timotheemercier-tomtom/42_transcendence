@@ -39,7 +39,7 @@ export class User {
   picture: string;
 
   @Column({ nullable: true })
-  secret: string;
+  twoFAsecret: string;
 
   @Column({ nullable: true })
   otpAuthUrl: string;

@@ -10,6 +10,7 @@ import { UserDto } from './user.dto';
 import { User } from './user.entity';
 import * as QRCode from 'qrcode';
 import * as speakeasy from 'speakeasy';
+import { TwoFA } from 'common';
 
 @Injectable()
 export class UserService {
@@ -102,7 +103,7 @@ export class UserService {
       issuer: '@Pong42',
     });
 
-    return { secret, otpauthUrl };
+    return { otpauthUrl };
   }
 
   // method to generate a QR code image URL from the otpauthUrl.
@@ -110,7 +111,13 @@ export class UserService {
     return QRCode.toDataURL(otpauthUrl);
   }
 
-
+  
+  async setTwoFA(user: User, twoFA: TwoFA): Promise<User> {
+    user.twoFAsecret = twoFA.secret;
+    user.otpAuthUrl = twoFA.otpAuthUrl;
+    return user;
+  }
+  
   /*
   //------------------------------------------------------------- DELETE 
   */

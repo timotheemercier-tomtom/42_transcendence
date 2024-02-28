@@ -74,16 +74,20 @@ export class UserController {
   @Post('enable-2fa')
   async enableTwoFA(@Session() session: any) {
     const user = session.user; // Assume user is stored in session
-    const { secret, otpauthUrl } =
+    const { otpauthUrl } =
       await this.userService.generateTwoFASecret(user);
     const qrCodeDataURL = await this.userService.getQRCodeDataURL(otpauthUrl);
 
     // Store the secret temporarily, ideally in session or a temporary storage,
     // until verification
-    session.tempSecret = secret;
+    session.tempSecret = otpauthUrl.secret;
 
     return { qrCodeDataURL };
   }
+
+
+
+
 
   
   @Post('verify-2fa')

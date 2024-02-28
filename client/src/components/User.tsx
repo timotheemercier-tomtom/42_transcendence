@@ -35,6 +35,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
 export const useUser = () => useContext(UserContext);
 
+
+
 export async function updateUserImage(
   login: string,
   base64Image: string,
@@ -54,6 +56,7 @@ export async function updateUserImage(
 
   return response.json();
 }
+
 
 function User() {
   const [loading, setLoading] = useState(true);

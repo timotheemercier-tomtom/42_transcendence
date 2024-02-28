@@ -78,15 +78,14 @@ export type User = {
   login: string;
   username: string;
   picture: string;
-  twoFA?: TwoFADetails | null;
+  twoFA?: TwoFA | null;
   won: number;
   lost: number;
   rank: number;
   friends: User[];
 };
 
-export type TwoFADetails = {
-    id: number;
+export type TwoFA = {
     secret: string;
     otpAuthUrl: string;
   };
