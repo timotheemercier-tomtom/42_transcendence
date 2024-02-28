@@ -1,15 +1,24 @@
 import { WsException } from '@nestjs/websockets';
-import { GameCommon, V2 } from './GameCommon';
+import { GameCommon, GameOpt, V2 } from './GameCommon';
 
 export default class GameServer extends GameCommon {
   static MAXUSERS = 2;
-  userI = new Map<string, number>();
 
   b!: { p: V2; v: V2 };
 
   keys: {
     [K in string]: { up: boolean; down: boolean };
   } = {};
+
+  constructor(id: string) {
+    super();
+    this.id = id;
+  }
+
+  addOpt(opt: GameOpt): void {
+    super.addOpt(opt);
+    this.emit('opt', this.opt);
+  }
 
   join(user: string) {
     if (this.users.has(user))
@@ -18,12 +27,14 @@ export default class GameServer extends GameCommon {
     else throw new WsException('game is full');
     this.keys[user] = { up: false, down: false };
     this.userI.set(user, this.users.size - 1);
+    this.emit('join', { user, id: this.id });
   }
 
   leave(user: string) {
     if (!this.users.has(user)) throw new WsException('user not in this game');
     this.users.delete(user);
     this.userI.delete(user);
+    this.emit('leave', { user, id: this.id });
   }
 
   start() {
@@ -38,7 +49,8 @@ export default class GameServer extends GameCommon {
 
       this.keys[e].down = !this.keys[e].down;
     });
-    setInterval(() => this.update(), 1000 / 30);
+    setInterval(() => this.update(), 1000 / 60);
+    this.emit('start', this.id);
   }
 
   destroy(): void {

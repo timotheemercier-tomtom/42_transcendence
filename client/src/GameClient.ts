@@ -13,7 +13,6 @@ export default class GameClient extends GameCommon {
   evdown!: (e: KeyboardEvent) => void;
   evup!: (e: KeyboardEvent) => void;
   user!: string;
-  id!: string;
   frameid!: number;
   iv!: unknown;
 
@@ -59,13 +58,17 @@ export default class GameClient extends GameCommon {
     // this.emit('join', this.ug);
 
     this.on('join', (v) => {
+      this.userI.set(v.user, this.users.size);
       this.users.add(v.user);
     });
 
     this.on('leave', (v) => {
       this.users.delete(v.user);
+      this.userI.delete(v.user);
     });
 
+    this.on('opt', (v) => this.addOpt(v));
+    socket.emit('opt', { id: this.id, user: {} });
     // this.iv = setInterval(() => {
     //   this.update();
     // }, 1000 / 30);
@@ -116,11 +119,18 @@ export default class GameClient extends GameCommon {
     this.ctx.fillStyle = 'black';
     this.ctx.fillRect(0, 0, this.w, this.h);
 
-    this.ctx.fillStyle = 'white';
     this.ctx.strokeStyle = 'white';
+    console.log(this.opt.user[this.getUserForPa()], this.getUserForPa());
 
+    let c = this.opt.user[this.getUserForPa()]?.paddle ?? 'white';
+    this.ctx.fillStyle = c;
     this.ctx.fillRect(10, this.pa, 20, 100);
+
+    c = this.opt.user[this.getUserForPb()]?.paddle ?? 'white';
+    this.ctx.fillStyle = c;
     this.ctx.fillRect(this.ctx.canvas.width - 30, this.pb, 20, 100);
+
+    this.ctx.fillStyle = 'white';
 
     this.ctx.beginPath();
     this.ctx.arc(this.b.x, this.b.y, 10, 0, 2 * Math.PI, false);

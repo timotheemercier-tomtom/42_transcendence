@@ -4,6 +4,7 @@ import {
   Eventer,
   GameEventData,
   GameEventType,
+  GameOpt,
   GameUserGame,
 } from './GameCommon';
 import { randomUUID } from 'crypto';
@@ -28,7 +29,7 @@ export class GameService extends Eventer {
 
   create(ug: GameUserGame) {
     if (this.games.has(ug.id)) throw new WsException('game already exists');
-    const game = new GameServer();
+    const game = new GameServer(ug.id);
     game.create(GameServer.W, GameServer.H);
     this.games.set(ug.id, game);
     this.gameToUsers.set(ug.id, new Set());
@@ -38,7 +39,7 @@ export class GameService extends Eventer {
   start(id: string) {
     const game = this.guardGame(id);
     game.start();
-    this.emit('start', id);
+    // this.emit('start', id);
   }
 
   destroy(id: string) {
@@ -55,7 +56,7 @@ export class GameService extends Eventer {
     game.join(user);
     this.userToGame.set(user, id);
     this.gameToUsers.get(id)?.add(user);
-    this.emit('join', { user, id });
+    // this.emit('join', { user, id });
   }
 
   leave(id: string, user: string) {
@@ -63,7 +64,7 @@ export class GameService extends Eventer {
     game.leave(user);
     this.userToGame.delete(user);
     this.gameToUsers.get(id)?.delete(user);
-    this.emit('leave', { user, id });
+    // this.emit('leave', { user, id });
   }
 
   passGameEvent<E extends GameEventType>(
@@ -85,5 +86,10 @@ export class GameService extends Eventer {
     const id = 'game-' + randomUUID();
     this.create({ id, user });
     this.join(id, user);
+  }
+
+  opt(opt: GameOpt) {
+    const game = this.guardGame(opt.id);
+    game.addOpt(opt);
   }
 }

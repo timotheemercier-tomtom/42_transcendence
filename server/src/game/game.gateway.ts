@@ -52,19 +52,29 @@ export class GameGateway extends Eventer {
 
     this.service.on('create', (ug) => {
       const game = this.service.guardGame(ug.id);
-      game.onAny = (e, v) => server.to(ug.id).emit(e, v);
+      game.onAny = (e, v) => {
+        const clients = Array.from(game.users.values()).map((v) =>
+          this.userToClient.get(v),
+        );
+
+        clients.forEach((c) => c?.emit(e, v));
+        // this.server.to(ug.id).emit(e, v);
+      };
+      game.on('leave', (ug) => {
+        const client = this.userToClient.get(ug.user)!;
+        // server.to(ug.id).emit('leave', ug);
+        if (client) client.leave(ug.id);
+      });
+      game.on('join', (ug) => {
+        const client = this.userToClient.get(ug.user)!;
+
+        if (client) {
+          client.join(ug.id);
+        }
+
+        // server.to(ug.id).emit('join', ug);
+      });
       this.userToClient.get(ug.user)?.emit('create', ug);
-    });
-    this.service.on('join', (ug) => {
-      if ('$anon0' == ug.user) return;
-      const client = this.userToClient.get(ug.user)!;
-      client.join(ug.id);
-      client.emit('join', ug);
-    });
-    this.service.on('leave', (ug) => {
-      const client = this.userToClient.get(ug.user)!;
-      client.leave(ug.id);
-      client.emit('leave', ug);
     });
   }
 
@@ -106,5 +116,10 @@ export class GameGateway extends Eventer {
   _enque(client: Socket) {
     const user = this.idmap.get(client.id)!;
     this.service.enque(user);
+  }
+
+  @SubscribeMessage('opt')
+  _opt(client: Socket, opt: GameEventData['opt']) {
+    this.service.opt(opt);
   }
 }

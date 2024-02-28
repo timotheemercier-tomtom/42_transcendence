@@ -1,4 +1,4 @@
-import { Button, Input } from '@mui/material';
+import { Button, FormLabel, Input } from '@mui/material';
 import Row from './Row';
 import Col from './Col';
 import { useEffect, useState } from 'react';
@@ -11,25 +11,46 @@ const GameMaker = () => {
   const user = getLogin();
   const nav = useNavigate();
   const [id, setId] = useState('');
+  const [paddle, setPaddle] = useState('');
+  const [ball, setBall] = useState('');
   useEffect(() => {
     socket.connect();
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
     const onjoin = (ug: GameEventData['join']) => {
       if (ug.user == user) nav('/r/' + ug.id);
     };
     const oncreate = (ug: GameEventData['create']) => {
       socket.emit('join', ug);
+      socket.emit('opt', { id: ug.id, user: { [ug.user]: { paddle, ball } } });
     };
     socket.on('join', onjoin);
     socket.on('create', oncreate);
     return () => {
       socket.off('join', onjoin);
       socket.off('create', oncreate);
-      socket.disconnect();
     };
-  }, [nav, user]);
+  }, [ball, nav, paddle, user]);
 
   return (
     <Row alignItems={'center'} gap={'1rem'}>
+      <Col>
+        <FormLabel>
+          paddle
+          <input
+            type="color"
+            onChange={(e) => setPaddle(e.target.value)}
+          ></input>
+        </FormLabel>
+        <FormLabel>
+          ball
+          <input type="color" onChange={(e) => setBall(e.target.value)}></input>
+        </FormLabel>
+      </Col>
       <Col>
         <Input
           placeholder="game id"

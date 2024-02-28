@@ -12,10 +12,16 @@ export type GameEventType =
   | 'up'
   | 'down'
   | 'frame'
-  | 'enque';
+  | 'enque'
+  | 'opt';
 
 export type GameUserGame = {
   user: string;
+  id: string;
+};
+
+export type GameOpt = {
+  user: { [K in string]: { i:number, ball: string; paddle: string } };
   id: string;
 };
 
@@ -33,6 +39,7 @@ export type GameEventData = {
   leave: GameUserGame;
   start: string;
   enque: string;
+  opt: GameOpt;
 };
 
 type EvCb<T> = (e: T) => void;
@@ -86,6 +93,32 @@ export class GameCommon extends Eventer {
   w!: number;
   h!: number;
   users = new Set<string>();
+  userI = new Map<string, number>();
+
+  id!: string;
+  opt: GameOpt = {
+    user: {},
+    id: '',
+  };
+
+  getUserForPa() {
+    for (const [k, v] of this.userI.entries()) {
+      if (v == 0) return k;
+    }
+    return '';
+  }
+
+  getUserForPb() {
+    for (const [k, v] of this.userI.entries()) {
+      if (v == 1) return k;
+    }
+    return '';
+  }
+
+  addOpt(opt: GameOpt) {
+    Object.assign(this.opt.user, opt.user);
+    this.opt.id = opt.id;
+  }
 
   create(w: number, h: number) {
     this.w = w;

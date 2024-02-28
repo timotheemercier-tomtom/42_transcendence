@@ -6,6 +6,7 @@ import Col from './components/Col';
 import Row from './components/Row';
 import Status from './components/Status';
 import { API } from './util';
+import GameMaker from './components/GameMaker';
 
 const App: React.FC = () => {
   const handle42Login = () => {
@@ -24,6 +25,7 @@ const App: React.FC = () => {
             <ButtonLogin onClick={handle42Login} text="Log In" />
             <ButtonLogin onClick={anonlogin} text="anon Log In" />
             <Status />
+            <GameMaker />
 
             {/* <Button onClick={handle42Login}>Log In</Button> */}
 
