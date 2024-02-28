@@ -31,12 +31,13 @@ import {
   Body,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { FourTwoStrategy } from './fourtwo.strategy';
+import { FourTwoStrategy, ValidateResult } from './fourtwo.strategy';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import * as speakeasy from 'speakeasy';
+import { log } from 'console';
 
 @Controller('auth')
 export class AuthController {
@@ -60,45 +61,14 @@ export class AuthController {
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async fortyTwoAuthRedirect(@Req() req: Request | any, @Res() res: Response) {
-    const { token, user } = req.user;
+    const { accessToken, user } = req.user as ValidateResult;
     if (user.secret) {
       // Check if 2FA is enabled
       // Redirect to a 2FA verification page, passing along necessary information
-
-      const twoFARedirectUrl = `http://${this.config.get('HOST')}:5173/verify2fa?token=${token}&u=${user.login}`;
+      const twoFARedirectUrl = `http://${this.config.get('HOST')}:5173/verify-2fa?token=${accessToken}&u=${user.login}`;
       return res.redirect(twoFARedirectUrl);
-    } else res.redirect(this.redir(token, user.login));
+    } else res.redirect(this.redir(accessToken, user.login));
     // Proceed with the usual redirection if 2FA is not enabled
-  }
-
-  @Post('verify-2fa')
-  async verifyTwoFA(
-    @Body() body: { username: string; token: string },
-  ): Promise<{ access: boolean; token?: string }> {
-    const { username, token } = body;
-    const user = await this.user.findOne(username);
-
-    if (!user || !user.secret) {
-      throw new UnauthorizedException('2FA not setup or user not found.');
-    }
-
-    const verified = speakeasy.totp.verify({
-      secret: user.secret,
-      encoding: 'base32',
-      token,
-    });
-
-    if (verified) {
-      // Generate a new JWT token for the user
-      const payload = { username: user.username, sub: user.id };
-      const token = this.jwt.sign(payload, {
-        secret: this.config.get('JWT_SECRET'),
-        expiresIn: '60m',
-      });
-      return { access: true, token: token };
-    } else {
-      throw new UnauthorizedException('Invalid 2FA token.');
-    }
   }
 
   anonc = 0;

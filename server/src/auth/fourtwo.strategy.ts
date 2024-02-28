@@ -11,7 +11,13 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import FortyTwoStrategy from 'passport-42';
+import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
+
+export type ValidateResult = {
+    accessToken: string,
+    user: User,
+}
 
 @Injectable()
 export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
@@ -44,7 +50,7 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
       });
     }
 
-    const payload = { login };
+    const payload = { login: user?.login };
     accessToken = this.jwtService.sign(payload);
     return { user, accessToken };
   }

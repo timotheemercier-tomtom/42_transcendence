@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { socket } from '../chat.socket';
+import { getLogin } from '../util';
 import Col from './Col';
 import Row from './Row';
 
@@ -23,7 +24,7 @@ export default function Chat({ id }: { id: string }) {
   const [dms, setDms] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [block, setBlock] = useState(new Set<string>());
-  const user = sessionStorage.getItem('user') ?? '';
+  const user = getLogin();
 
   useEffect(() => {
     socket.connect();

@@ -8,8 +8,8 @@ import Alert from '@mui/material/Alert';
 const EnableTwoFA = ({ onTokenVerified }: any) => {
   const [token, setToken] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<any>('info');
+  const [snackbarMessage, setAlertMessage] = useState('');
+  const [snackbarSeverity, setAlertLevel] = useState<any>('info');
 
   const handleCloseSnackbar = (event: any, reason: string) => {
     if (reason === 'clickaway') {
@@ -23,21 +23,21 @@ const EnableTwoFA = ({ onTokenVerified }: any) => {
       const response = await axios.post('/user/verify-2fa', { token });
       if (response.data.verified) {
         // Token verified successfully
-        setSnackbarMessage('2FA token verified successfully.');
-        setSnackbarSeverity('success');
+        setAlertMessage('2FA token verified successfully.');
+        setAlertLevel('success');
         onTokenVerified && onTokenVerified(true); // Trigger any additional actions on successful verification
       } else {
         // Token verification failed
-        setSnackbarMessage('Failed to verify 2FA token. Please try again.');
-        setSnackbarSeverity('error');
+        setAlertMessage('Failed to verify 2FA token. Please try again.');
+        setAlertLevel('error');
         onTokenVerified && onTokenVerified(false);
       }
     } catch (error) {
       console.error('Error verifying token:', error);
-      setSnackbarMessage(
+      setAlertMessage(
         'An error occurred during verification. Please try again.',
       );
-      setSnackbarSeverity('error');
+      setAlertLevel('error');
     }
     setOpenSnackbar(true);
   };
