@@ -43,7 +43,6 @@ import { AuthService } from './auth.service';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authService: FourTwoStrategy,
     private jwtService: JwtService,
     private userService: UserService,
     private configService: ConfigService,
