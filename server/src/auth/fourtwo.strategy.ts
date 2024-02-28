@@ -13,6 +13,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import FortyTwoStrategy from 'passport-42';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
+import * as speakeasy from 'speakeasy';
 
 export type ValidateResult = {
     accessToken: string,
@@ -54,4 +55,5 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     accessToken = this.jwtService.sign(payload);
     return { user, accessToken };
   }
+
 }

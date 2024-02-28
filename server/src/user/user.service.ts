@@ -91,34 +91,6 @@ export class UserService {
   }
 
   /*
-  //------------------------------------------------------------- 2FA 
-  */
-  // method to generate a 2FA secret for a user. This method generates a secret
-  // and a QR code URL.
-  async generateTwoFASecret(user: User) {
-    const secret = speakeasy.generateSecret({ length: 20 });
-    const otpauthUrl = speakeasy.otpauthURL({
-      secret: secret.base32,
-      label: encodeURIComponent(`@Pong42:${user.login}`),
-      issuer: '@Pong42',
-    });
-
-    return { otpauthUrl };
-  }
-
-  // method to generate a QR code image URL from the otpauthUrl.
-  async getQRCodeDataURL(otpauthUrl: string): Promise<string> {
-    return QRCode.toDataURL(otpauthUrl);
-  }
-
-  
-  async setTwoFA(user: User, twoFA: TwoFA): Promise<User> {
-    user.twoFAsecret = twoFA.secret;
-    user.otpAuthUrl = twoFA.otpAuthUrl;
-    return user;
-  }
-  
-  /*
   //------------------------------------------------------------- DELETE 
   */
   async removeOne(login: string): Promise<void> {
@@ -126,27 +98,25 @@ export class UserService {
   }
 }
 
+//   async update2(login: string, updateUserDto: UserDto): Promise<User> {
+//     const user = await this.usersRepository.findOne({
+//       where: { login: login },
+//     });
+//     if (!user) {
+//       throw new NotFoundException('User not found');
+//     }
+//     Object.assign(user, updateUserDto);
+//     return await this.usersRepository.save(user);
+//   }
 
-
-  //   async update2(login: string, updateUserDto: UserDto): Promise<User> {
-  //     const user = await this.usersRepository.findOne({
-  //       where: { login: login },
-  //     });
-  //     if (!user) {
-  //       throw new NotFoundException('User not found');
-  //     }
-  //     Object.assign(user, updateUserDto);
-  //     return await this.usersRepository.save(user);
-  //   }
-
-  //   async updateImage(login: string, base64Image: string): Promise<User> {
-  //     const user = await this.usersRepository.findOneBy({ login });
-  //     if (user) {
-  //       user.picture = base64Image;
-  //       return this.usersRepository.save(user);
-  //     }
-  //     throw new HttpException(
-  //       'User with this login does not exist',
-  //       HttpStatus.NOT_FOUND,
-  //     );
-  //   }
+//   async updateImage(login: string, base64Image: string): Promise<User> {
+//     const user = await this.usersRepository.findOneBy({ login });
+//     if (user) {
+//       user.picture = base64Image;
+//       return this.usersRepository.save(user);
+//     }
+//     throw new HttpException(
+//       'User with this login does not exist',
+//       HttpStatus.NOT_FOUND,
+//     );
+//   }

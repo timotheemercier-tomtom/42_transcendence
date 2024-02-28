@@ -71,53 +71,7 @@ export class UserController {
   // API endpoint to generate the 2FA secret and QR code, and sends the QR code
   // data URL back to the frontend.
 
-  @Post('enable-2fa')
-  async enableTwoFA(@Session() session: any) {
-    const user = session.user; // Assume user is stored in session
-    const { otpauthUrl } =
-      await this.userService.generateTwoFASecret(user);
-    const qrCodeDataURL = await this.userService.getQRCodeDataURL(otpauthUrl);
-
-    // Store the secret temporarily, ideally in session or a temporary storage,
-    // until verification
-    session.tempSecret = otpauthUrl.secret;
-
-    return { qrCodeDataURL };
-  }
-
-
-
-
-
-  
-  @Post('verify-2fa')
-  async verifyTwoFA(
-    @Body() body: { login: string; accessToken: string },
-  ): Promise<{ access: boolean; token?: string }> {
-      const { login, accessToken } = body;
-      const user = await this.userService.findOne(login);
-    if (!user?.secret) {
-      throw new UnauthorizedException('2FA not setup.');
-    }
-
-    const verified = speakeasy.totp.verify({
-      secret: user.secret,
-      encoding: 'base32',
-      token: ,
-    });
-
-    if (verified) {
-      // Generate a new JWT token for the user
-      const payload = { login: user?.login };
-      const token = this.jwtService.sign(payload, {
-        //   const token = this.jwt.sign(payload, {
-        expiresIn: '60m',
-      });
-      return { access: true, token: token };
-    } else {
-      throw new UnauthorizedException('Invalid 2FA token.');
-    }
-  }
+ 
 
   // This endpoint checks the provided 2FA token against the user's stored secret.
   // If the verification succeeds, it generates a new JWT token for the user to
