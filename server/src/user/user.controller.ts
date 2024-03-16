@@ -65,7 +65,7 @@ export class UserController {
     const base64Image = userDto.picture;
     delete userDto.picture; // Remove the image data from the DTO to prevent direct assignment
 
-    return await this.userService.update(login, userDto, base64Image);
+    return await this.userService.updateUser(login, userDto, base64Image);
   }
 
   // API endpoint to generate the 2FA secret and QR code, and sends the QR code

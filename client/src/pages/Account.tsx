@@ -2,7 +2,7 @@ import AddFriend from '../components/AddFriend';
 import Friends from '../components/Friends';
 import User from '../components/User';
 
-const Profile = () => {
+const Account = () => {
   // You can add more profile-specific content or logic here
   return (
     <div>
@@ -15,4 +15,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Account;

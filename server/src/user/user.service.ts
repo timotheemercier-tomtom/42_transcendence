@@ -68,7 +68,7 @@ export class UserService {
   //------------------------------------------------------------- UPDATE 
   */
 
-  async update(
+  async updateUser(
     login: string,
     updateUserDto: UserDto,
     username?: string,

@@ -7,7 +7,7 @@ import App from './App.tsx';
 import './css/index.css';
 import Error404 from './pages/Error404.tsx';
 import LoginResult from './pages/LoginResult.tsx';
-import Profile from './pages/Profile.tsx';
+import Account from './pages/Account.tsx';
 import Room from './pages/Room.tsx';
 import theme from './theme.ts';
 import Home from './pages/Home.tsx';
@@ -33,12 +33,8 @@ const router = createBrowserRouter([
         path: 'login',
       },
       {
-        element: <Profile />,
+        element: <Account />,
         path: 'u/:login',
-      },
-      {
-        element: <Profile />,
-        path: 'u/',
       },
     ],
   },

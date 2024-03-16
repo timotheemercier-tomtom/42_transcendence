@@ -86,11 +86,10 @@ export type User = {
 };
 
 export type TwoFA = {
-    secret: string;
-    otpAuthUrl: string;
-  };
+  secret: string;
+  otpAuthUrl: string;
+};
 
-  
 export type StatusEventType = 'state' | 'list';
 export type StatusType = 'offline' | 'online' | 'in-game';
 export type StatusState = [string, StatusType];
@@ -100,3 +99,29 @@ export type V2 = {
   x: number;
   y: number;
 };
+
+// export default interface IDataProvider<Resource> {
+//   createData: (resource: Resource) => Promise<void>;
+//   readData: (args: {id: string, matchField: string}) => Promise<Resource>;
+//   updateData: (args: {id: string, resource: Resource}) => Promise<void>;
+//   deleteData: (id: string) => Promise<void>;
+// }
+
+export enum AuthActionEnum {
+  LOG_IN = 'LOG_IN',
+  LOG_OUT = 'LOG_OUT',
+}
+
+export type AuthAction =
+  | {
+      type: AuthActionEnum.LOG_IN;
+      payload: {
+        authToken: string;
+        login: string;
+        twoFA: string | null;
+      };
+    }
+  | {
+      type: AuthActionEnum.LOG_OUT;
+      payload: null;
+    };
