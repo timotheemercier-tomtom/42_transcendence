@@ -21,11 +21,11 @@ export default class GameClient extends GameCommon {
     this.w = this.ctx.canvas.width;
     this.h = this.ctx.canvas.height;
     this.frameid = 0;
-    this.pa = this.h / 2 - GameClient.PH / 2;
-    this.pb = this.h / 2 - GameClient.PH / 2;
-    this.b = {
-      p: { x: this.w / 2, y: this.h / 2 },
-      v: { x: -GameClient.BSPEED, y: 0 },
+    this.pa = this.h / 2 - GameClient.PH / 2; // pos player a
+    this.pb = this.h / 2 - GameClient.PH / 2; // pos player b
+    this.b = {                                // ball
+      p: { x: this.w / 2, y: this.h / 2 },    // ball position
+      v: { x: -GameClient.BSPEED, y: 0 },     // ball speed
     };
 
     this.evdown = ((e: KeyboardEvent) => {
