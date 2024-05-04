@@ -31,8 +31,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { HealthController } from './health/health.controller';
@@ -55,7 +53,7 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     database: configService.get('DB_NAME'),
     entities: [User, Friend],
     synchronize: configService.get<boolean>('TYPEORM_SYNC', false),
-    logging: true,
+    logging: false,
     migrations: [],
   }),
 });
@@ -74,7 +72,7 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     StatusModule,
     GameModule,
   ],
-  controllers: [AppController, HealthController],
-  providers: [AppService],
+  controllers: [HealthController],
+  providers: [],
 })
 export class AppModule {}
