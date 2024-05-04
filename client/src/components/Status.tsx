@@ -3,10 +3,11 @@ import { socket } from '../status.socket';
 import Row from './Row';
 import { StatusType, StatusList, StatusState } from 'common';
 import { Link } from 'react-router-dom';
+import { getLogin } from '../util';
 
 const Status = () => {
   const [status, setStatus] = useState(new Map<string, StatusType>());
-  const user = sessionStorage.getItem('user') ?? '';
+  const user = getLogin();
   useEffect(() => {
     socket.connect();
 

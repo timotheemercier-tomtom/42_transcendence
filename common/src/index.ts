@@ -95,8 +95,3 @@ export type StatusEventType = 'state' | 'list';
 export type StatusType = 'offline' | 'online' | 'in-game';
 export type StatusState = [string, StatusType];
 export type StatusList = StatusState[];
-
-export type V2 = {
-  x: number;
-  y: number;
-};
