@@ -7,7 +7,7 @@ import { getLogin } from '../util';
 
 const Status = () => {
   const [status, setStatus] = useState(new Map<string, StatusType>());
-  const user = getLogin();
+  const user = sessionStorage.getItem('user') ?? '';
   useEffect(() => {
     socket.connect();
 

@@ -25,7 +25,7 @@ const App: React.FC = () => {
             <ButtonLogin onClick={handle42Login} text="Log In" />
             <ButtonLogin onClick={anonlogin} text="anon Log In" />
             <Status />
-            <GameMaker />
+            {/* <GameMaker /> */}
 
             {/* <Button onClick={handle42Login}>Log In</Button> */}
 
