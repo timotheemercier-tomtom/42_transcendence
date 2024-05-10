@@ -5,7 +5,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
-import { Eventer, GameEventData } from './GameCommon';
+import { Eventer, GameEventData, V2 } from './GameCommon';
 import { GameService } from './game.service';
 
 // @Catch()
@@ -15,6 +15,8 @@ import { GameService } from './game.service';
 //     client.emit('error', exception.message);
 //   }
 // }
+
+type testMsgType = { id: number, name: string};
 
 // @UseFilters(new WebsocketExceptionFilter())
 @WebSocketGateway({ namespace: '/game/ws', transports: ['websocket'] })
@@ -76,6 +78,33 @@ export class GameGateway extends Eventer {
       });
       this.userToClient.get(ug.user)?.emit('create', ug);
     });
+  }
+
+  @SubscribeMessage('test')
+  _testReceiver(socket: Socket, dataReceived: testMsgType) : void {
+    console.log("test received: " + dataReceived.id + ", " + dataReceived.name + "!");
+    console.log("client id: " + socket.id);
+    const user = this.idmap.get(socket.id);
+    console.log("user id: " + user);
+
+    console.log("nr of games: " + this.service.games.size);
+    for (const [key, value] of this.service.games.entries())
+    {
+      console.log("key:");
+      console.log(key);
+      console.log("value:");
+      console.log(value);
+    }
+
+    type frame = GameEventData['frame'];
+    type ball = frame['b'];
+    let v2_1: V2 = {x: 10, y: 20};
+    let v2_2: V2 = {x: 10, y: 20};
+    let test_ball: ball = {p: v2_1, v: v2_2};
+    let test_frame: frame = {pa: 123, pb: 456, b: test_ball};;
+
+    console.log("emitting frame!");
+    socket.emit("frame", test_frame);
   }
 
   @SubscribeMessage('create')

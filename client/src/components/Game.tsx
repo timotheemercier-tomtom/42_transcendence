@@ -4,6 +4,8 @@ import Col from './Col';
 import { getLogin } from '../util';
 import { useParams } from 'react-router-dom';
 import { Button } from '@mui/material';
+import { GameEventData } from '../GameCommon';
+import { socket } from '../game.socket';
 
 const GC = new GameClient();
 
@@ -16,6 +18,16 @@ const Game = () => {
     if (!ctx) return;
     GC.load(ctx, getLogin(), id!);
   }, [cr, id]);
+
+  useEffect(() => {
+    const onframe = (frameReceived: GameEventData['frame']) => {
+      console.log("frame received" + frameReceived);
+    };
+    socket.on('frame', onframe);
+    return () => {
+      socket.off('frame', onframe);
+    };
+  }, []);
 
   return (
     <Col>
