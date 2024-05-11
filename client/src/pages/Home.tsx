@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <Col>
       <h1>Home page , pong!</h1>
-      {/* <GameMaker /> */}
+      <GameMaker />
     </Col>
   );
 }
