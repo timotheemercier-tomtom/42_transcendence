@@ -45,7 +45,10 @@ export default class GameClient extends GameCommon {
     socket.connect();
 
     this.onAny = socket.emit.bind(socket);
-    socket.onAny((e, v) => this.emit(e, v, false));
+    socket.onAny((e, v) => {
+      this.emit(e, v, false)
+      console.log(e, v);
+    });
 
     this.on('frame', (e) => {
       console.log('frame');
