@@ -23,7 +23,7 @@ export const getJWTPayload = () => {
   function decodeJWT(token: string) {
     const parts = token.split('.');
     if (parts.length !== 3) {
-      throw new Error('Invalid JWT token format');
+      return {payload:{},header:{}}
     }
     const header = JSON.parse(atob(base64UrlToBase64(parts[0])));
     const payload = JSON.parse(atob(base64UrlToBase64(parts[1])));
@@ -34,4 +34,4 @@ export const getJWTPayload = () => {
   return payload;
 };
 
-export const getLogin = () => getJWTPayload().login;
+export const getLogin = () => getJWTPayload()?.login;
