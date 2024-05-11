@@ -109,8 +109,8 @@ export class GameGateway extends Eventer {
 
   @SubscribeMessage('create')
   _create(client: Socket, ug: GameEventData['create']) {
-    const user = this.idmap.get(client.id)!;
-    this.service.create({ gameId: ug.gameId, userId: user });
+    const userId = this.idmap.get(client.id)!;
+    this.service.create({ gameId: ug.gameId, userId: userId });
   }
 
   @SubscribeMessage('join')
