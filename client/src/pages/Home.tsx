@@ -1,7 +1,13 @@
-import React from "react";
+import Col from '../components/Col';
+import GameMaker from '../components/GameMaker';
 
 export default function Home() {
-  return <div>Home page , pong!</div>;
+  return (
+    <Col>
+      <h1>Home page , pong!</h1>
+      <GameMaker />
+    </Col>
+  );
 }
 
 // import { Component } from "react";

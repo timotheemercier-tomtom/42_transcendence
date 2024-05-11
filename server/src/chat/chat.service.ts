@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 import { ChatMute } from 'common';
 
 @Injectable()
@@ -120,6 +121,8 @@ export class ChatService {
   }
 
   addUser(room: string, user: string) {
+    if (this.rooms.get(room)?.has(user))
+      throw new WsException('user already in room');
     this.rooms.get(room)?.add(user);
   }
 

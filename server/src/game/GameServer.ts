@@ -1,10 +1,8 @@
-import { V2 } from 'common';
-import { GameCommon } from './GameCommon';
+import { WsException } from '@nestjs/websockets';
+import { GameCommon, GameOpt, V2 } from './GameCommon';
 
 export default class GameServer extends GameCommon {
   static MAXUSERS = 2;
-  users: string[];
-  paddles = new Map<string, number>();
 
   b!: { p: V2; v: V2 };
 
@@ -12,19 +10,51 @@ export default class GameServer extends GameCommon {
     [K in string]: { up: boolean; down: boolean };
   } = {};
 
+  constructor(id: string) {
+    super();
+    this.id = id;
+  }
+
+  addOpt(opt: GameOpt): void {
+    super.addOpt(opt);
+    this.emit('opt', this.opt);
+  }
+
   join(user: string) {
-    if (this.users.length < GameServer.MAXUSERS) this.users.push(user);
-    else throw Error('game is full');
+    if (this.users.has(user))
+      throw new WsException('user already in this game');
+    if (this.users.size < GameServer.MAXUSERS) this.users.add(user);
+    else throw new WsException('game is full');
+    this.keys[user] = { up: false, down: false };
+    this.userI.set(user, this.users.size - 1);
+    this.emit('join', { user, id: this.id });
+  }
+
+  leave(user: string) {
+    if (!this.users.has(user)) throw new WsException('user not in this game');
+    this.users.delete(user);
+    this.userI.delete(user);
+    this.emit('leave', { user, id: this.id });
   }
 
   start() {
+    this.b = { p: { x: this.w / 2, y: this.h / 2 }, v: { x: 0, y: 0 } };
     this.on('up', (e: string) => {
+      console.log('up', e);
+
       this.keys[e].up = !this.keys[e].up;
     });
     this.on('down', (e: string) => {
-      this.keys[e].up = !this.keys[e].up;
+      console.log('down', e);
+
+      this.keys[e].down = !this.keys[e].down;
     });
-    setInterval(() => this.update(), 1000 / 30);
+    setInterval(() => this.update(), 1000 / 60);
+    this.emit('start', this.id);
+  }
+
+  destroy(): void {
+    super.destroy();
   }
 
   get paleft() {
@@ -80,29 +110,17 @@ export default class GameServer extends GameCommon {
   }
 
   update() {
+    const clamp = (v: number) =>
+      Math.min(
+        this.h - GameServer.PH - GameServer.PPAD,
+        Math.max(GameServer.PPAD, v),
+      );
     this.users.forEach((user) => {
-      if (this.keys[user].up) {
-        this.paddles.set(
-          user,
-          Math.min(
-            this.h - GameServer.PH - GameServer.PPAD,
-            Math.max(
-              GameServer.PPAD,
-              this.paddles.get(user)! - GameServer.PSPEED,
-            ),
-          ),
-        );
-      } else if (this.keys[user].down) {
-        this.paddles.set(
-          user,
-          Math.min(
-            this.h - GameServer.PH - GameServer.PPAD,
-            Math.max(
-              GameServer.PPAD,
-              this.paddles.get(user)! + GameServer.PSPEED,
-            ),
-          ),
-        );
+      const i = this.userI.get(user)!;
+      if (this.keys[user]?.up) {
+        this.p[i] = clamp(this.p[i] - GameServer.PSPEED);
+      } else if (this.keys[user]?.down) {
+        this.p[i] = clamp(this.p[i] + GameServer.PSPEED);
       }
     });
 
@@ -143,5 +161,8 @@ export default class GameServer extends GameCommon {
       this.b.v.x = -this.b.v.x;
       rvy();
     }
+    const frame = { pa: this.pa, pb: this.pb, b: this.b };
+
+    this.emit('frame', frame);
   }
 }

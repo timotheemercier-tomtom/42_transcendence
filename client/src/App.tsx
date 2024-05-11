@@ -5,37 +5,34 @@ import ButtonLogin from './components/ButtonLogin';
 import Col from './components/Col';
 import Row from './components/Row';
 import Status from './components/Status';
-import LandingPage from './pages/LandingPage';
+import { API } from './util';
+import GameMaker from './components/GameMaker';
 
 const App: React.FC = () => {
-  // const handle42Login = () => {
-  //   window.location.href = API + '/auth/42';
-  // };
+  const handle42Login = () => {
+    window.location.href = API + '/auth/42';
+  };
 
-  // const anonlogin = () => {
-  //   location.href = API + `/auth/anon`;
-  // };
+  const anonlogin = () => {
+    location.href = API + `/auth/anon`;
+  };
 
   return (
     <Container className="root">
       <Col className="app">
-        {/* <header>
-          <meta name="viewport" content="initial-scale=1, width=device-width" />
-        </header> */}
-        <LandingPage />
-
-        {/* <header>
+        <header>
           <Row>
             <ButtonLogin onClick={handle42Login} text="Log In" />
             <ButtonLogin onClick={anonlogin} text="anon Log In" />
             <Status />
+            <GameMaker />
 
             {/* <Button onClick={handle42Login}>Log In</Button> */}
 
-        {/* <Button onClick={handleAccountClick}>Account</Button>{' '} */}
-        {/* <Link to="/u/@self">Account</Link> */}
-        {/* Updated this button */}
-        {/* </Row>
+            {/* <Button onClick={handleAccountClick}>Account</Button>{' '} */}
+            {/* <Link to="/u/@self">Account</Link> */}
+            {/* Updated this button */}
+          </Row>
         </header>
         <Col flexGrow={1} className="page">
           <Outlet />
@@ -44,7 +41,7 @@ const App: React.FC = () => {
           <a href="https://stallman.org/photos/rms-working/dsc00367.jpg">
             average gnome user
           </a>
-        </footer> */}
+        </footer>
       </Col>
     </Container>
   );
