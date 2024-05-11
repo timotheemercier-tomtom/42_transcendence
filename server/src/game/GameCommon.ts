@@ -95,7 +95,7 @@ export class GameCommon extends Eventer {
   users = new Set<string>();
   userI = new Map<string, number>();
 
-  id!: string;
+  gameId!: string;
   opt: GameOpt = {
     user: {},
     gameId: '',

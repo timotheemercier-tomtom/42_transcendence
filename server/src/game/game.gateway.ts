@@ -90,10 +90,7 @@ export class GameGateway extends Eventer {
     console.log("nr of games: " + this.service.games.size);
     for (const [key, value] of this.service.games.entries())
     {
-      console.log("key:");
-      console.log(key);
-      console.log("value:");
-      console.log(value);
+      console.log("key:", key, "value:", value);
     }
 
     type frame = GameEventData['frame'];
@@ -137,8 +134,8 @@ export class GameGateway extends Eventer {
   }
 
   @SubscribeMessage('start')
-  _start(client: Socket, id: GameEventData['start']) {
-    this.service.start(id);
+  _start(client: Socket, gameId: GameEventData['start']) {
+    this.service.start(gameId);
   }
 
   @SubscribeMessage('enque')

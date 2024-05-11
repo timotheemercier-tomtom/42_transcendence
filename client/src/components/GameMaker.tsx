@@ -8,9 +8,9 @@ import { getLogin } from '../util';
 import { useNavigate } from 'react-router-dom';
 
 const GameMaker = () => {
-  const user = getLogin();
+  const userId = getLogin();
   const nav = useNavigate();
-  const [id, setId] = useState('');
+  const [gameId, setId] = useState('');
   const [paddle, setPaddle] = useState('');
   const [ball, setBall] = useState('');
   useEffect(() => {
@@ -22,11 +22,11 @@ const GameMaker = () => {
 
   useEffect(() => {
     const onjoin = (ug: GameEventData['join']) => {
-      if (ug.user == user) nav('/r/' + ug.id);
+      if (ug.userId == userId) nav('/r/' + ug.gameId);
     };
     const oncreate = (ug: GameEventData['create']) => {
       socket.emit('join', ug);
-      socket.emit('opt', { id: ug.id, user: { [ug.user]: { paddle, ball } } });
+      socket.emit('opt', { gameId: ug.gameId, user: { [ug.userId]: { paddle, ball } } });
     };
     socket.on('join', onjoin);
     socket.on('create', oncreate);
@@ -34,7 +34,7 @@ const GameMaker = () => {
       socket.off('join', onjoin);
       socket.off('create', oncreate);
     };
-  }, [ball, nav, paddle, user]);
+  }, [ball, nav, paddle, userId]);
 
   return (
     <Row alignItems={'center'} gap={'1rem'}>
@@ -54,13 +54,13 @@ const GameMaker = () => {
       <Col>
         <Input
           placeholder="game id"
-          value={id}
+          value={gameId}
           onChange={(e) => setId(e.target.value)}
         ></Input>
-        <Button onClick={() => socket.emit('create', id)}>Create</Button>
+        <Button onClick={() => socket.emit('create', {userId: userId, gameId: gameId})}>Create</Button>
       </Col>
       <Col>
-        <Button onClick={() => socket.emit('enque', user)}>Enqueue</Button>
+        <Button onClick={() => socket.emit('enque', userId)}>Enqueue</Button>
       </Col>
     </Row>
   );

@@ -12,21 +12,21 @@ export default class GameClient extends GameCommon {
   };
   evdown!: (e: KeyboardEvent) => void;
   evup!: (e: KeyboardEvent) => void;
-  user!: string;
+  userId!: string;
   frameid!: number;
   iv!: unknown;
 
   get ug() {
-    return { user: this.user, id: this.id };
+    return { userId: this.userId, gameId: this.gameId };
   }
 
-  load(ctx: CanvasRenderingContext2D, user: string, id: string) {
+  load(ctx: CanvasRenderingContext2D, userId: string, gameId: string) {
     this.unload();
     this.ctx = ctx;
-    this.user = user;
+    this.userId = userId;
     this.create(GameClient.W, GameClient.H);
     this.frameid = 0;
-    this.id = id;
+    this.gameId = gameId;
 
     this.b = { x: this.w / 2, y: this.h / 2 };
 
@@ -47,7 +47,7 @@ export default class GameClient extends GameCommon {
     this.onAny = socket.emit.bind(socket);
     socket.onAny((e, v) => {
       this.emit(e, v, false)
-      console.log(e, v);
+      // console.log(e, v);
     });
 
     this.on('frame', (e) => {
@@ -61,17 +61,17 @@ export default class GameClient extends GameCommon {
     // this.emit('join', this.ug);
 
     this.on('join', (v) => {
-      this.userI.set(v.user, this.users.size);
-      this.users.add(v.user);
+      this.userI.set(v.userId, this.users.size);
+      this.users.add(v.userId);
     });
 
     this.on('leave', (v) => {
-      this.users.delete(v.user);
-      this.userI.delete(v.user);
+      this.users.delete(v.userId);
+      this.userI.delete(v.userId);
     });
 
     this.on('opt', (v) => this.addOpt(v));
-    socket.emit('opt', { id: this.id, user: {} });
+    socket.emit('opt', { gameId: this.gameId, user: {} });
     // this.iv = setInterval(() => {
     //   this.update();
     // }, 1000 / 30);
@@ -90,7 +90,7 @@ export default class GameClient extends GameCommon {
   }
 
   start() {
-    this.emit('start', this.id);
+    this.emit('start', this.gameId);
   }
 
   joinAnon() {
@@ -98,8 +98,8 @@ export default class GameClient extends GameCommon {
   }
 
   onkeychange(key: string) {
-    if (key == 'w') this.emit('up', this.user);
-    else if (key == 's') this.emit('down', this.user);
+    if (key == 'w') this.emit('up', this.userId);
+    else if (key == 's') this.emit('down', this.userId);
   }
 
   update() {
@@ -123,7 +123,7 @@ export default class GameClient extends GameCommon {
     this.ctx.fillRect(0, 0, this.w, this.h);
 
     this.ctx.strokeStyle = 'white';
-    console.log(this.opt.user[this.getUserForPa()], this.getUserForPa());
+    // console.log(this.opt.user[this.getUserForPa()], this.getUserForPa());
 
     let c = this.opt.user[this.getUserForPa()]?.paddle ?? 'white';
     this.ctx.fillStyle = c;

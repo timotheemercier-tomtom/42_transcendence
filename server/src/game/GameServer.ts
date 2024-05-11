@@ -10,9 +10,9 @@ export default class GameServer extends GameCommon {
     [K in string]: { up: boolean; down: boolean };
   } = {};
 
-  constructor(id: string) {
+  constructor(gameId: string) {
     super();
-    this.id = id;
+    this.gameId = gameId;
   }
 
   addOpt(opt: GameOpt): void {
@@ -20,21 +20,21 @@ export default class GameServer extends GameCommon {
     this.emit('opt', this.opt);
   }
 
-  join(user: string) {
-    if (this.users.has(user))
+  join(userId: string) {
+    if (this.users.has(userId))
       throw new WsException('user already in this game');
-    if (this.users.size < GameServer.MAXUSERS) this.users.add(user);
+    if (this.users.size < GameServer.MAXUSERS) this.users.add(userId);
     else throw new WsException('game is full');
-    this.keys[user] = { up: false, down: false };
-    this.userI.set(user, this.users.size - 1);
-    this.emit('join', { userId: user, gameId: this.id });
+    this.keys[userId] = { up: false, down: false };
+    this.userI.set(userId, this.users.size - 1);
+    this.emit('join', { userId: userId, gameId: this.gameId });
   }
 
-  leave(user: string) {
-    if (!this.users.has(user)) throw new WsException('user not in this game');
-    this.users.delete(user);
-    this.userI.delete(user);
-    this.emit('leave', { userId: user, gameId: this.id });
+  leave(userId: string) {
+    if (!this.users.has(userId)) throw new WsException('user not in this game');
+    this.users.delete(userId);
+    this.userI.delete(userId);
+    this.emit('leave', { userId: userId, gameId: this.gameId });
   }
 
   start() {
@@ -50,7 +50,7 @@ export default class GameServer extends GameCommon {
       this.keys[e].down = !this.keys[e].down;
     });
     setInterval(() => this.update(), 1000 / 60);
-    this.emit('start', this.id);
+    this.emit('start', this.gameId);
   }
 
   destroy(): void {

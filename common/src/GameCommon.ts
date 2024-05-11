@@ -16,13 +16,13 @@ export type GameEventType =
   | 'opt';
 
 export type GameUserGame = {
-  user: string;
-  id: string;
+  userId: string;
+  gameId: string;
 };
 
 export type GameOpt = {
   user: { [K in string]: { i:number, ball: string; paddle: string } };
-  id: string;
+  gameId: string;
 };
 
 export type GameEventData = {
@@ -95,10 +95,10 @@ export class GameCommon extends Eventer {
   users = new Set<string>();
   userI = new Map<string, number>();
 
-  id!: string;
+  gameId!: string;
   opt: GameOpt = {
     user: {},
-    id: '',
+    gameId: '',
   };
 
   getUserForPa() {
@@ -117,7 +117,7 @@ export class GameCommon extends Eventer {
 
   addOpt(opt: GameOpt) {
     Object.assign(this.opt.user, opt.user);
-    this.opt.id = opt.id;
+    this.opt.gameId = opt.gameId;
   }
 
   create(w: number, h: number) {
