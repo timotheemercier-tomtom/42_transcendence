@@ -1,26 +1,31 @@
-import React, { useState, ChangeEvent } from 'react';
-import { Avatar as MuiAvatar } from '@mui/material';
+import { Avatar as MuiAvatar, CircularProgress } from '@mui/material';
 import { green } from '@mui/material/colors';
+import React, { useState } from 'react';
 
 type AvatarProps = {
   username: string;
   picture: string;
-  onUpdate: (newPictureUrl: string) => void; // Callback pour mettre à jour l'URL de l'image dans le composant parent
+  onUpdate: (newPictureUrl: string) => void;
 };
 
 const Picture: React.FC<AvatarProps> = ({ username, picture, onUpdate }) => {
   const [imageError, setImageError] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const handleFileChange = (event: any) => {
+  const handleFileChange = async (event: any) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (readEvent) => {
-        // Ajout d'une vérification pour s'assurer que readEvent.target n'est pas null
-        if (readEvent.target) {
-          const base64Image = readEvent.target.result;
-          // send the 64 chain to the server
+      reader.onload = async (readEvent) => {
+        const base64Image = readEvent.target?.result;
+        if (base64Image) {
+          setUploading(true);
+          try {
+            await onUpdate(base64Image.toString());
+          } catch (error) {
+            console.error('Error updating the image', error);
+          }
+          setUploading(false);
         }
       };
       reader.readAsDataURL(file);
@@ -29,18 +34,20 @@ const Picture: React.FC<AvatarProps> = ({ username, picture, onUpdate }) => {
 
   return (
     <div>
-        
-      <MuiAvatar
-        sx={{ bgcolor: green[500] }}
-        alt={username}
-        src={imageError ? undefined : picture}
-        onError={() => setImageError(true)}
-      >
-        {imageError ? username.charAt(0) : ''}
-      </MuiAvatar>
-
+      {uploading ? (
+        <CircularProgress />
+      ) : (
+        <MuiAvatar
+          sx={{ bgcolor: green[500] }}
+          alt={username}
+          src={imageError ? undefined : picture}
+          onError={() => setImageError(true)}
+        >
+          {imageError ? username.charAt(0) : ''}
+        </MuiAvatar>
+      )}
+      <input type="file" onChange={handleFileChange} />
     </div>
-    
   );
 };
 

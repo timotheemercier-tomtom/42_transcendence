@@ -1,4 +1,4 @@
-/**
+ /**
 
 controller handles request in NestJS. This file contains the AuthController for
 a NestJS application. Handles HTTP requests related to user authentication.
@@ -58,20 +58,22 @@ export class AuthController {
     )}:5173/login?token=${token}&u=${login}`;
   }
 
-  redirTwoFA(token: string, login: string) {
-    return `http://${this.configService.get(
-      'HOST',
-    )}:5173/verify-2fa?token=${token}&u=${login}`;
-  }
+//   redirTwoFA(token: string, login: string) {
+//     return `http://${this.configService.get(
+//       'HOST',
+//     )}:5173/verify-2fa?token=${token}&u=${login}`;
+//   }
 
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async fortyTwoAuthRedirect(@Req() req: Request | any, @Res() res: Response) {
     const { accessToken, user } = req.user as ValidateResult;
-    if (user.twoFAsecret) {
-      return res.redirect(this.redirTwoFA(accessToken, user.login));
-    } else res.redirect(this.redir(accessToken, user.login));
+    // if (user.twoFAsecret) {
+    //   return res.redirect(this.redirTwoFA(accessToken, user.login));
+    // } else 
+        res.redirect(this.redir(accessToken, user.login));
   }
+
 
   anonc = 0;
 

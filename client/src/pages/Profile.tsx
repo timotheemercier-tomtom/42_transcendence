@@ -1,8 +1,8 @@
 import AddFriend from '../components/AddFriend';
 import Friends from '../components/Friends';
-import User from '../components/User';
+import User from '../components/User.tsx';
 
-const Profile = () => {
+export const Profile = () => {
   // You can add more profile-specific content or logic here
   return (
     <div>
@@ -15,4 +15,3 @@ const Profile = () => {
   );
 };
 
-export default Profile;

@@ -67,7 +67,6 @@ export class UserService {
   /*
   //------------------------------------------------------------- UPDATE 
   */
-
   async update(
     login: string,
     updateUserDto: UserDto,
@@ -89,7 +88,6 @@ export class UserService {
     Object.assign(user, updateUserDto);
     return this.usersRepository.save(user);
   }
-
   /*
   //------------------------------------------------------------- DELETE 
   */

@@ -7,12 +7,11 @@ import App from './App.tsx';
 import './css/index.css';
 import Error404 from './pages/Error404.tsx';
 import LoginResult from './pages/LoginResult.tsx';
-import Profile from './pages/Profile.tsx';
+import { Profile } from './pages/Profile.tsx';
 import Room from './pages/Room.tsx';
 import theme from './theme.ts';
 import Home from './pages/Home.tsx';
-
-
+import { UserProvider } from './components/User.tsx';
 
 const router = createBrowserRouter([
   {
@@ -47,8 +46,10 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     {/* <ThemeProvider theme={theme}> */}
+    <UserProvider>
       <CssBaseline />
       <RouterProvider router={router} />
+    </UserProvider>
     {/* </ThemeProvider> */}
   </React.StrictMode>,
 );

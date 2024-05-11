@@ -50,8 +50,10 @@ export class UserController {
     return user;
   }
 
+
   @Patch(':login')
-  async updateUser(
+  @UseGuards(JwtAuthGuard)
+  async update(
     @Param('login') login: string,
     @Body() userDto: UserDto,
     @Req() req: Request & any,

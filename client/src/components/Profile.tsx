@@ -1,7 +1,6 @@
 import React, { ChangeEvent, FormEvent, useState } from 'react';
 import { API } from '../util';
 
-
 interface IFormData {
   login: string;
   username: string;
@@ -23,37 +22,42 @@ const FormWithValidation: React.FC<FormWithValidationProps> = ({
   onImageUpdate,
 }) => {
   const [formData, setFormData] = useState<IFormData>(initialFormData);
-  const [file, setFile] = useState<File | null>(null);
   const [formErrors, setFormErrors] = useState<IFormErrors>({
     username: '',
     picture: '',
   });
 
+  const validateForm = () => {
+    return {
+      username:
+        formData.username === '' ? 'Le nom d’utilisateur est requis.' : '',
+      picture: formData.picture === '' ? 'Une image est requise.' : '',
+    };
+  };
+
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-
-    // Update form data, but not the login
     if (name !== 'login') {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
     }
   };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files[0]) {
-      setFile(files[0]);
-      // Conversion en Base64 (optionnel)
       const reader = new FileReader();
       reader.onload = (readEvent) => {
-        if (readEvent.target) {
-          setFormData({
-            ...formData,
-            picture: readEvent.target.result as string,
-          });
+        const result = readEvent.target?.result;
+        if (result) {
+          setFormData((prevData) => ({
+            ...prevData,
+            picture: result as string,
+          }));
+          onImageUpdate(result as string);
         }
+      };
+      reader.onerror = () => {
+        console.error('Error loading the file');
       };
       reader.readAsDataURL(files[0]);
     }
@@ -61,23 +65,11 @@ const FormWithValidation: React.FC<FormWithValidationProps> = ({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Initialize validation errors
-    const validationErrors: IFormErrors = {
-      username: formData.username === '' ? 'Username is required.' : '',
-      picture: formData.picture === '' ? 'Picture is required.' : '',
-    };
-
-    setFormErrors(validationErrors);
-
-    // Check if there are any validation errors
-    const isFormValid = Object.values(validationErrors).every(
-      (error) => error === '',
-    );
-
-    if (isFormValid) {
+    const errors = validateForm();
+    setFormErrors(errors);
+    if (Object.values(errors).every((error) => error === '')) {
       try {
-        const response = await fetch(API + `/user/${formData.login}/update`, {
+        const response = await fetch(`${API}/user/${formData.login}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -88,38 +80,41 @@ const FormWithValidation: React.FC<FormWithValidationProps> = ({
         });
 
         if (!response.ok) {
-          throw new Error('Failed to update profile');
+          throw new Error(
+            `Échec de la mise à jour du profil : ${await response.text()}`,
+          );
         }
 
         const updatedUser = await response.json();
-        console.log('Profile updated successfully:', updatedUser);
-        // Update local state or context as needed
+        console.log('Profil mis à jour avec succès:', updatedUser);
       } catch (error) {
-        console.error('Error updating profile:', error);
+        console.error('Erreur lors de la mise à jour du profil:', error);
       }
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      Profile Picture:
-      <input type="file" name="picture" onChange={handleFileChange} />
-      <p />
-      <label>
-        <span className="error">{formErrors.picture}</span>
-        <p />
-        Username:
+      <div>
+        <label>Profile Picture:</label>
+        <input type="file" name="picture" onChange={handleFileChange} />
+        {formErrors.picture && (
+          <span className="error">{formErrors.picture}</span>
+        )}
+      </div>
+      <div>
+        <label>Username:</label>
         <input
           type="text"
           name="username"
           value={formData.username}
           onChange={handleInputChange}
         />
-        <span className="error">{formErrors.username}</span>
-      </label>
-      <p />
+        {formErrors.username && (
+          <span className="error">{formErrors.username}</span>
+        )}
+      </div>
       <button type="submit">Submit</button>
-      <p />
     </form>
   );
 };

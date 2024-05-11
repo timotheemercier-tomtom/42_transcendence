@@ -17,6 +17,7 @@ const App: React.FC = () => {
     location.href = API + `/auth/anon`;
   };
 
+
   return (
     <Container className="root">
       <Col className="app">

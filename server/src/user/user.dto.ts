@@ -14,7 +14,7 @@ export class UserDto {
   readonly login?: string;
 
   @IsOptional()
-  @Transform(({ obj }: any) => !!obj.twoFA)
+  @Transform(({ value }) => !!value)
   twoFAEnabled?: boolean;
 
   @IsOptional()
