@@ -53,7 +53,7 @@ export class GameGateway extends Eventer {
     });
 
     this.service.on('create', (ug) => {
-      const game = this.service.guardGame(ug.id);
+      const game = this.service.guardGame(ug.gameId);
       game.onAny = (e, v) => {
         const clients = Array.from(game.users.values()).map((v) =>
           this.userToClient.get(v),
@@ -63,20 +63,20 @@ export class GameGateway extends Eventer {
         // this.server.to(ug.id).emit(e, v);
       };
       game.on('leave', (ug) => {
-        const client = this.userToClient.get(ug.user)!;
+        const client = this.userToClient.get(ug.userId)!;
         // server.to(ug.id).emit('leave', ug);
-        if (client) client.leave(ug.id);
+        if (client) client.leave(ug.gameId);
       });
       game.on('join', (ug) => {
-        const client = this.userToClient.get(ug.user)!;
+        const client = this.userToClient.get(ug.userId)!;
 
         if (client) {
-          client.join(ug.id);
+          client.join(ug.gameId);
         }
 
         // server.to(ug.id).emit('join', ug);
       });
-      this.userToClient.get(ug.user)?.emit('create', ug);
+      this.userToClient.get(ug.userId)?.emit('create', ug);
     });
   }
 
@@ -110,18 +110,18 @@ export class GameGateway extends Eventer {
   @SubscribeMessage('create')
   _create(client: Socket, ug: GameEventData['create']) {
     const user = this.idmap.get(client.id)!;
-    this.service.create({ id: ug.id, user });
+    this.service.create({ gameId: ug.gameId, userId: user });
   }
 
   @SubscribeMessage('join')
   _join(client: Socket, ug: GameEventData['join']) {
     const user = this.idmap.get(client.id)!;
-    this.service.join(ug.id, user);
+    this.service.join(ug.gameId, user);
   }
 
   @SubscribeMessage('join_anon')
   _join_anon(client: Socket, ug: GameEventData['join_anon']) {
-    this.service.join(ug.id, '$anon0');
+    this.service.join(ug.gameId, '$anon0');
   }
 
   @SubscribeMessage('up')

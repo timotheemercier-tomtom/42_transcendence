@@ -28,11 +28,11 @@ export class GameService extends Eventer {
   }
 
   create(ug: GameUserGame) {
-    if (this.games.has(ug.id)) throw new WsException('game already exists');
-    const game = new GameServer(ug.id);
+    if (this.games.has(ug.gameId)) throw new WsException('game already exists');
+    const game = new GameServer(ug.gameId);
     game.create(GameServer.W, GameServer.H);
-    this.games.set(ug.id, game);
-    this.gameToUsers.set(ug.id, new Set());
+    this.games.set(ug.gameId, game);
+    this.gameToUsers.set(ug.gameId, new Set());
     this.emit('create', ug);
   }
 
@@ -84,12 +84,12 @@ export class GameService extends Eventer {
       if (v.size < GameServer.MAXUSERS && this.userToGame.get(user) != k)
         return this.join(k, user);
     const id = 'game-' + randomUUID();
-    this.create({ id, user });
+    this.create({ gameId: id, userId: user });
     this.join(id, user);
   }
 
   opt(opt: GameOpt) {
-    const game = this.guardGame(opt.id);
+    const game = this.guardGame(opt.gameId);
     game.addOpt(opt);
   }
 }

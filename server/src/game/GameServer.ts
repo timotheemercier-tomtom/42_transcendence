@@ -27,14 +27,14 @@ export default class GameServer extends GameCommon {
     else throw new WsException('game is full');
     this.keys[user] = { up: false, down: false };
     this.userI.set(user, this.users.size - 1);
-    this.emit('join', { user, id: this.id });
+    this.emit('join', { userId: user, gameId: this.id });
   }
 
   leave(user: string) {
     if (!this.users.has(user)) throw new WsException('user not in this game');
     this.users.delete(user);
     this.userI.delete(user);
-    this.emit('leave', { user, id: this.id });
+    this.emit('leave', { userId: user, gameId: this.id });
   }
 
   start() {
