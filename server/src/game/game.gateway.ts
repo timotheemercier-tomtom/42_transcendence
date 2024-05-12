@@ -16,7 +16,7 @@ import { GameService } from './game.service';
 //   }
 // }
 
-type testMsgType = { id: number, name: string};
+type testMsgType = { userId: string, gameId: string};
 
 // @UseFilters(new WebsocketExceptionFilter())
 @WebSocketGateway({ namespace: '/game/ws', transports: ['websocket'] })
@@ -82,7 +82,7 @@ export class GameGateway extends Eventer {
 
   @SubscribeMessage('test')
   _testReceiver(socket: Socket, dataReceived: testMsgType) : void {
-    console.log("test received: " + dataReceived.id + ", " + dataReceived.name + "!");
+    console.log("test received: ", dataReceived, "!");
     console.log("client id: " + socket.id);
     const user = this.idmap.get(socket.id);
     console.log("user id: " + user);
@@ -91,6 +91,14 @@ export class GameGateway extends Eventer {
     for (const [key, value] of this.service.games.entries())
     {
       console.log("key:", key, "value:", value);
+    }
+
+    // check if game with gameId exists
+    if (this.service.games.has(dataReceived.gameId)) {
+      console.log("Game found!");
+    }
+    else {
+      console.log("Game Not found!");
     }
 
     type frame = GameEventData['frame'];

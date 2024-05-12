@@ -1,20 +1,21 @@
 import Button from '@mui/material/Button';
 import { socket as gameSocket } from '../game.socket';
+import { useParams } from 'react-router-dom';
 
-type testMsgType = { id: number, name: string};
+type testMsgType = { userId: string, gameId: string};
 
-function clicker(): void {
-  const myObj: testMsgType = {id: 123, name: "John"};
-
+function clicker(userID: string): void {
   console.log("test starts!");
+  const myObj: testMsgType = {userId: userID, gameId: "myGameId"};
   console.log(myObj);
   gameSocket.emit("test", myObj);
 };
 
 const TestComponent = () => {
+  const { id: userId = ""} = useParams();
   return (
     <>
-      <Button onClick={clicker}>Test button</Button>
+      <Button onClick={() => clicker(userId)}>Test button</Button>
     </>
   );
 }
