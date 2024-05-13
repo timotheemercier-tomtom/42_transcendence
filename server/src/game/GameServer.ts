@@ -37,7 +37,8 @@ export default class GameServer extends GameCommon {
     this.emit('leave', { userId: userId, gameId: this.gameId });
   }
 
-  start() {
+  start(gameId: string) {
+    console.log("starting game!");
     this.b = { p: { x: this.w / 2, y: this.h / 2 }, v: { x: 0, y: 0 } };
     this.on('up', (e: string) => {
       console.log('up', e);
@@ -49,8 +50,9 @@ export default class GameServer extends GameCommon {
 
       this.keys[e].down = !this.keys[e].down;
     });
-    setInterval(() => this.update(), 1000 / 60);
-    this.emit('start', this.gameId);
+    // setInterval(() => this.update(), 1000 / 60);
+    // this.emit('start', this.gameId);
+
   }
 
   destroy(): void {

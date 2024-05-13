@@ -4,18 +4,23 @@ import { useParams } from 'react-router-dom';
 
 type testMsgType = { userId: string, gameId: string};
 
-function clicker(userID: string): void {
+function clicker(userId: string, gameId: string): void {
   console.log("test starts!");
-  const myObj: testMsgType = {userId: userID, gameId: "myGameId"};
+  const myObj: testMsgType = {userId: userId, gameId: gameId};
   console.log(myObj);
-  gameSocket.emit("test", myObj);
+  gameSocket.emit("test", myObj); // emit to server
 };
 
-const TestComponent = () => {
+
+// const TestComponent = ({mykey}) => {
+const TestComponent = (props: any) => {
   const { id: userId = ""} = useParams();
+  const gameId: string = props.myObj.gameId;
   return (
     <>
-      <Button onClick={() => clicker(userId)}>Test button</Button>
+      <p>userId: {userId}</p>
+      <p>gameId: {gameId}</p>
+      <Button onClick={() => clicker(userId, gameId)}>Test button</Button>
     </>
   );
 }
