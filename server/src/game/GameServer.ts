@@ -43,6 +43,18 @@ export default class GameServer extends GameCommon {
     // set starting positions and speed of the ball
     this.b = { p: { x: this.w / 2, y: this.h / 2 }, v: { x: 0, y: 0 } };
 
+    // activate key listeners
+    this.on('up', (e: string) => {
+      // console.log('GameServer: up', e);
+      console.log("key up!!")
+      this.keys[e].up = !this.keys[e].up;
+    });
+    this.on('down', (e: string) => {
+      console.log("key down!!")
+      // console.log('GameServer: down', e);
+      this.keys[e].down = !this.keys[e].down;
+    });
+
     type frame = GameEventData['frame'];
     type ball = frame['b'];
 
@@ -64,7 +76,14 @@ export default class GameServer extends GameCommon {
     }
 
     const updater = () => {
-      let newframe: frame = calcNewFrame(cur_frame);
+
+      // keys
+      let userA: string = this.users.values().next().value;
+      let keyUp: boolean = this.keys[userA].up;
+      let keydown: boolean = this.keys[userA].down;
+      console.log("key status: ", userA, keyUp, keydown);
+
+      let newframe: frame = calcNewFrame(cur_frame, keyUp, keydown);
       this.b = newframe.b;
       this.pa = newframe.pa;
       this.pb = newframe.pb;
@@ -76,16 +95,16 @@ export default class GameServer extends GameCommon {
   start(gameId: string) {
     console.log("starting game!");
     this.b = { p: { x: this.w / 2, y: this.h / 2 }, v: { x: 0, y: 0 } };
-    this.on('up', (e: string) => {
-      console.log('up', e);
+    // this.on('up', (e: string) => {
+    //   console.log('up', e);
 
-      this.keys[e].up = !this.keys[e].up;
-    });
-    this.on('down', (e: string) => {
-      console.log('down', e);
+    //   this.keys[e].up = !this.keys[e].up;
+    // });
+    // this.on('down', (e: string) => {
+    //   console.log('down', e);
 
-      this.keys[e].down = !this.keys[e].down;
-    });
+    //   this.keys[e].down = !this.keys[e].down;
+    // });
     // setInterval(() => this.update(), 1000 / 60);
     // this.emit('start', this.gameId);
 
