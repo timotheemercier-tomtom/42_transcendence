@@ -11,13 +11,8 @@ import { socket } from '../game.socket';
 const GC = new GameClient();
 
 const Game = () => {
-  const { id } = useParams();
+  const { id } = useParams();  // this is the room ID!
   const cr = createRef<HTMLCanvasElement>();
-
-
-  // console.log("----");
-  // console.log("GC.gameId", GC.gameId);
-  // console.log("(user?)id", id);
 
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
@@ -39,9 +34,7 @@ const Game = () => {
     <Col>
       <Button onClick={() => GC.start()}>Start</Button>
       <Button onClick={() => GC.joinAnon()}>Join Anon</Button>
-      {/* passing a json object */}
-      {/* <TestComponent myObj={{gameId: "abcd", userId: {id}}}/> */}
-      <TestComponent myObj={{gameId: GC.gameId, userId: {id}}}/>
+      <TestComponent myObj={{userId: getLogin(), gameId: id}}/>
 
       <canvas ref={cr} width={GameClient.W} height={GameClient.H}></canvas>
     </Col>

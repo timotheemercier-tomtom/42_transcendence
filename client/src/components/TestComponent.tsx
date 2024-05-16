@@ -7,15 +7,14 @@ type testMsgType = { userId: string, gameId: string};
 function clicker(userId: string, gameId: string): void {
   console.log("test starts!");
   const myObj: testMsgType = {userId: userId, gameId: gameId};
-  console.log(myObj);
   gameSocket.emit("test", myObj); // emit to server
 };
 
 
 // const TestComponent = ({mykey}) => {
 const TestComponent = (props: any) => {
-  const { id: userId = ""} = useParams();
   const gameId: string = props.myObj.gameId;
+  const userId: string = props.myObj.userId;
   return (
     <>
       <p>userId: {userId}</p>

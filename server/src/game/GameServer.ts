@@ -1,5 +1,6 @@
 import { WsException } from '@nestjs/websockets';
-import { GameCommon, GameOpt, V2 } from './GameCommon';
+import { GameCommon, GameOpt, V2, GameEventData } from './GameCommon';
+import { calcNewFrame } from './utils';
 
 export default class GameServer extends GameCommon {
   static MAXUSERS = 2;
@@ -35,6 +36,41 @@ export default class GameServer extends GameCommon {
     this.users.delete(userId);
     this.userI.delete(userId);
     this.emit('leave', { userId: userId, gameId: this.gameId });
+  }
+
+  test (gameId: string) {
+
+    // set starting positions and speed of the ball
+    this.b = { p: { x: this.w / 2, y: this.h / 2 }, v: { x: 0, y: 0 } };
+
+    type frame = GameEventData['frame'];
+    type ball = frame['b'];
+
+    // ball
+    let curr_ball: ball = {
+      p: {x: this.b.p.x, y: this.b.p.y},
+      v: {x: this.b.v.x, y: this.b.v.y}
+    };
+
+    // paddles
+    let pa: number = this.pa;
+    let pb: number = this.pb;
+
+    // frame
+    let cur_frame: frame = {
+      pa: pa,
+      pb: pb,
+      b: curr_ball
+    }
+
+    const updater = () => {
+      let newframe: frame = calcNewFrame(cur_frame);
+      this.b = newframe.b;
+      this.pa = newframe.pa;
+      this.pb = newframe.pb;
+      this.emit('frame', newframe);
+    }
+    setInterval(() => updater(), 100);
   }
 
   start(gameId: string) {
