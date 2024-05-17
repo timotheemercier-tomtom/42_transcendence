@@ -1,6 +1,6 @@
 import { WsException } from '@nestjs/websockets';
 import { GameCommon, GameOpt, V2, GameEventData } from './GameCommon';
-import { calcNewFrame } from './utils';
+import { updateFrame } from './utils';
 
 export default class GameServer extends GameCommon {
   static MAXUSERS = 2;
@@ -46,49 +46,28 @@ export default class GameServer extends GameCommon {
 
     // activate key listeners
     this.on('up', (e: string) => {
-      // console.log('GameServer: up', e);
       console.log("key up!!")
       this.keys[e].up = !this.keys[e].up;
     });
     this.on('down', (e: string) => {
       console.log("key down!!")
-      // console.log('GameServer: down', e);
       this.keys[e].down = !this.keys[e].down;
     });
 
-    type frame = GameEventData['frame'];
-    type ball = frame['b'];
-
-    // ball
-    let curr_ball: ball = {
-      p: {x: this.b.p.x, y: this.b.p.y},
-      v: {x: this.b.v.x, y: this.b.v.y}
-    };
-
-    // paddles
-    let pa: number = this.pa;
-    let pb: number = this.pb;
-
-    // frame
-    let cur_frame: frame = {
-      pa: pa,
-      pb: pb,
-      b: curr_ball
+    let frame: GameEventData['frame'] = {
+      pa: this.pa,
+      pb: this.pb,
+      b: this.b
     }
 
     const updater = () => {
-
-      // keys
-      let userA: string = this.users.values().next().value;
+      let userA: string = this.users.values().next().value;  // temp solution for 1-player game
       let keyUp: boolean = this.keys[userA].up;
       let keydown: boolean = this.keys[userA].down;
       console.log("key status: ", userA, keyUp, keydown);
 
-      let newframe: frame = calcNewFrame(cur_frame, keyUp, keydown);
-      this.b = newframe.b;
-      this.pa = newframe.pa;
-      this.pb = newframe.pb;
-      this.emit('frame', newframe);
+      updateFrame(frame, keyUp, keydown);
+      this.emit('frame', frame);
     }
     setInterval(() => updater(), 1000 / 60);
   }

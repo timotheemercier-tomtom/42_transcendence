@@ -1,20 +1,26 @@
-import { GameEventData } from './GameCommon';
+import { GameCommon, GameEventData } from './GameCommon';
 
 type frame = GameEventData['frame'];
 
-// PLACEHOLDER physics:
-// Todo: check boundaries, speed etc.
-// required inputs: keypresses and current frame + attributes like frame dimensions
-export function calcNewFrame(currFrame: frame, keyUp: boolean, keydown: boolean): frame
-{
-  let newframe: frame = currFrame;
-  if (newframe.b.p.x > 15)
-      newframe.b.p.x = currFrame.b.p.x - 10;
+function updateBall(frame: frame) : void {
+  if (frame.b.p.x > 15)
+      frame.b.p.x -= GameCommon.BSPEED;
+}
+
+function updatePaddle(frame: frame, keyUp: boolean, keydown: boolean) : void {
   if (keyUp && !keydown) {
-    newframe.pa -= 10;
+    frame.pa -= GameCommon.PSPEED;
   }
   if (keydown && !keyUp) {
-    newframe.pa += 10;
+    frame.pa += GameCommon.PSPEED;
   }
-  return (newframe);
+}
+
+// PLACEHOLDER physics:
+// Todo: check boundaries, speed etc.
+// required inputs: keypresses and current frame
+export function updateFrame(frame: frame, keyUp: boolean, keydown: boolean): void
+{
+  updateBall(frame);
+  updatePaddle(frame, keyUp, keydown);
 }
