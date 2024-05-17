@@ -38,7 +38,8 @@ export default class GameServer extends GameCommon {
     this.emit('leave', { userId: userId, gameId: this.gameId });
   }
 
-  test (gameId: string) {
+  start(gameId: string) {
+    console.log("starting game '" + gameId + "'!");
 
     // set starting positions and speed of the ball
     this.b = { p: { x: this.w / 2, y: this.h / 2 }, v: { x: 0, y: 0 } };
@@ -89,25 +90,7 @@ export default class GameServer extends GameCommon {
       this.pb = newframe.pb;
       this.emit('frame', newframe);
     }
-    setInterval(() => updater(), 100);
-  }
-
-  start(gameId: string) {
-    console.log("starting game!");
-    this.b = { p: { x: this.w / 2, y: this.h / 2 }, v: { x: 0, y: 0 } };
-    // this.on('up', (e: string) => {
-    //   console.log('up', e);
-
-    //   this.keys[e].up = !this.keys[e].up;
-    // });
-    // this.on('down', (e: string) => {
-    //   console.log('down', e);
-
-    //   this.keys[e].down = !this.keys[e].down;
-    // });
-    // setInterval(() => this.update(), 1000 / 60);
-    // this.emit('start', this.gameId);
-
+    setInterval(() => updater(), 1000 / 60);
   }
 
   destroy(): void {

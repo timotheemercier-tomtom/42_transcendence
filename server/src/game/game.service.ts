@@ -36,11 +36,6 @@ export class GameService extends Eventer {
     this.emit('create', ug);
   }
 
-  test(gameId: string) {
-    const game = this.guardGame(gameId);
-    game.test(gameId);
-  }
-
   start(gameId: string) {
     const game = this.guardGame(gameId);
     game.start(gameId);

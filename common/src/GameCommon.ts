@@ -4,7 +4,6 @@ export type V2 = {
 };
 
 export type GameEventType =
-  | 'test'
   | 'create'
   | 'start'
   | 'join'
@@ -41,7 +40,6 @@ export type GameEventData = {
   start: string;
   enque: string;
   opt: GameOpt;
-  test: {userId: string, gameId: string}
 };
 
 type EvCb<T> = (e: T) => void;

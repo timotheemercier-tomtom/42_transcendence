@@ -80,14 +80,6 @@ export class GameGateway extends Eventer {
     });
   }
 
-  @SubscribeMessage('test')
-  _testReceiver(socket: Socket, dataReceived: testMsgType) : void {
-    if (this.service.games.has(dataReceived.gameId)) {
-      console.log("Game found!");
-      this.service.test(dataReceived.gameId);
-    }
-  }
-
   @SubscribeMessage('create')
   _create(client: Socket, ug: GameEventData['create']) {
     const userId = this.idmap.get(client.id)!;
