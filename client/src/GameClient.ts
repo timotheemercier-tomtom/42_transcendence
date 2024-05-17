@@ -90,7 +90,7 @@ export default class GameClient extends GameCommon {
   }
 
   start() {
-    this.emit('start', this.gameId);
+    this.emit('test', {userId: this.userId, gameId: this.gameId});
   }
 
   joinAnon() {
