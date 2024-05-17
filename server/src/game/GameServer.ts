@@ -1,6 +1,6 @@
 import { WsException } from '@nestjs/websockets';
 import { GameCommon, GameOpt, V2, GameEventData } from './GameCommon';
-import { updateFrame } from './utils';
+import { updateFrame } from './physics';
 
 export default class GameServer extends GameCommon {
   static MAXUSERS = 2;
