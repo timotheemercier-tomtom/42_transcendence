@@ -29,8 +29,8 @@ export type GameEventData = {
   up: string;
   down: string;
   frame: {
-    playerA_ypos: number;
-    playerB_ypos: number;
+    playerA: number;
+    playerB: number;
     ball_xpos: number;
     ball_ypos: number;
     ball_angle_rad: number;

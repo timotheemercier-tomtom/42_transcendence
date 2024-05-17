@@ -5,13 +5,13 @@ type frame = GameEventData['frame'];
 function updateBall(frame: frame) : void {
   const paleft: number = GameCommon.PPAD;
   const paright: number = GameCommon.PPAD + GameCommon.PW;
-  const pabottom: number = frame.playerA_ypos + GameCommon.PH;
-  const patop: number = frame.playerA_ypos;
+  const pabottom: number = frame.playerA + GameCommon.PH;
+  const patop: number = frame.playerA;
 
   const pbleft: number = GameCommon.W - (GameCommon.PPAD + GameCommon.PW);
   const pbright: number = GameCommon.W - GameCommon.PPAD;
-  const pbbottom: number = frame.playerB_ypos + GameCommon.PH;
-  const pbtop: number = frame.playerB_ypos;
+  const pbbottom: number = frame.playerB + GameCommon.PH;
+  const pbtop: number = frame.playerB;
 
   const bleft: number = frame.ball_xpos - GameCommon.BRAD;
   const bright: number = frame.ball_xpos + GameCommon.BRAD;
@@ -33,10 +33,10 @@ function updateBall(frame: frame) : void {
 
 function updatePaddle(frame: frame, keyUp: boolean, keydown: boolean) : void {
   if (keyUp && !keydown) {
-    frame.playerA_ypos -= GameCommon.PSPEED;
+    frame.playerA -= GameCommon.PSPEED;
   }
   if (keydown && !keyUp) {
-    frame.playerA_ypos += GameCommon.PSPEED;
+    frame.playerA += GameCommon.PSPEED;
   }
 }
 

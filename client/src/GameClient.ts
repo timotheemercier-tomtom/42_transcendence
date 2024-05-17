@@ -51,8 +51,8 @@ export default class GameClient extends GameCommon {
       console.log('frame');
       this.ball_xpos = e.ball_xpos;
       this.ball_ypos = e.ball_ypos;
-      this.pa = e.playerA_ypos;
-      this.pb = e.playerB_ypos;
+      this.pa = e.playerA;
+      this.pb = e.playerB;
     });
     // this.emit('create', this.ug);
     // this.emit('join', this.ug);

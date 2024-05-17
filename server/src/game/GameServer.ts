@@ -52,8 +52,8 @@ export default class GameServer extends GameCommon {
     });
 
     let frame: GameEventData['frame'] = {
-      playerA_ypos: this.pa,
-      playerB_ypos: this.pb,
+      playerA: this.pa,
+      playerB: this.pb,
       ball_xpos: this.ball_xpos,
       ball_ypos: this.ball_ypos,
       ball_angle_rad: this.ball_angle_rad,
