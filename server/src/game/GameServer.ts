@@ -41,9 +41,6 @@ export default class GameServer extends GameCommon {
   start(gameId: string) {
     console.log("starting game '" + gameId + "'!");
 
-    // set starting positions and speed of the ball
-    this.b = { p: { x: this.w / 2, y: this.h / 2 }, v: { x: 0, y: 0 } };
-
     // activate key listeners
     this.on('up', (e: string) => {
       console.log("key up!!")
@@ -55,9 +52,11 @@ export default class GameServer extends GameCommon {
     });
 
     let frame: GameEventData['frame'] = {
-      pa: this.pa,
-      pb: this.pb,
-      b: this.b
+      playerA_ypos: this.pa,
+      playerB_ypos: this.pb,
+      ball_xpos: this.ball_xpos,
+      ball_ypos: this.ball_ypos,
+      ball_angle_rad: this.ball_angle_rad,
     }
 
     const updater = () => {

@@ -3,7 +3,6 @@ import { socket } from './game.socket';
 
 export default class GameClient extends GameCommon {
   ctx!: CanvasRenderingContext2D;
-  b!: V2;
   keys = {
     w: false,
     s: false,
@@ -28,8 +27,6 @@ export default class GameClient extends GameCommon {
     this.frameid = 0;
     this.gameId = gameId;
 
-    this.b = { x: this.w / 2, y: this.h / 2 };
-
     this.evdown = ((e: KeyboardEvent) => {
       if (e.repeat) return;
       this.onkeychange(e.key);
@@ -52,10 +49,10 @@ export default class GameClient extends GameCommon {
 
     this.on('frame', (e) => {
       console.log('frame');
-
-      this.b = e.b.p;
-      this.pa = e.pa;
-      this.pb = e.pb;
+      this.ball_xpos = e.ball_xpos;
+      this.ball_ypos = e.ball_ypos;
+      this.pa = e.playerA_ypos;
+      this.pb = e.playerB_ypos;
     });
     // this.emit('create', this.ug);
     // this.emit('join', this.ug);
@@ -136,7 +133,7 @@ export default class GameClient extends GameCommon {
     this.ctx.fillStyle = 'white';
 
     this.ctx.beginPath();
-    this.ctx.arc(this.b.x, this.b.y, 10, 0, 2 * Math.PI, false);
+    this.ctx.arc(this.ball_xpos, this.ball_ypos, 10, 0, 2 * Math.PI, false);
     this.ctx.fill();
 
     this.frameid = requestAnimationFrame(this._draw);

@@ -29,9 +29,11 @@ export type GameEventData = {
   up: string;
   down: string;
   frame: {
-    pa: number;
-    pb: number;
-    b: { p: V2; v: V2 };
+    playerA_ypos: number;
+    playerB_ypos: number;
+    ball_xpos: number;
+    ball_ypos: number;
+    ball_angle_rad: number;
   };
   create: GameUserGame;
   join: GameUserGame;
@@ -79,6 +81,10 @@ export class GameCommon extends Eventer {
   static FRAMERATE: number = 1000 / 60; // frames per second
 
   p: number[] = [];
+  ball_xpos!: number;
+  ball_ypos!: number;
+  ball_angle_rad!: number;
+
   get pa() {
     return this.p[0];
   }
@@ -126,6 +132,9 @@ export class GameCommon extends Eventer {
     this.h = h;
     this.pa = this.h / 2 - GameCommon.PH / 2;
     this.pb = this.h / 2 - GameCommon.PH / 2;
+    this.ball_xpos = GameCommon.W / 2;
+    this.ball_ypos = GameCommon.H / 2;
+    this.ball_angle_rad = 0;
   }
 
   destroy() {}
