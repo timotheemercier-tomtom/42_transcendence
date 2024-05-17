@@ -68,14 +68,15 @@ export class Eventer {
 }
 
 export class GameCommon extends Eventer {
-  static W = 800;
-  static H = 600;
-  static PSPEED = 15;
-  static BSPEED = 10;
-  static BRAD = 10;
-  static PW = 20;
-  static PH = 100;
-  static PPAD = 10;
+  static W: number = 800;
+  static H: number = 600;
+  static PSPEED: number = 15;
+  static BSPEED: number = 10;
+  static BRAD: number = 10;
+  static PW: number = 20;
+  static PH: number = 100;
+  static PPAD: number = 10;
+  static FRAMERATE: number = 1000 / 60; // frames per second
 
   p: number[] = [];
   get pa() {
