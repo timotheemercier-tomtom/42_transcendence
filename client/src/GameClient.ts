@@ -69,10 +69,6 @@ export default class GameClient extends GameCommon {
 
     this.on('opt', (v) => this.addOpt(v));
     socket.emit('opt', { gameId: this.gameId, user: {} });
-    // this.iv = setInterval(() => {
-    //   this.update();
-    // }, 1000 / 30);
-
     window.addEventListener('keydown', this.evdown);
     window.addEventListener('keyup', this.evup);
     this.draw();
@@ -99,20 +95,6 @@ export default class GameClient extends GameCommon {
     else if (key == 's') this.emit('down', this.userId);
   }
 
-  update() {
-    if (this.keys.i) {
-      this.pb = Math.min(
-        this.h - GameClient.PH - GameClient.PPAD,
-        Math.max(GameClient.PPAD, this.pb - GameClient.PSPEED),
-      );
-    } else if (this.keys.k) {
-      this.pb = Math.min(
-        this.h - GameClient.PH - GameClient.PPAD,
-        Math.max(GameClient.PPAD, this.pb + GameClient.PSPEED),
-      );
-    }
-  }
-
   _draw = this.draw.bind(this);
 
   draw() {
@@ -133,7 +115,7 @@ export default class GameClient extends GameCommon {
     this.ctx.fillStyle = 'white';
 
     this.ctx.beginPath();
-    this.ctx.arc(this.ball_xpos, this.ball_ypos, 10, 0, 2 * Math.PI, false);
+    this.ctx.arc(this.ball_xpos, this.ball_ypos, GameCommon.BRAD, 0, 2 * Math.PI, false);
     this.ctx.fill();
 
     this.frameid = requestAnimationFrame(this._draw);
