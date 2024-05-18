@@ -1,3 +1,10 @@
+/*
+This module describes the behaviour of the ball and the paddles in the pong game.
+Note:
+  - point (0, 0) is on the top left of the screen
+  - an angle of 0 rad is defined as the ball going downwards
+*/
+
 import { GameCommon, GameEventData } from './GameCommon';
 
 type frame = GameEventData['frame'];
@@ -17,6 +24,34 @@ function isCeilingOrFloorBounce(frame: frame, newY: number) : boolean {
   return (
     (newY < GameCommon.BRAD && Math.cos(frame.ball_angle_rad) < 0)
     || (newY > GameCommon.H - GameCommon.BRAD) && Math.cos(frame.ball_angle_rad) > 0);
+}
+
+// NOTE should only used for ceiling (and top of paddle), since vertial bounces are the goals!
+function calcBounceEffect(ballAngle: number) : number {
+  let newAngle!: number;
+
+  // floor bounce, ball goes to the right
+  if (ballAngle < Math.PI * 0.5) {
+    newAngle = Math.PI - ballAngle;
+  }
+  // ceiling bounce, ball goes to the right
+  else if (ballAngle < Math.PI) {
+    newAngle = Math.PI - ballAngle;
+  }
+  // ceiling bounce, ball goes to the left
+  else if (ballAngle < Math.PI * 1.5) {
+    newAngle = Math.PI * 3 - ballAngle;
+  }
+  // floor bounce, ball goes to the left
+  else {
+    newAngle = Math.PI * 3 - ballAngle;
+  }
+  return newAngle;
+}
+
+// NOTE this is a temp function, since goals are not supposed to bounce. (maybe powerup!)
+function calcGoalBounceEffect(ballAngle: number) : number {
+  return (Math.PI * 2 - ballAngle);
 }
 
 function updateBall(frame: frame) : void {
@@ -41,33 +76,27 @@ function updateBall(frame: frame) : void {
 
   if (isGoal(frame, newX))
   {
-    console.log("bounce goal");
     if (newX < GameCommon.BRAD) {
       newX = GameCommon.BRAD;
     }
     if (newX > GameCommon.W - GameCommon.BRAD) {
       newX = GameCommon.W - GameCommon.BRAD
     }
-    frame.ball_angle_rad += 0.5 * Math.PI;  // todo Modulo!! Also: angle calculation not correct!
-    if (frame.ball_angle_rad >= 2 * Math.PI) {
-      frame.ball_angle_rad = frame.ball_angle_rad - 2 * Math.PI;
-    }
+    frame.ball_angle_rad = calcGoalBounceEffect(frame.ball_angle_rad);
     frame.ball_xpos = newX;
   }
   else if (isCeilingOrFloorBounce(frame, newY)) {
-    console.log("bounce ceiling / floor");
     if (newY < GameCommon.BRAD) {
       newY = GameCommon.BRAD;
     }
     if (newY > GameCommon.H - GameCommon.BRAD) {
       newY = GameCommon.H - GameCommon.BRAD
     }
-
-    frame.ball_angle_rad += 0.5 * Math.PI; // todo Modulo!! Also: angle calculation not correct!
-    if (frame.ball_angle_rad >= 2 * Math.PI) {
-      frame.ball_angle_rad = frame.ball_angle_rad - 2 * Math.PI;
-    }
+    frame.ball_angle_rad = calcBounceEffect(frame.ball_angle_rad);
     frame.ball_ypos = newY;
+  }
+  else if (false) {
+    // todo: paddle bounce
   }
   else {
     // no bounce
@@ -85,9 +114,6 @@ function updatePaddle(frame: frame, keyUp: boolean, keydown: boolean) : void {
   }
 }
 
-// PLACEHOLDER physics:
-// Todo: check boundaries, speed etc.
-// required inputs: keypresses and current frame
 export function updateFrame(frame: frame, keyUp: boolean, keydown: boolean): void
 {
   updateBall(frame);
