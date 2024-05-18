@@ -78,7 +78,7 @@ export class GameCommon extends Eventer {
   static PW: number = 20;
   static PH: number = 100;
   static PPAD: number = 10;
-  static FRAMERATE: number = 1000 / 60; // frames per second
+  static FRAMEDELAY: number = 1000 / 60; // milli seconds per frame
 
   p: number[] = [];
   ball_xpos!: number;

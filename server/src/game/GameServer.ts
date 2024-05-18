@@ -68,7 +68,7 @@ export default class GameServer extends GameCommon {
       updateFrame(frame, keyUp, keydown);
       this.emit('frame', frame);
     }
-    setInterval(() => updater(), GameCommon.FRAMERATE);
+    setInterval(() => updater(), GameCommon.FRAMEDELAY);
   }
 
   destroy(): void {
