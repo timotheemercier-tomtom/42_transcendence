@@ -90,10 +90,13 @@ function handle_paddleBounce_A(frame: frame, newX: number, newY: number) : boole
 
   if (newX - GameCommon.BRAD < paright
     && newY < pabottom && newY > patop
+    && frame.ball_angle_rad > Math.PI
   ) {
-    console.log("paddle bounce! (work in progress)!");
+    console.log("paddle bounce player A! (work in progress)!");
     frame.ball_angle_rad = calcGoalBounceEffect(frame.ball_angle_rad); // temp function
     frame.ball_xpos = paright;
+    frame.ball_ypos = newY;
+    return true;
   }
   return false;
 }
