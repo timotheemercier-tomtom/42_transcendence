@@ -88,15 +88,34 @@ function handle_paddleBounce_A(frame: frame, newX: number, newY: number) : boole
   const bbottom: number = frame.ball_ypos + GameCommon.BRAD;
   const btop: number = frame.ball_ypos - GameCommon.BRAD;
 
-  if (newX - GameCommon.BRAD < paright
-    && newY < pabottom && newY > patop
-    && frame.ball_angle_rad > Math.PI
+  if (newX - GameCommon.BRAD <= paright
+    && newY <= pabottom && newY >= patop
+    && frame.ball_angle_rad > Math.PI // ball goes to the left
   ) {
     console.log("paddle bounce player A! (work in progress)!");
-    frame.ball_angle_rad = calcGoalBounceEffect(frame.ball_angle_rad); // temp function
+    if (newY > (pabottom - patop) / 2 && frame.ball_angle_rad >= 1.50 * Math.PI) {
+      console.log("upper half paddle, downward ball!");
+      // upper half of paddle // bounce on paddle A // downward ball
+      const symetricBounce: number = (Math.PI * 2 - frame.ball_angle_rad);
+      const maxUpwards = Math.PI * 0.9
+      const adjustmentFactor = ((GameCommon.PH / 2) - (newY - patop)) / (GameCommon.PH / 2);
+      frame.ball_angle_rad = symetricBounce + adjustmentFactor * (maxUpwards - symetricBounce);
+      console.log(symetricBounce / Math.PI, maxUpwards / Math.PI, adjustmentFactor, frame.ball_angle_rad / Math.PI);
+    }
+    else {
+      // all other scenarios
+      // TODO:
+      // - upper half of paddle // bounce on paddle A // upward ball
+      // - lower half of paddle // bounce on paddle A // downward ball
+      // - lower half of paddle // bounce on paddle A // upward ball
+
+      // console.log("  old values: ", frame.ball_angle_rad / Math.PI, frame.ball_xpos, frame.ball_ypos, newX, newY);
+      frame.ball_angle_rad = calcGoalBounceEffect(frame.ball_angle_rad); // temp function
+    }
     frame.ball_xpos = paright;
     frame.ball_ypos = newY;
     return true;
+    // console.log("  new values: ", frame.ball_angle_rad / Math.PI, frame.ball_xpos, frame.ball_ypos);
   }
   return false;
 }
