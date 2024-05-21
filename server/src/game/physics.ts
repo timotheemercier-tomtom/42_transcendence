@@ -22,12 +22,18 @@ export function updateFrame(frame: frame, keyUp: boolean, keydown: boolean): voi
     frame.ball_ypos = newY;
   }
 
-  // update paddle
+  // update paddle player A
   if (keyUp && !keydown) {
     frame.playerA -= GameCommon.PSPEED;
+    if (frame.playerA < GameCommon.PPAD) {
+      frame.playerA = GameCommon.PPAD;
+    }
   }
   if (keydown && !keyUp) {
     frame.playerA += GameCommon.PSPEED;
+    if (frame.playerA > (GameCommon.H - GameCommon.PH - GameCommon.PPAD)) {
+      frame.playerA = GameCommon.H - GameCommon.PH - GameCommon.PPAD;
+    }
   }
 }
 
