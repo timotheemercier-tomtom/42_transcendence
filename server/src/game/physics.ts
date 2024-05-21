@@ -89,11 +89,9 @@ function handle_paddleBounce_A(frame: frame, newX: number, newY: number) : boole
   const btop: number = frame.ball_ypos - GameCommon.BRAD;
 
   if (newX <= paright + GameCommon.BRAD
-    && newY <= pabottom && newY >= patop
+    && newY <= pabottom + GameCommon.BRAD && newY >= patop - GameCommon.BRAD
     && frame.ball_angle_rad > Math.PI // ball goes to the left
   ) {
-    console.log("paddle bounce player A! (work in progress)!");
-
     // calc exact hit point on paddle
     newY = frame.ball_ypos + (newY - frame.ball_ypos) * (paright + GameCommon.BRAD - frame.ball_xpos) / (newX - frame.ball_xpos);
     frame.ball_ypos = newY;
@@ -104,7 +102,6 @@ function handle_paddleBounce_A(frame: frame, newX: number, newY: number) : boole
     const bounce_symetric: number = Math.PI * 2 - frame.ball_angle_rad;
     const rel_dist_from_center: number = Math.abs(newY - (patop + (pabottom - patop)/2)) / ((pabottom - patop)/2);
     frame.ball_angle_rad = rel_dist_from_center * bounce_extreme + (1 - rel_dist_from_center) * bounce_symetric;
-
     return true;
   }
   return false;
