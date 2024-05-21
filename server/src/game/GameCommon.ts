@@ -134,9 +134,7 @@ export class GameCommon extends Eventer {
     this.pb = this.h / 2 - GameCommon.PH / 2;
     this.ball_xpos = GameCommon.W / 2;
     this.ball_ypos = GameCommon.H / 2;
-    // this.ball_angle_rad = 1.5 * Math.PI;
-    // this.ball_angle_rad = 1.75 * Math.PI;
-    this.ball_angle_rad = 0.25 * Math.PI;
+    this.ball_angle_rad = 1.50 * Math.PI;
   }
   destroy() {}
 }

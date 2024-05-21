@@ -100,17 +100,15 @@ export default class GameClient extends GameCommon {
   draw() {
     this.ctx.fillStyle = 'black';
     this.ctx.fillRect(0, 0, this.w, this.h);
-
     this.ctx.strokeStyle = 'white';
-    // console.log(this.opt.user[this.getUserForPa()], this.getUserForPa());
 
     let c = this.opt.user[this.getUserForPa()]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
-    this.ctx.fillRect(10, this.pa, 20, 100);
+    this.ctx.fillRect(GameCommon.PPAD, this.pa, GameCommon.PW, GameCommon.PH);
 
     c = this.opt.user[this.getUserForPb()]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
-    this.ctx.fillRect(this.ctx.canvas.width - 30, this.pb, 20, 100);
+    this.ctx.fillRect(GameCommon.W - (GameCommon.PPAD + GameCommon.PW), this.pb, GameCommon.PW, GameCommon.PH);
 
     this.ctx.fillStyle = 'white';
 

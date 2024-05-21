@@ -63,7 +63,7 @@ export default class GameServer extends GameCommon {
       let userA: string = this.users.values().next().value;  // temp solution for 1-player game
       let keyUp: boolean = this.keys[userA].up;
       let keydown: boolean = this.keys[userA].down;
-      console.log("key status: ", userA, keyUp, keydown);
+      // console.log("key status: ", userA, keyUp, keydown);
 
       updateFrame(frame, keyUp, keydown);
       this.emit('frame', frame);
