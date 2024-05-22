@@ -92,32 +92,34 @@ function handleCeilingOrFloorBounce(frame: frame, newY: number): boolean {
   }
 }
 
-function isPaddleBounce(frame: frame, newX: number, newY: number): boolean {
-  return (
+function getPaddle(
+  frame: frame,
+  newX: number,
+  newY: number,
+): paddle | undefined {
+  let paddle: paddle | undefined = undefined;
+  if (
+    newX <= GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD &&
+    newY <= frame.playerA + GameCommon.PH + GameCommon.BRAD &&
+    newY >= frame.playerA - GameCommon.BRAD &&
+    frame.ball_angle_rad > Math.PI
+  ) {
     // ball goes to the left and hits paddle player A
-    (newX <= GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD &&
-      newY <= frame.playerA + GameCommon.PH + GameCommon.BRAD &&
-      newY >= frame.playerA - GameCommon.BRAD &&
-      frame.ball_angle_rad > Math.PI) ||
-    // ball goes to the right and hits paddle player B
-    (newX >= GameCommon.W - GameCommon.PPAD - GameCommon.PW - GameCommon.BRAD &&
-      newY <= frame.playerB + GameCommon.PH + GameCommon.BRAD &&
-      newY >= frame.playerB - GameCommon.BRAD &&
-      frame.ball_angle_rad < Math.PI)
-  );
-}
-
-function getBouncePaddle(frame: frame): paddle {
-  if (frame.ball_xpos < GameCommon.W / 2) {
-    return {
+    paddle = {
       front: GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD,
       top: frame.playerA,
       bottom: frame.playerA + GameCommon.PH,
       maxBallAngleUp: 0.9 * Math.PI,
       maxBallAngleDown: 0.1 * Math.PI,
     };
-  } else {
-    return {
+  } else if (
+    newX >= GameCommon.W - GameCommon.PPAD - GameCommon.PW - GameCommon.BRAD &&
+    newY <= frame.playerB + GameCommon.PH + GameCommon.BRAD &&
+    newY >= frame.playerB - GameCommon.BRAD &&
+    frame.ball_angle_rad < Math.PI
+  ) {
+    // ball goes to the right and hits paddle player B
+    paddle = {
       front: GameCommon.W - (GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD),
       top: frame.playerB,
       bottom: frame.playerB + GameCommon.PH,
@@ -125,11 +127,12 @@ function getBouncePaddle(frame: frame): paddle {
       maxBallAngleDown: 1.9 * Math.PI,
     };
   }
+  return paddle;
 }
 
 function handlePaddleBounce(frame: frame, newX: number, newY: number): boolean {
-  if (isPaddleBounce(frame, newX, newY)) {
-    const paddle: paddle = getBouncePaddle(frame);
+  const paddle: paddle | undefined = getPaddle(frame, newX, newY);
+  if (paddle) {
     if (newY <= paddle.top) {
       // bounce on top of paddle
       frame.ball_ypos = paddle.top - GameCommon.BRAD;
