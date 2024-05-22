@@ -87,6 +87,7 @@ function handle_ceilingOrFloorBounce(frame: frame, newY: number): boolean {
 // Todo: ball can also bounce at the bottom or top of the paddle!!
 // Todo: bounce on paddle B
 // Todo: improve calculation to determine the new angle
+// Todo optional: calc exact spot on top or bottom of paddle
 function handle_paddleBounce_A(
   frame: frame,
   newX: number,
@@ -101,25 +102,38 @@ function handle_paddleBounce_A(
     newY >= patop - GameCommon.BRAD &&
     frame.ball_angle_rad > Math.PI // ball goes to the left
   ) {
-    // calc exact hit point on paddle
-    newY =
-      frame.ball_ypos +
-      ((newY - frame.ball_ypos) *
-        (paright + GameCommon.BRAD - frame.ball_xpos)) /
-        (newX - frame.ball_xpos);
-    frame.ball_ypos = newY;
-    frame.ball_xpos = paright + GameCommon.BRAD;
+    if (newY <= patop) {
+      // bounce on top of paddle
+      frame.ball_ypos = patop - GameCommon.BRAD;
+      frame.ball_angle_rad = 0.9 * Math.PI;
+    }
+    else if (newY > pabottom) {
+      // bounce on bottom of paddle
+      frame.ball_ypos = pabottom + GameCommon.BRAD;
+      frame.ball_angle_rad = 0.1 * Math.PI;
+    }
+    else {
+      // bounce on paddle front
+      // calc exact hit point on paddle
+      newY =
+        frame.ball_ypos +
+        ((newY - frame.ball_ypos) *
+          (paright + GameCommon.BRAD - frame.ball_xpos)) /
+          (newX - frame.ball_xpos);
+      frame.ball_ypos = newY;
+      frame.ball_xpos = paright + GameCommon.BRAD;
 
-    // calc angle; extremes are capped to prevent (nearly) pure vertical angles
-    const bounce_extreme: number =
-      Math.PI * (newY > patop + (pabottom - patop) / 2 ? 0.1 : 0.9);
-    const bounce_symetric: number = Math.PI * 2 - frame.ball_angle_rad;
-    const rel_dist_from_center: number =
-      Math.abs(newY - (patop + (pabottom - patop) / 2)) /
-      (GameCommon.BRAD + (pabottom - patop) / 2);
-    frame.ball_angle_rad =
-      rel_dist_from_center * bounce_extreme +
-      (1 - rel_dist_from_center) * bounce_symetric;
+      // calc angle; extremes are capped to prevent (nearly) pure vertical angles
+      const bounce_extreme: number =
+        Math.PI * (newY > patop + (pabottom - patop) / 2 ? 0.1 : 0.9);
+      const bounce_symetric: number = Math.PI * 2 - frame.ball_angle_rad;
+      const rel_dist_from_center: number =
+        Math.abs(newY - (patop + (pabottom - patop) / 2)) /
+        (GameCommon.BRAD + (pabottom - patop) / 2);
+      frame.ball_angle_rad =
+        rel_dist_from_center * bounce_extreme +
+        (1 - rel_dist_from_center) * bounce_symetric;
+    }
     return true;
   }
   return false;
