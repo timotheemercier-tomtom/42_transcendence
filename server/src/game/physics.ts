@@ -128,10 +128,11 @@ function handle_paddleBounce_A(
     const bounce_symetric: number = Math.PI * 2 - frame.ball_angle_rad;
     const rel_dist_from_center: number =
       Math.abs(newY - (patop + (pabottom - patop) / 2)) /
-      (2 * GameCommon.BRAD + (pabottom - patop) / 2);
+      (GameCommon.BRAD + (pabottom - patop) / 2);
     frame.ball_angle_rad =
       rel_dist_from_center * bounce_extreme +
       (1 - rel_dist_from_center) * bounce_symetric;
+    console.log(frame.ball_angle_rad / Math.PI);
     return true;
   }
   return false;
