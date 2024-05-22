@@ -9,15 +9,22 @@ Note:
 import { GameCommon, GameEventData } from './GameCommon';
 type frame = GameEventData['frame'];
 
-export function updateFrame(frame: frame, keyUp: boolean, keydown: boolean): void
-{
+export function updateFrame(
+  frame: frame,
+  keyUp: boolean,
+  keydown: boolean,
+): void {
   // update ball
-  let newX: number = frame.ball_xpos + Math.sin(frame.ball_angle_rad) * GameCommon.BSPEED;
-  let newY: number = frame.ball_ypos + Math.cos(frame.ball_angle_rad) * GameCommon.BSPEED;
-  if ( handle_goal(frame, newX)
-    || handle_ceilingOrFloorBounce(frame, newY)
-    || handle_paddleBounce_A(frame, newX, newY)) {}
-  else {
+  let newX: number =
+    frame.ball_xpos + Math.sin(frame.ball_angle_rad) * GameCommon.BSPEED;
+  let newY: number =
+    frame.ball_ypos + Math.cos(frame.ball_angle_rad) * GameCommon.BSPEED;
+  if (
+    handle_goal(frame, newX) ||
+    handle_ceilingOrFloorBounce(frame, newY) ||
+    handle_paddleBounce_A(frame, newX, newY)
+  ) {
+  } else {
     frame.ball_xpos = newX;
     frame.ball_ypos = newY;
   }
@@ -31,46 +38,48 @@ export function updateFrame(frame: frame, keyUp: boolean, keydown: boolean): voi
   }
   if (keydown && !keyUp) {
     frame.playerA += GameCommon.PSPEED;
-    if (frame.playerA > (GameCommon.H - GameCommon.PH - GameCommon.PPAD)) {
+    if (frame.playerA > GameCommon.H - GameCommon.PH - GameCommon.PPAD) {
       frame.playerA = GameCommon.H - GameCommon.PH - GameCommon.PPAD;
     }
   }
 }
 
-function handle_goal(frame: frame, newX: number) : boolean {
-  if ((newX < GameCommon.BRAD && Math.sin(frame.ball_angle_rad) < 0)
-    || (newX > GameCommon.W - GameCommon.BRAD && Math.sin(frame.ball_angle_rad) > 0))
-  {
+function handle_goal(frame: frame, newX: number): boolean {
+  if (
+    (newX < GameCommon.BRAD && Math.sin(frame.ball_angle_rad) < 0) ||
+    (newX > GameCommon.W - GameCommon.BRAD &&
+      Math.sin(frame.ball_angle_rad) > 0)
+  ) {
     if (newX < GameCommon.BRAD) {
       newX = GameCommon.BRAD;
     }
     if (newX > GameCommon.W - GameCommon.BRAD) {
-      newX = GameCommon.W - GameCommon.BRAD
+      newX = GameCommon.W - GameCommon.BRAD;
     }
     frame.ball_angle_rad = calcGoalBounceEffect(frame.ball_angle_rad);
     frame.ball_xpos = newX;
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
 
-function handle_ceilingOrFloorBounce(frame: frame, newY: number) : boolean {
-  if ((newY < GameCommon.BRAD && Math.cos(frame.ball_angle_rad) < 0)
-    || (newY > GameCommon.H - GameCommon.BRAD) && Math.cos(frame.ball_angle_rad) > 0)
-  {
+function handle_ceilingOrFloorBounce(frame: frame, newY: number): boolean {
+  if (
+    (newY < GameCommon.BRAD && Math.cos(frame.ball_angle_rad) < 0) ||
+    (newY > GameCommon.H - GameCommon.BRAD &&
+      Math.cos(frame.ball_angle_rad) > 0)
+  ) {
     if (newY < GameCommon.BRAD) {
       newY = GameCommon.BRAD;
     }
     if (newY > GameCommon.H - GameCommon.BRAD) {
-      newY = GameCommon.H - GameCommon.BRAD
+      newY = GameCommon.H - GameCommon.BRAD;
     }
     frame.ball_angle_rad = calcBounceEffect(frame.ball_angle_rad);
     frame.ball_ypos = newY;
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
@@ -78,7 +87,11 @@ function handle_ceilingOrFloorBounce(frame: frame, newY: number) : boolean {
 // Todo: ball can also bounce at the bottom or top of the paddle!!
 // Todo: bounce on paddle B
 // Todo: improve calculation to determine the new angle
-function handle_paddleBounce_A(frame: frame, newX: number, newY: number) : boolean {
+function handle_paddleBounce_A(
+  frame: frame,
+  newX: number,
+  newY: number,
+): boolean {
   const paleft: number = GameCommon.PPAD;
   const paright: number = GameCommon.PPAD + GameCommon.PW;
   const pabottom: number = frame.playerA + GameCommon.PH;
@@ -94,29 +107,38 @@ function handle_paddleBounce_A(frame: frame, newX: number, newY: number) : boole
   const bbottom: number = frame.ball_ypos + GameCommon.BRAD;
   const btop: number = frame.ball_ypos - GameCommon.BRAD;
 
-  if (newX <= paright + GameCommon.BRAD
-    && newY <= pabottom + GameCommon.BRAD && newY >= patop - GameCommon.BRAD
-    && frame.ball_angle_rad > Math.PI // ball goes to the left
+  if (
+    newX <= paright + GameCommon.BRAD &&
+    newY <= pabottom + GameCommon.BRAD &&
+    newY >= patop - GameCommon.BRAD &&
+    frame.ball_angle_rad > Math.PI // ball goes to the left
   ) {
     // calc exact hit point on paddle
-    newY = frame.ball_ypos + (newY - frame.ball_ypos) * (paright + GameCommon.BRAD - frame.ball_xpos) / (newX - frame.ball_xpos);
+    newY =
+      frame.ball_ypos +
+      ((newY - frame.ball_ypos) *
+        (paright + GameCommon.BRAD - frame.ball_xpos)) /
+        (newX - frame.ball_xpos);
     frame.ball_ypos = newY;
     frame.ball_xpos = paright + GameCommon.BRAD;
 
     // calc angle; extremes are capped to prevent (nearly) pure vertical angles
-    const bounce_extreme: number = Math.PI * ((newY > (patop + (pabottom - patop)/2)) ? 0.1 : 0.9);
+    const bounce_extreme: number =
+      Math.PI * (newY > patop + (pabottom - patop) / 2 ? 0.1 : 0.9);
     const bounce_symetric: number = Math.PI * 2 - frame.ball_angle_rad;
     const rel_dist_from_center: number =
       Math.abs(newY - (patop + (pabottom - patop) / 2)) /
       (2 * GameCommon.BRAD + (pabottom - patop) / 2);
-    frame.ball_angle_rad = rel_dist_from_center * bounce_extreme + (1 - rel_dist_from_center) * bounce_symetric;
+    frame.ball_angle_rad =
+      rel_dist_from_center * bounce_extreme +
+      (1 - rel_dist_from_center) * bounce_symetric;
     return true;
   }
   return false;
 }
 
 // NOTE should only used for ceiling (and top of paddle)
-function calcBounceEffect(ballAngle: number) : number {
+function calcBounceEffect(ballAngle: number): number {
   let newAngle!: number;
 
   // floor bounce, ball goes to the right
@@ -139,6 +161,6 @@ function calcBounceEffect(ballAngle: number) : number {
 }
 
 // NOTE this is a temp function, since goals are not supposed to bounce. (maybe powerup!)
-function calcGoalBounceEffect(ballAngle: number) : number {
-  return (Math.PI * 2 - ballAngle);
+function calcGoalBounceEffect(ballAngle: number): number {
+  return Math.PI * 2 - ballAngle;
 }
