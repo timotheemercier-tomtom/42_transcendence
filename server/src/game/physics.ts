@@ -92,21 +92,9 @@ function handle_paddleBounce_A(
   newX: number,
   newY: number,
 ): boolean {
-  const paleft: number = GameCommon.PPAD;
   const paright: number = GameCommon.PPAD + GameCommon.PW;
   const pabottom: number = frame.playerA + GameCommon.PH;
   const patop: number = frame.playerA;
-
-  const pbleft: number = GameCommon.W - (GameCommon.PPAD + GameCommon.PW);
-  const pbright: number = GameCommon.W - GameCommon.PPAD;
-  const pbbottom: number = frame.playerB + GameCommon.PH;
-  const pbtop: number = frame.playerB;
-
-  const bleft: number = frame.ball_xpos - GameCommon.BRAD;
-  const bright: number = frame.ball_xpos + GameCommon.BRAD;
-  const bbottom: number = frame.ball_ypos + GameCommon.BRAD;
-  const btop: number = frame.ball_ypos - GameCommon.BRAD;
-
   if (
     newX <= paright + GameCommon.BRAD &&
     newY <= pabottom + GameCommon.BRAD &&
@@ -132,7 +120,6 @@ function handle_paddleBounce_A(
     frame.ball_angle_rad =
       rel_dist_from_center * bounce_extreme +
       (1 - rel_dist_from_center) * bounce_symetric;
-    console.log(frame.ball_angle_rad / Math.PI);
     return true;
   }
   return false;
