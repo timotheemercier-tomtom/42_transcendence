@@ -20,9 +20,9 @@ export function updateFrame(
   let newY: number =
     frame.ball_ypos + Math.cos(frame.ball_angle_rad) * GameCommon.BSPEED;
   if (
-    handle_goal(frame, newX) ||
-    handle_ceilingOrFloorBounce(frame, newY) ||
-    handle_paddleBounce_A(frame, newX, newY)
+    handleGoal(frame, newX) ||
+    handleCeilingOrFloorBounce(frame, newY) ||
+    handlePaddleBounce(frame, newX, newY)
   ) {
   } else {
     frame.ball_xpos = newX;
@@ -44,7 +44,7 @@ export function updateFrame(
   }
 }
 
-function handle_goal(frame: frame, newX: number): boolean {
+function handleGoal(frame: frame, newX: number): boolean {
   if (
     (newX < GameCommon.BRAD && Math.sin(frame.ball_angle_rad) < 0) ||
     (newX > GameCommon.W - GameCommon.BRAD &&
@@ -64,7 +64,7 @@ function handle_goal(frame: frame, newX: number): boolean {
   }
 }
 
-function handle_ceilingOrFloorBounce(frame: frame, newY: number): boolean {
+function handleCeilingOrFloorBounce(frame: frame, newY: number): boolean {
   if (
     (newY < GameCommon.BRAD && Math.cos(frame.ball_angle_rad) < 0) ||
     (newY > GameCommon.H - GameCommon.BRAD &&
@@ -84,52 +84,73 @@ function handle_ceilingOrFloorBounce(frame: frame, newY: number): boolean {
   }
 }
 
-// Todo: ball can also bounce at the bottom or top of the paddle!!
-// Todo: bounce on paddle B
-// Todo: improve calculation to determine the new angle
-// Todo optional: calc exact spot on top or bottom of paddle
-function handle_paddleBounce_A(
-  frame: frame,
-  newX: number,
-  newY: number,
-): boolean {
-  const paright: number = GameCommon.PPAD + GameCommon.PW;
-  const pabottom: number = frame.playerA + GameCommon.PH;
-  const patop: number = frame.playerA;
-  if (
-    newX <= paright + GameCommon.BRAD &&
-    newY <= pabottom + GameCommon.BRAD &&
-    newY >= patop - GameCommon.BRAD &&
-    frame.ball_angle_rad > Math.PI // ball goes to the left
-  ) {
-    if (newY <= patop) {
+function isPaddleBounce(frame: frame, newX: number, newY: number): boolean {
+  return (
+    // ball goes to the left and hits paddle player A
+    (newX <= GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD &&
+      newY <= frame.playerA + GameCommon.PH + GameCommon.BRAD &&
+      newY >= frame.playerA - GameCommon.BRAD &&
+      frame.ball_angle_rad > Math.PI) ||
+    // ball goes to the right and hits paddle player B
+    (newX >= GameCommon.W - GameCommon.PPAD - GameCommon.PW - GameCommon.BRAD &&
+      newY <= frame.playerB + GameCommon.PH + GameCommon.BRAD &&
+      newY >= frame.playerB - GameCommon.BRAD &&
+      frame.ball_angle_rad < Math.PI)
+  );
+}
+
+function handlePaddleBounce(frame: frame, newX: number, newY: number): boolean {
+  if (isPaddleBounce(frame, newX, newY)) {
+    let paddleFront!: number;
+    let paddleTop!: number;
+    let paddleBottom!: number;
+    let maxBallAngleUp!: number;
+    let maxBallAngleDown!: number;
+
+    if (frame.ball_angle_rad > Math.PI) {
+      // bounce player A
+      paddleFront = GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD;
+      paddleTop = frame.playerA;
+      paddleBottom = frame.playerA + GameCommon.PH;
+      maxBallAngleUp = 0.9 * Math.PI;
+      maxBallAngleDown = 0.1 * Math.PI;
+    } else {
+      // bounce player B
+      paddleFront =
+        GameCommon.W - (GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD);
+      paddleTop = frame.playerB;
+      paddleBottom = frame.playerB + GameCommon.PH;
+      maxBallAngleUp = 1.1 * Math.PI;
+      maxBallAngleDown = 1.9 * Math.PI;
+    }
+
+    if (newY <= paddleTop) {
       // bounce on top of paddle
-      frame.ball_ypos = patop - GameCommon.BRAD;
-      frame.ball_angle_rad = 0.9 * Math.PI;
-    }
-    else if (newY > pabottom) {
+      frame.ball_ypos = paddleTop - GameCommon.BRAD;
+      frame.ball_angle_rad = maxBallAngleUp;
+    } else if (newY > paddleBottom) {
       // bounce on bottom of paddle
-      frame.ball_ypos = pabottom + GameCommon.BRAD;
-      frame.ball_angle_rad = 0.1 * Math.PI;
-    }
-    else {
+      frame.ball_ypos = paddleBottom + GameCommon.BRAD;
+      frame.ball_angle_rad = maxBallAngleDown;
+    } else {
       // bounce on paddle front
       // calc exact hit point on paddle
       newY =
         frame.ball_ypos +
-        ((newY - frame.ball_ypos) *
-          (paright + GameCommon.BRAD - frame.ball_xpos)) /
+        ((newY - frame.ball_ypos) * (paddleFront - frame.ball_xpos)) /
           (newX - frame.ball_xpos);
       frame.ball_ypos = newY;
-      frame.ball_xpos = paright + GameCommon.BRAD;
+      frame.ball_xpos = paddleFront;
 
       // calc angle; extremes are capped to prevent (nearly) pure vertical angles
       const bounce_extreme: number =
-        Math.PI * (newY > patop + (pabottom - patop) / 2 ? 0.1 : 0.9);
+        newY > paddleTop + GameCommon.PH / 2
+          ? maxBallAngleDown
+          : maxBallAngleUp;
       const bounce_symetric: number = Math.PI * 2 - frame.ball_angle_rad;
       const rel_dist_from_center: number =
-        Math.abs(newY - (patop + (pabottom - patop) / 2)) /
-        (GameCommon.BRAD + (pabottom - patop) / 2);
+        Math.abs(newY - (paddleTop + GameCommon.PH / 2)) /
+        (GameCommon.BRAD + GameCommon.PH / 2);
       frame.ball_angle_rad =
         rel_dist_from_center * bounce_extreme +
         (1 - rel_dist_from_center) * bounce_symetric;
