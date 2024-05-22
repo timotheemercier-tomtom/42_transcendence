@@ -106,7 +106,9 @@ function handle_paddleBounce_A(frame: frame, newX: number, newY: number) : boole
     // calc angle; extremes are capped to prevent (nearly) pure vertical angles
     const bounce_extreme: number = Math.PI * ((newY > (patop + (pabottom - patop)/2)) ? 0.1 : 0.9);
     const bounce_symetric: number = Math.PI * 2 - frame.ball_angle_rad;
-    const rel_dist_from_center: number = Math.abs(newY - (patop + (pabottom - patop)/2)) / ((pabottom - patop)/2);
+    const rel_dist_from_center: number =
+      Math.abs(newY - (patop + (pabottom - patop) / 2)) /
+      (2 * GameCommon.BRAD + (pabottom - patop) / 2);
     frame.ball_angle_rad = rel_dist_from_center * bounce_extreme + (1 - rel_dist_from_center) * bounce_symetric;
     return true;
   }
