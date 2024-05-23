@@ -1,4 +1,4 @@
-import { GameCommon, V2 } from './GameCommon';
+import { GameCommon } from './GameCommon';
 import { socket } from './game.socket';
 
 export default class GameClient extends GameCommon {

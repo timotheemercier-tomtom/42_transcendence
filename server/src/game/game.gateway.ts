@@ -5,7 +5,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
-import { Eventer, GameEventData, V2 } from './GameCommon';
+import { Eventer, GameEventData } from './GameCommon';
 import { GameService } from './game.service';
 
 // @Catch()
