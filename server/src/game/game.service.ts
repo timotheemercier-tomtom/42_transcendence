@@ -58,6 +58,11 @@ export class GameService extends Eventer {
     this.userToGame.delete(user);
   }
 
+  key_change(userId: string, key_change: GameEventData['key_change']) {
+    const game = this.guardUserInGame(userId);
+    game.emit('key_change', key_change);
+  }
+
   passGameEvent<E extends GameEventType>(
     user: string,
     e: E,

@@ -16,11 +16,12 @@ type paddle = {
   maxBallAngleUp: number;
   maxBallAngleDown: number;
 };
+type keyStatus = { up: boolean; down: boolean };
 
 export function updateFrame(
   frame: frame,
-  keyUp: boolean,
-  keydown: boolean,
+  keysA: keyStatus,
+  keysB: keyStatus,
 ): void {
   // update ball
   let newX: number =
@@ -37,17 +38,25 @@ export function updateFrame(
     frame.ball_ypos = newY;
   }
 
-  // update paddle player A
-  if (keyUp && !keydown) {
+  // update paddles
+  if (keysA.up == true) {
     frame.playerA -= GameCommon.PSPEED;
-    if (frame.playerA < GameCommon.PPAD) {
-      frame.playerA = GameCommon.PPAD;
-    }
+    if (frame.playerA < GameCommon.PPAD) frame.playerA = GameCommon.PPAD;
   }
-  if (keydown && !keyUp) {
+  if (keysA.down == true) {
     frame.playerA += GameCommon.PSPEED;
     if (frame.playerA > GameCommon.H - GameCommon.PH - GameCommon.PPAD) {
       frame.playerA = GameCommon.H - GameCommon.PH - GameCommon.PPAD;
+    }
+  }
+  if (keysB.up == true) {
+    frame.playerB -= GameCommon.PSPEED;
+    if (frame.playerB < GameCommon.PPAD) frame.playerB = GameCommon.PPAD;
+  }
+  if (keysB.down == true) {
+    frame.playerB += GameCommon.PSPEED;
+    if (frame.playerB > GameCommon.H - GameCommon.PH - GameCommon.PPAD) {
+      frame.playerB = GameCommon.H - GameCommon.PH - GameCommon.PPAD;
     }
   }
 }

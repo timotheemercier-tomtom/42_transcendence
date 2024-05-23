@@ -1,4 +1,4 @@
-import { GameCommon } from './GameCommon';
+import { GameCommon, keyState } from './GameCommon';
 import { socket } from './game.socket';
 
 export default class GameClient extends GameCommon {
@@ -6,8 +6,6 @@ export default class GameClient extends GameCommon {
   keys = {
     w: false,
     s: false,
-    i: false,
-    k: false,
   };
   evdown!: (e: KeyboardEvent) => void;
   evup!: (e: KeyboardEvent) => void;
@@ -29,14 +27,24 @@ export default class GameClient extends GameCommon {
 
     this.evdown = ((e: KeyboardEvent) => {
       if (e.repeat) return;
-      this.onkeychange(e.key);
-      if (e.key in this.keys) this.keys[e.key as keyof typeof this.keys] = true;
+      if (e.key in this.keys) {
+        this.emit('key_change', {
+          userId: userId,
+          key: e.key,
+          keyState: keyState.Pressed,
+        });
+      }
     }).bind(this);
+
     this.evup = ((e: KeyboardEvent) => {
       if (e.repeat) return;
-      this.onkeychange(e.key);
-      if (e.key in this.keys)
-        this.keys[e.key as keyof typeof this.keys] = false;
+      if (e.key in this.keys) {
+        this.emit('key_change', {
+          userId: userId,
+          key: e.key,
+          keyState: keyState.Released,
+        });
+      }
     }).bind(this);
 
     socket.connect();
@@ -91,11 +99,6 @@ export default class GameClient extends GameCommon {
     this.emit('join_anon', this.ug);
   }
 
-  onkeychange(key: string) {
-    if (key == 'w') this.emit('up', this.userId);
-    else if (key == 's') this.emit('down', this.userId);
-  }
-
   _draw = this.draw.bind(this);
 
   draw() {
@@ -109,12 +112,24 @@ export default class GameClient extends GameCommon {
 
     c = this.opt.user[this.userB!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
-    this.ctx.fillRect(GameCommon.W - (GameCommon.PPAD + GameCommon.PW), this.pb, GameCommon.PW, GameCommon.PH);
+    this.ctx.fillRect(
+      GameCommon.W - (GameCommon.PPAD + GameCommon.PW),
+      this.pb,
+      GameCommon.PW,
+      GameCommon.PH,
+    );
 
     this.ctx.fillStyle = 'white';
 
     this.ctx.beginPath();
-    this.ctx.arc(this.ball_xpos, this.ball_ypos, GameCommon.BRAD, 0, 2 * Math.PI, false);
+    this.ctx.arc(
+      this.ball_xpos,
+      this.ball_ypos,
+      GameCommon.BRAD,
+      0,
+      2 * Math.PI,
+      false,
+    );
     this.ctx.fill();
 
     this.frameid = requestAnimationFrame(this._draw);

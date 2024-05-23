@@ -7,6 +7,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { Eventer, GameEventData } from './GameCommon';
 import { GameService } from './game.service';
+import { WsException } from '@nestjs/websockets';
 
 // @Catch()
 // export class WebsocketExceptionFilter implements WsExceptionFilter<GameError> {
@@ -91,16 +92,12 @@ export class GameGateway extends Eventer {
     this.service.join(ug.gameId, '$anon0');
   }
 
-  @SubscribeMessage('up')
-  _up(client: Socket) {
+  @SubscribeMessage('key_change')
+  _key_change(client: Socket, key_change: GameEventData['key_change']) {
     const user = this.idmap.get(client.id)!;
-    this.service.passGameEvent(user, 'up', user);
-  }
-
-  @SubscribeMessage('down')
-  _down(client: Socket) {
-    const user = this.idmap.get(client.id)!;
-    this.service.passGameEvent(user, 'down', user);
+    if (user != key_change.userId)
+      throw new WsException('userId does not match client-userId');
+    this.service.key_change(user, key_change);
   }
 
   @SubscribeMessage('start')

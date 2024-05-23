@@ -1,13 +1,17 @@
+export enum keyState {
+  Released,
+  Pressed,
+}
+
 export type GameEventType =
   | 'create'
-  | 'start'
+  | 'enque'
   | 'join'
   | 'join_anon'
   | 'leave'
-  | 'up'
-  | 'down'
+  | 'start'
   | 'frame'
-  | 'enque'
+  | 'key_change'
   | 'opt';
 
 export type GameUserGame = {
@@ -16,13 +20,17 @@ export type GameUserGame = {
 };
 
 export type GameOpt = {
-  user: { [K in string]: { i:number, ball: string; paddle: string } };
+  user: { [K in string]: { i: number; ball: string; paddle: string } };
   gameId: string;
 };
 
 export type GameEventData = {
-  up: string;
-  down: string;
+  create: GameUserGame;
+  enque: string;
+  join: GameUserGame;
+  join_anon: GameUserGame;
+  leave: GameUserGame;
+  start: string;
   frame: {
     playerA: number;
     playerB: number;
@@ -30,12 +38,7 @@ export type GameEventData = {
     ball_ypos: number;
     ball_angle_rad: number;
   };
-  create: GameUserGame;
-  join: GameUserGame;
-  join_anon: GameUserGame;
-  leave: GameUserGame;
-  start: string;
-  enque: string;
+  key_change: { userId: string; key: string; keyState: keyState };
   opt: GameOpt;
 };
 
@@ -114,7 +117,7 @@ export class GameCommon extends Eventer {
     this.pb = this.h / 2 - GameCommon.PH / 2;
     this.ball_xpos = GameCommon.W / 2;
     this.ball_ypos = GameCommon.H / 2;
-    this.ball_angle_rad = 1.50 * Math.PI;
+    this.ball_angle_rad = 1.5 * Math.PI;
   }
   destroy() {}
 }

@@ -1,11 +1,12 @@
 import { WsException } from '@nestjs/websockets';
-import { GameCommon, GameOpt, GameEventData } from './GameCommon';
+import { GameCommon, GameOpt, GameEventData, keyState } from './GameCommon';
 import { updateFrame } from './physics';
 
+type keyStatus = { up: boolean; down: boolean };
+
 export default class GameServer extends GameCommon {
-  keys: {
-    [K in string]: { up: boolean; down: boolean };
-  } = {};
+  keysA: keyStatus = { up: false, down: false };
+  keysB: keyStatus = { up: false, down: false };
 
   constructor(gameId: string) {
     super();
@@ -23,10 +24,11 @@ export default class GameServer extends GameCommon {
     if (this.userA && this.userB) throw new WsException('game is full');
     if (!this.userA) {
       this.userA = userId;
+      this.keysA = { up: false, down: false };
     } else if (!this.userB) {
       this.userB = userId;
+      this.keysB = { up: false, down: false };
     }
-    this.keys[userId] = { up: false, down: false };
     this.emit('join', { userId: userId, gameId: this.gameId });
   }
 
@@ -44,12 +46,25 @@ export default class GameServer extends GameCommon {
   start(gameId: string) {
     console.log("starting game '" + gameId + "'!");
 
-    // activate key listeners
-    this.on('up', (e: string) => {
-      this.keys[e].up = !this.keys[e].up;
-    });
-    this.on('down', (e: string) => {
-      this.keys[e].down = !this.keys[e].down;
+    // listen to key-change messages
+    this.on('key_change', (key_change: GameEventData['key_change']) => {
+      let userKeys!: keyStatus;
+      if (key_change.userId == this.userA) userKeys = this.keysA;
+      if (key_change.userId == this.userB) userKeys = this.keysB;
+      if (key_change.key == 'w' && key_change.keyState == keyState.Pressed) {
+        userKeys.up = true;
+        userKeys.down = false;
+      }
+      if (key_change.key == 's' && key_change.keyState == keyState.Pressed) {
+        userKeys.up = false;
+        userKeys.down = true;
+      }
+      if (key_change.key == 'w' && key_change.keyState == keyState.Released) {
+        userKeys.up = false;
+      }
+      if (key_change.key == 's' && key_change.keyState == keyState.Released) {
+        userKeys.down = false;
+      }
     });
 
     let frame: GameEventData['frame'] = {
@@ -60,14 +75,9 @@ export default class GameServer extends GameCommon {
       ball_angle_rad: this.ball_angle_rad,
     };
 
-    // temp solution for 1-player game
     const updater = () => {
-      if (this.userA) {
-        let keyUp: boolean = this.keys[this.userA].up;
-        let keydown: boolean = this.keys[this.userA].down;
-        updateFrame(frame, keyUp, keydown);
-        this.emit('frame', frame);
-      }
+      updateFrame(frame, this.keysA, this.keysB);
+      this.emit('frame', frame);
     };
     setInterval(() => updater(), GameCommon.FRAMEDELAY);
   }
