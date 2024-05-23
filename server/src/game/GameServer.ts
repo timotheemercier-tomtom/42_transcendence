@@ -1,11 +1,9 @@
 import { WsException } from '@nestjs/websockets';
-import { GameCommon, GameOpt, V2, GameEventData } from './GameCommon';
+import { GameCommon, GameOpt, GameEventData } from './GameCommon';
 import { updateFrame } from './physics';
 
 export default class GameServer extends GameCommon {
   static MAXUSERS = 2;
-
-  b!: { p: V2; v: V2 };
 
   keys: {
     [K in string]: { up: boolean; down: boolean };
