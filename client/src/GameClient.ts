@@ -48,7 +48,6 @@ export default class GameClient extends GameCommon {
     });
 
     this.on('frame', (e) => {
-      console.log('frame');
       this.ball_xpos = e.ball_xpos;
       this.ball_ypos = e.ball_ypos;
       this.pa = e.playerA;

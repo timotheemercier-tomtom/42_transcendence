@@ -43,11 +43,11 @@ export default class GameServer extends GameCommon {
 
     // activate key listeners
     this.on('up', (e: string) => {
-      console.log("key up!!")
+      // console.log("key up!!")
       this.keys[e].up = !this.keys[e].up;
     });
     this.on('down', (e: string) => {
-      console.log("key down!!")
+      // console.log("key down!!")
       this.keys[e].down = !this.keys[e].down;
     });
 

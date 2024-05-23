@@ -23,7 +23,7 @@ const Game = () => {
 
   useEffect(() => {
     const onframe = (frameReceived: GameEventData['frame']) => {
-      console.log("frame received", frameReceived);
+      // console.log("frame received", frameReceived);
     };
     socket.on('frame', onframe);
     return () => {
