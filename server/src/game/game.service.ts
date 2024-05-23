@@ -14,7 +14,6 @@ import { WsException } from '@nestjs/websockets';
 export class GameService extends Eventer {
   games = new Map<string, GameServer>();
   userToGame = new Map<string, string>();
-  gameToUsers = new Map<string, Set<string>>();
 
   guardGame(id: string): GameServer {
     if (!this.games.has(id)) throw new WsException('game does not exist');
@@ -32,7 +31,6 @@ export class GameService extends Eventer {
     const game = new GameServer(ug.gameId);
     game.create(GameServer.W, GameServer.H);
     this.games.set(ug.gameId, game);
-    this.gameToUsers.set(ug.gameId, new Set());
     this.emit('create', ug);
   }
 
@@ -44,8 +42,6 @@ export class GameService extends Eventer {
   destroy(id: string) {
     const game = this.guardGame(id);
     game.destroy();
-    this.gameToUsers.get(id)?.forEach((v) => this.userToGame.delete(v));
-    this.gameToUsers.delete(id);
   }
 
   join(id: string, user: string) {
@@ -54,16 +50,12 @@ export class GameService extends Eventer {
       throw new WsException('user already in a game');
     game.join(user);
     this.userToGame.set(user, id);
-    this.gameToUsers.get(id)?.add(user);
-    // this.emit('join', { user, id });
   }
 
   leave(id: string, user: string) {
     const game = this.guardGame(id);
     game.leave(user);
     this.userToGame.delete(user);
-    this.gameToUsers.get(id)?.delete(user);
-    // this.emit('leave', { user, id });
   }
 
   passGameEvent<E extends GameEventType>(
@@ -79,9 +71,13 @@ export class GameService extends Eventer {
     console.log('enque', user);
     if (this.userToGame.has(user))
       throw new WsException('user already in a game');
-    for (const [k, v] of this.gameToUsers.entries())
-      if (v.size < GameServer.MAXUSERS && this.userToGame.get(user) != k)
-        return this.join(k, user);
+    // join existing game
+    for (const [gameId, game] of this.games.entries()) {
+      if (!game.userA || !game.userB) {
+        return this.join(gameId, user);
+      }
+    }
+    // create new game
     const id = 'game-' + randomUUID();
     this.create({ gameId: id, userId: user });
     this.join(id, user);

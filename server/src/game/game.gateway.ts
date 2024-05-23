@@ -16,8 +16,6 @@ import { GameService } from './game.service';
 //   }
 // }
 
-type testMsgType = { userId: string, gameId: string};
-
 // @UseFilters(new WebsocketExceptionFilter())
 @WebSocketGateway({ namespace: '/game/ws', transports: ['websocket'] })
 export class GameGateway extends Eventer {
@@ -55,26 +53,22 @@ export class GameGateway extends Eventer {
     this.service.on('create', (ug) => {
       const game = this.service.guardGame(ug.gameId);
       game.onAny = (e, v) => {
-        const clients = Array.from(game.users.values()).map((v) =>
-          this.userToClient.get(v),
-        );
-
-        clients.forEach((c) => c?.emit(e, v));
-        // this.server.to(ug.id).emit(e, v);
+        if (game.userA) {
+          const clientA: Socket | undefined = this.userToClient.get(game.userA);
+          if (clientA) clientA.emit(e, v);
+        }
+        if (game.userB) {
+          const clientB: Socket | undefined = this.userToClient.get(game.userB);
+          if (clientB) clientB.emit(e, v);
+        }
       };
       game.on('leave', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
-        // server.to(ug.id).emit('leave', ug);
         if (client) client.leave(ug.gameId);
       });
       game.on('join', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
-
-        if (client) {
-          client.join(ug.gameId);
-        }
-
-        // server.to(ug.id).emit('join', ug);
+        if (client) client.join(ug.gameId);
       });
       this.userToClient.get(ug.userId)?.emit('create', ug);
     });

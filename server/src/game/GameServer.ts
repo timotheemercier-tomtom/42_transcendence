@@ -3,8 +3,6 @@ import { GameCommon, GameOpt, GameEventData } from './GameCommon';
 import { updateFrame } from './physics';
 
 export default class GameServer extends GameCommon {
-  static MAXUSERS = 2;
-
   keys: {
     [K in string]: { up: boolean; down: boolean };
   } = {};
@@ -20,19 +18,26 @@ export default class GameServer extends GameCommon {
   }
 
   join(userId: string) {
-    if (this.users.has(userId))
+    if (this.userA == userId || this.userB == userId)
       throw new WsException('user already in this game');
-    if (this.users.size < GameServer.MAXUSERS) this.users.add(userId);
-    else throw new WsException('game is full');
+    if (this.userA && this.userB) throw new WsException('game is full');
+    if (!this.userA) {
+      this.userA = userId;
+    } else if (!this.userB) {
+      this.userB = userId;
+    }
     this.keys[userId] = { up: false, down: false };
-    this.userI.set(userId, this.users.size - 1);
     this.emit('join', { userId: userId, gameId: this.gameId });
   }
 
   leave(userId: string) {
-    if (!this.users.has(userId)) throw new WsException('user not in this game');
-    this.users.delete(userId);
-    this.userI.delete(userId);
+    if (this.userA == userId) {
+      this.userA = undefined;
+    } else if (this.userB == userId) {
+      this.userB = undefined;
+    } else {
+      throw new WsException('user not in this game');
+    }
     this.emit('leave', { userId: userId, gameId: this.gameId });
   }
 
@@ -41,11 +46,9 @@ export default class GameServer extends GameCommon {
 
     // activate key listeners
     this.on('up', (e: string) => {
-      // console.log("key up!!")
       this.keys[e].up = !this.keys[e].up;
     });
     this.on('down', (e: string) => {
-      // console.log("key down!!")
       this.keys[e].down = !this.keys[e].down;
     });
 
@@ -55,17 +58,17 @@ export default class GameServer extends GameCommon {
       ball_xpos: this.ball_xpos,
       ball_ypos: this.ball_ypos,
       ball_angle_rad: this.ball_angle_rad,
-    }
+    };
 
+    // temp solution for 1-player game
     const updater = () => {
-      let userA: string = this.users.values().next().value;  // temp solution for 1-player game
-      let keyUp: boolean = this.keys[userA].up;
-      let keydown: boolean = this.keys[userA].down;
-      // console.log("key status: ", userA, keyUp, keydown);
-
-      updateFrame(frame, keyUp, keydown);
-      this.emit('frame', frame);
-    }
+      if (this.userA) {
+        let keyUp: boolean = this.keys[this.userA].up;
+        let keydown: boolean = this.keys[this.userA].down;
+        updateFrame(frame, keyUp, keydown);
+        this.emit('frame', frame);
+      }
+    };
     setInterval(() => updater(), GameCommon.FRAMEDELAY);
   }
 

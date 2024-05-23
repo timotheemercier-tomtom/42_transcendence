@@ -75,6 +75,8 @@ export class GameCommon extends Eventer {
   static PPAD: number = 10;
   static FRAMEDELAY: number = 1000 / 60; // milli seconds per frame
 
+  userA: string | undefined = undefined;
+  userB: string | undefined = undefined;
   p: number[] = [];
   ball_xpos!: number;
   ball_ypos!: number;
@@ -94,28 +96,11 @@ export class GameCommon extends Eventer {
   }
   w!: number;
   h!: number;
-  users = new Set<string>();
-  userI = new Map<string, number>();
-
   gameId!: string;
   opt: GameOpt = {
     user: {},
     gameId: '',
   };
-
-  getUserForPa() {
-    for (const [k, v] of this.userI.entries()) {
-      if (v == 0) return k;
-    }
-    return '';
-  }
-
-  getUserForPb() {
-    for (const [k, v] of this.userI.entries()) {
-      if (v == 1) return k;
-    }
-    return '';
-  }
 
   addOpt(opt: GameOpt) {
     Object.assign(this.opt.user, opt.user);
