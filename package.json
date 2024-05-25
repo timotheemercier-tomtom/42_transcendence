@@ -2,7 +2,7 @@
   "name": "transcend",
   "version": "1.0.0",
   "description": "",
-  "private": "true",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"cd server && yarn start\" \"cd client && yarn start\"",
@@ -13,9 +13,9 @@
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "client",
-    "server",
-    "common"
+    "client/",
+    "server/",
+    "common/"
   ],
   "dependencies": {
     "concurrently": "^8.2.2",

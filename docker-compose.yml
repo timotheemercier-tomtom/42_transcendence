@@ -1,0 +1,40 @@
+version: '4.0'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: transcend
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  server:
+    build:
+      context: ./
+      dockerfile: ./server/Dockerfile
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: transcend
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+
+  client:
+    build:
+      context: ./
+      dockerfile: ./client/Dockerfile
+    ports:
+      - '5173:3000'
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
