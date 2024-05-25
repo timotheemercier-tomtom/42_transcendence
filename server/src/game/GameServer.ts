@@ -7,6 +7,10 @@ type keyStatus = { up: boolean; down: boolean };
 export default class GameServer extends GameCommon {
   keysA: keyStatus = { up: false, down: false };
   keysB: keyStatus = { up: false, down: false };
+  scoreA: number = 0;
+  scoreB: number = 0;
+  pausingAfterGoal: boolean = false;
+  goalTimeStamp: number = 0;
 
   constructor(gameId: string) {
     super();
@@ -73,10 +77,12 @@ export default class GameServer extends GameCommon {
       ball_xpos: this.ball_xpos,
       ball_ypos: this.ball_ypos,
       ball_angle_rad: this.ball_angle_rad,
+      scoreA: this.scoreA,
+      scoreB: this.scoreB,
     };
 
     const updater = () => {
-      updateFrame(frame, this.keysA, this.keysB);
+      updateFrame.bind(this)(frame, this.keysA, this.keysB);
       this.emit('frame', frame);
     };
     setInterval(() => updater(), GameCommon.FRAMEDELAY);

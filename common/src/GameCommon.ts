@@ -37,6 +37,8 @@ export type GameEventData = {
     ball_xpos: number;
     ball_ypos: number;
     ball_angle_rad: number;
+    scoreA: number;
+    scoreB: number;
   };
   key_change: { userId: string; key: string; keyState: keyState };
   opt: GameOpt;

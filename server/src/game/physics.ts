@@ -18,18 +18,25 @@ type paddle = {
 };
 type keyStatus = { up: boolean; down: boolean };
 
+// NOTE: the "this" of the GameServer object should be bound the function call!
 export function updateFrame(
   frame: frame,
   keysA: keyStatus,
   keysB: keyStatus,
 ): void {
-  // update ball
+  // Unpause after a second.
+  if (this.pausingAfterGoal && Date.now() - this.goalTimeStamp > 1000) {
+    this.pausingAfterGoal = false;
+  }
+
+  // update ball (except when game is paused)
   let newX: number =
     frame.ball_xpos + Math.sin(frame.ball_angle_rad) * GameCommon.BSPEED;
   let newY: number =
     frame.ball_ypos + Math.cos(frame.ball_angle_rad) * GameCommon.BSPEED;
   if (
-    handleGoal(frame, newX) ||
+    this.pausingAfterGoal ||
+    handleGoal.bind(this)(frame, newX) ||
     handleCeilingOrFloorBounce(frame, newY) ||
     handlePaddleBounce(frame, newX, newY)
   ) {
@@ -38,7 +45,7 @@ export function updateFrame(
     frame.ball_ypos = newY;
   }
 
-  // update paddles
+  // update paddles (also when game is paused)
   if (keysA.up == true) {
     frame.playerA -= GameCommon.PSPEED;
     if (frame.playerA < GameCommon.PPAD) frame.playerA = GameCommon.PPAD;
@@ -68,13 +75,17 @@ function handleGoal(frame: frame, newX: number): boolean {
       Math.sin(frame.ball_angle_rad) > 0)
   ) {
     if (newX < GameCommon.BRAD) {
-      newX = GameCommon.BRAD;
+      frame.scoreB++;
     }
     if (newX > GameCommon.W - GameCommon.BRAD) {
-      newX = GameCommon.W - GameCommon.BRAD;
+      frame.scoreA++;
     }
-    frame.ball_angle_rad = calcGoalBounceEffect(frame.ball_angle_rad);
-    frame.ball_xpos = newX;
+    frame.ball_xpos = GameCommon.W / 2;
+    frame.ball_ypos = GameCommon.H / 2;
+    frame.ball_angle_rad = 1.5 * Math.PI;
+    this.pausingAfterGoal = true;
+    this.goalTimeStamp = Date.now();
+    console.log('score: ', frame.scoreA, frame.scoreB);
     return true;
   } else {
     return false;
@@ -198,9 +209,4 @@ function calcBounceEffect(ballAngle: number): number {
     newAngle = Math.PI * 3 - ballAngle;
   }
   return newAngle;
-}
-
-// NOTE this is a temp function, since goals are not supposed to bounce. (maybe powerup!)
-function calcGoalBounceEffect(ballAngle: number): number {
-  return Math.PI * 2 - ballAngle;
 }
