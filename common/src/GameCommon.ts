@@ -85,7 +85,9 @@ export class GameCommon extends Eventer {
   p: number[] = [];
   ballXpos!: number;
   ballYpos!: number;
-  ballAngle!: number;  // angle in radians: [0, 2*PI]
+  ballAngle!: number; // angle in radians: [0, 2*PI]
+  scoreA: number = 0;
+  scoreB: number = 0;
 
   get pa() {
     return this.p[0];

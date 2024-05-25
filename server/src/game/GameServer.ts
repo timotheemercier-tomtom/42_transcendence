@@ -7,8 +7,6 @@ type keyStatus = { up: boolean; down: boolean };
 export default class GameServer extends GameCommon {
   keysA: keyStatus = { up: false, down: false };
   keysB: keyStatus = { up: false, down: false };
-  scoreA: number = 0;
-  scoreB: number = 0;
   pausingAfterGoal: boolean = false;
   goalTimeStamp: number = 0;
 
