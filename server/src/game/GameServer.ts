@@ -1,6 +1,12 @@
 import { WsException } from '@nestjs/websockets';
-import { GameCommon, GameOpt, GameEventData, KeyState } from './GameCommon';
-import { updateFrame } from './physics';
+import {
+  GameCommon,
+  GameOpt,
+  GameEventData,
+  KeyState,
+  GameState,
+} from './GameCommon';
+import { runPhysics } from './physics';
 
 type keyStatus = { up: boolean; down: boolean };
 
@@ -31,6 +37,7 @@ export default class GameServer extends GameCommon {
       this.userB = userId;
       this.keysB = { up: false, down: false };
     }
+    if (this.userA && this.userB) this.gameState = GameState.ReadyToStart;
     this.emit('join', { userId: userId, gameId: this.gameId });
   }
 
@@ -47,6 +54,7 @@ export default class GameServer extends GameCommon {
 
   start(gameId: string) {
     console.log("starting game '" + gameId + "'!");
+    this.gameState = GameState.Running;
 
     // listen to key-change messages
     this.on('key_change', (key_change: GameEventData['key_change']) => {
@@ -69,7 +77,24 @@ export default class GameServer extends GameCommon {
       }
     });
 
-    let frame: GameEventData['frame'] = {
+    const gameRunner = () => {
+      runPhysics.bind(this)();
+      if (this.scoreA == 10 || this.scoreB == 10) {
+        this.gameState = GameState.Finished;
+        clearInterval(frameInterval);
+        // todo: send game result to DB
+      }
+      this.emit('frame', this.createFrame());
+    };
+    const frameInterval: NodeJS.Timeout = setInterval(
+      () => gameRunner(),
+      GameCommon.FRAMEDELAY,
+    );
+  }
+
+  createFrame(): GameEventData['frame'] {
+    const frame: GameEventData['frame'] = {
+      gameState: this.gameState,
       playerA: this.pa,
       playerB: this.pb,
       ballXpos: this.ballXpos,
@@ -78,12 +103,7 @@ export default class GameServer extends GameCommon {
       scoreA: this.scoreA,
       scoreB: this.scoreB,
     };
-
-    const updater = () => {
-      updateFrame.bind(this)(frame, this.keysA, this.keysB);
-      this.emit('frame', frame);
-    };
-    setInterval(() => updater(), GameCommon.FRAMEDELAY);
+    return frame;
   }
 
   destroy(): void {

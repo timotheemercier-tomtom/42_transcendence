@@ -3,6 +3,13 @@ export enum KeyState {
   Pressed,
 }
 
+export enum GameState {
+  WaitingForPlayers,
+  ReadyToStart,
+  Running,
+  Finished,
+}
+
 export type GameEventType =
   | 'create'
   | 'enque'
@@ -32,6 +39,7 @@ export type GameEventData = {
   leave: GameUserGame;
   start: string;
   frame: {
+    gameState: GameState;
     playerA: number;
     playerB: number;
     ballXpos: number;
@@ -80,6 +88,7 @@ export class GameCommon extends Eventer {
   static PPAD: number = 10;
   static FRAMEDELAY: number = 1000 / 60; // milli seconds per frame
 
+  gameState: GameState = GameState.WaitingForPlayers;
   userA: string | undefined = undefined;
   userB: string | undefined = undefined;
   p: number[] = [];
