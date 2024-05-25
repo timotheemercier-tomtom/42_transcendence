@@ -1,4 +1,4 @@
-export enum keyState {
+export enum KeyState {
   Released,
   Pressed,
 }
@@ -34,13 +34,13 @@ export type GameEventData = {
   frame: {
     playerA: number;
     playerB: number;
-    ball_xpos: number;
-    ball_ypos: number;
-    ball_angle_rad: number;
+    ballXpos: number;
+    ballYpos: number;
+    ballAngle: number;
     scoreA: number;
     scoreB: number;
   };
-  key_change: { userId: string; key: string; keyState: keyState };
+  key_change: { userId: string; key: string; keyState: KeyState };
   opt: GameOpt;
 };
 
@@ -83,9 +83,9 @@ export class GameCommon extends Eventer {
   userA: string | undefined = undefined;
   userB: string | undefined = undefined;
   p: number[] = [];
-  ball_xpos!: number;
-  ball_ypos!: number;
-  ball_angle_rad!: number;
+  ballXpos!: number;
+  ballYpos!: number;
+  ballAngle!: number;  // angle in radians: [0, 2*PI]
 
   get pa() {
     return this.p[0];
@@ -117,9 +117,9 @@ export class GameCommon extends Eventer {
     this.h = h;
     this.pa = this.h / 2 - GameCommon.PH / 2;
     this.pb = this.h / 2 - GameCommon.PH / 2;
-    this.ball_xpos = GameCommon.W / 2;
-    this.ball_ypos = GameCommon.H / 2;
-    this.ball_angle_rad = 1.5 * Math.PI;
+    this.ballXpos = GameCommon.W / 2;
+    this.ballYpos = GameCommon.H / 2;
+    this.ballAngle = 1.5 * Math.PI;
   }
   destroy() {}
 }

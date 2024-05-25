@@ -1,5 +1,5 @@
 import { WsException } from '@nestjs/websockets';
-import { GameCommon, GameOpt, GameEventData, keyState } from './GameCommon';
+import { GameCommon, GameOpt, GameEventData, KeyState } from './GameCommon';
 import { updateFrame } from './physics';
 
 type keyStatus = { up: boolean; down: boolean };
@@ -55,18 +55,18 @@ export default class GameServer extends GameCommon {
       let userKeys!: keyStatus;
       if (key_change.userId == this.userA) userKeys = this.keysA;
       if (key_change.userId == this.userB) userKeys = this.keysB;
-      if (key_change.key == 'w' && key_change.keyState == keyState.Pressed) {
+      if (key_change.key == 'w' && key_change.keyState == KeyState.Pressed) {
         userKeys.up = true;
         userKeys.down = false;
       }
-      if (key_change.key == 's' && key_change.keyState == keyState.Pressed) {
+      if (key_change.key == 's' && key_change.keyState == KeyState.Pressed) {
         userKeys.up = false;
         userKeys.down = true;
       }
-      if (key_change.key == 'w' && key_change.keyState == keyState.Released) {
+      if (key_change.key == 'w' && key_change.keyState == KeyState.Released) {
         userKeys.up = false;
       }
-      if (key_change.key == 's' && key_change.keyState == keyState.Released) {
+      if (key_change.key == 's' && key_change.keyState == KeyState.Released) {
         userKeys.down = false;
       }
     });
@@ -74,9 +74,9 @@ export default class GameServer extends GameCommon {
     let frame: GameEventData['frame'] = {
       playerA: this.pa,
       playerB: this.pb,
-      ball_xpos: this.ball_xpos,
-      ball_ypos: this.ball_ypos,
-      ball_angle_rad: this.ball_angle_rad,
+      ballXpos: this.ballXpos,
+      ballYpos: this.ballYpos,
+      ballAngle: this.ballAngle,
       scoreA: this.scoreA,
       scoreB: this.scoreB,
     };
