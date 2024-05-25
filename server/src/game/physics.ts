@@ -193,11 +193,11 @@ function calcBallAnlgeAfterBounce(ballAngle: number): number {
   let newAngle!: number;
 
   // floor/ceiling bounce; ball goes to the right
-  if (ballAngle < Math.PI * 0.5) {
+  if (ballAngle < Math.PI) {
     newAngle = Math.PI - ballAngle;
   }
   // floor/ceiling bounce; ball goes to the left
-  else if (ballAngle < Math.PI * 1.5) {
+  else {
     newAngle = Math.PI * 3 - ballAngle;
   }
   return newAngle;

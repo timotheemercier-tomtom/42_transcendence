@@ -1,4 +1,4 @@
-import { GameCommon, keyState } from './GameCommon';
+import { GameCommon, KeyState } from './GameCommon';
 import { socket } from './game.socket';
 
 export default class GameClient extends GameCommon {
@@ -31,7 +31,7 @@ export default class GameClient extends GameCommon {
         this.emit('key_change', {
           userId: userId,
           key: e.key,
-          keyState: keyState.Pressed,
+          keyState: KeyState.Pressed,
         });
       }
     }).bind(this);
@@ -42,7 +42,7 @@ export default class GameClient extends GameCommon {
         this.emit('key_change', {
           userId: userId,
           key: e.key,
-          keyState: keyState.Released,
+          keyState: KeyState.Released,
         });
       }
     }).bind(this);
@@ -55,8 +55,8 @@ export default class GameClient extends GameCommon {
     });
 
     this.on('frame', (e) => {
-      this.ball_xpos = e.ball_xpos;
-      this.ball_ypos = e.ball_ypos;
+      this.ballXpos = e.ballXpos;
+      this.ballYpos = e.ballYpos;
       this.pa = e.playerA;
       this.pb = e.playerB;
     });
@@ -123,8 +123,8 @@ export default class GameClient extends GameCommon {
 
     this.ctx.beginPath();
     this.ctx.arc(
-      this.ball_xpos,
-      this.ball_ypos,
+      this.ballXpos,
+      this.ballYpos,
       GameCommon.BRAD,
       0,
       2 * Math.PI,
