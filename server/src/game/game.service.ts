@@ -9,11 +9,20 @@ import {
 } from './GameCommon';
 import { randomUUID } from 'crypto';
 import { WsException } from '@nestjs/websockets';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class GameService extends Eventer {
+  constructor(private readonly userService: UserService) {
+    super();
+  }
+
   games = new Map<string, GameServer>();
   userToGame = new Map<string, string>();
+
+  updateScore(userId: string) {
+    this.userService.updateWinScore(userId);
+  }
 
   guardGame(id: string): GameServer {
     if (!this.games.has(id)) throw new WsException('game does not exist');
@@ -28,7 +37,7 @@ export class GameService extends Eventer {
 
   create(ug: GameUserGame) {
     if (this.games.has(ug.gameId)) throw new WsException('game already exists');
-    const game = new GameServer(ug.gameId);
+    const game = new GameServer(ug.gameId, this);
     game.create(GameServer.W, GameServer.H);
     this.games.set(ug.gameId, game);
     this.emit('create', ug);

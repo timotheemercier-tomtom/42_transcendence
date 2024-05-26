@@ -7,6 +7,7 @@ import {
   GameState,
 } from './GameCommon';
 import { runPhysics } from './physics';
+import { GameService } from 'src/game/game.service';
 
 type keyStatus = { up: boolean; down: boolean };
 
@@ -16,7 +17,10 @@ export default class GameServer extends GameCommon {
   pausingAfterGoal: boolean = false;
   goalTimeStamp: number = 0;
 
-  constructor(gameId: string) {
+  constructor(
+    gameId: string,
+    private readonly gameService: GameService,
+  ) {
     super();
     this.gameId = gameId;
   }
@@ -82,7 +86,7 @@ export default class GameServer extends GameCommon {
       if (this.scoreA == 10 || this.scoreB == 10) {
         this.gameState = GameState.Finished;
         clearInterval(frameInterval);
-        // todo: send game result to DB
+        this.gameService.updateScore('cherrewi'); // TODO: dummy, placeholder!!
       }
       this.emit('frame', this.createFrame());
     };
