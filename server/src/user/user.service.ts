@@ -33,13 +33,24 @@ export class UserService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async updateWinScore(login: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({ username: login });
-    if (!user) {
+  async updateWinLossScore(loginWon: string, loginLost: string): Promise<User> {
+    const userWon = await this.usersRepository.findOneBy({
+      username: loginWon,
+    });
+    if (!userWon) {
       throw new NotFoundException('User not found');
     }
-    user.won = user.won + 1;
-    return this.usersRepository.save(user);
+    userWon.won += 1;
+    this.usersRepository.save(userWon);
+
+    const userLost = await this.usersRepository.findOneBy({
+      username: loginLost,
+    });
+    if (!userLost) {
+      throw new NotFoundException('User not found');
+    }
+    userLost.lost += 1;
+    return this.usersRepository.save(userLost);
   }
 
   async updateImage(login: string, base64Image: string): Promise<User> {

@@ -20,10 +20,6 @@ export class GameService extends Eventer {
   games = new Map<string, GameServer>();
   userToGame = new Map<string, string>();
 
-  updateScore(userId: string) {
-    this.userService.updateWinScore(userId);
-  }
-
   guardGame(id: string): GameServer {
     if (!this.games.has(id)) throw new WsException('game does not exist');
     return this.games.get(id)!;
@@ -37,7 +33,7 @@ export class GameService extends Eventer {
 
   create(ug: GameUserGame) {
     if (this.games.has(ug.gameId)) throw new WsException('game already exists');
-    const game = new GameServer(ug.gameId, this);
+    const game = new GameServer(ug.gameId, this.userService);
     game.create(GameServer.W, GameServer.H);
     this.games.set(ug.gameId, game);
     this.emit('create', ug);

@@ -7,7 +7,7 @@ import {
   GameState,
 } from './GameCommon';
 import { runPhysics } from './physics';
-import { GameService } from 'src/game/game.service';
+import { UserService } from 'src/user/user.service';
 
 type keyStatus = { up: boolean; down: boolean };
 
@@ -19,7 +19,7 @@ export default class GameServer extends GameCommon {
 
   constructor(
     gameId: string,
-    private readonly gameService: GameService,
+    private readonly userService: UserService,
   ) {
     super();
     this.gameId = gameId;
@@ -86,7 +86,11 @@ export default class GameServer extends GameCommon {
       if (this.scoreA == 10 || this.scoreB == 10) {
         this.gameState = GameState.Finished;
         clearInterval(frameInterval);
-        this.gameService.updateScore('cherrewi'); // TODO: dummy, placeholder!!
+        if (this.scoreA > this.scoreB) {
+          this.userService.updateWinLossScore(this.userA!, this.userB!);
+        } else {
+          this.userService.updateWinLossScore(this.userB!, this.userA!);
+        }
       }
       this.emit('frame', this.createFrame());
     };
