@@ -41,7 +41,10 @@ export default class GameServer extends GameCommon {
       this.userB = userId;
       this.keysB = { up: false, down: false };
     }
-    if (this.userA && this.userB) this.gameState = GameState.ReadyToStart;
+    if (this.userA && this.userB) {
+      this.gameState = GameState.ReadyToStart;
+      this.emit('game_state', this.gameState);
+    }
     this.emit('join', { userId: userId, gameId: this.gameId });
   }
 
@@ -58,7 +61,6 @@ export default class GameServer extends GameCommon {
 
   start(gameId: string) {
     console.log("starting game '" + gameId + "'!");
-    this.gameState = GameState.Running;
 
     // listen to key-change messages
     this.on('key_change', (key_change: GameEventData['key_change']) => {
@@ -81,11 +83,15 @@ export default class GameServer extends GameCommon {
       }
     });
 
+    this.gameState = GameState.Running;
+    this.emit('game_state', this.gameState);
+
     const gameRunner = () => {
       runPhysics.bind(this)();
       if (this.scoreA == 10 || this.scoreB == 10) {
-        this.gameState = GameState.Finished;
         clearInterval(frameInterval);
+        this.gameState = GameState.Finished;
+        this.emit('game_state', this.gameState);
         if (this.scoreA > this.scoreB) {
           this.userService.updateWinLossScore(this.userA!, this.userB!);
         } else {
@@ -102,7 +108,6 @@ export default class GameServer extends GameCommon {
 
   createFrame(): GameEventData['frame'] {
     const frame: GameEventData['frame'] = {
-      gameState: this.gameState,
       playerA: this.pa,
       playerB: this.pb,
       ballXpos: this.ballXpos,

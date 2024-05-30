@@ -18,6 +18,7 @@ export type GameEventType =
   | 'leave'
   | 'start'
   | 'frame'
+  | 'game_state'
   | 'key_change'
   | 'opt';
 
@@ -39,7 +40,6 @@ export type GameEventData = {
   leave: GameUserGame;
   start: string;
   frame: {
-    gameState: GameState;
     playerA: number;
     playerB: number;
     ballXpos: number;
@@ -48,6 +48,7 @@ export type GameEventData = {
     scoreA: number;
     scoreB: number;
   };
+  game_state: GameState;
   key_change: { userId: string; key: string; keyState: KeyState };
   opt: GameOpt;
 };

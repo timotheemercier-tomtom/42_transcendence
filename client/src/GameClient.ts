@@ -79,6 +79,10 @@ export default class GameClient extends GameCommon {
       }
     });
 
+    this.on('game_state', (gameState) => {
+      this.gameState = gameState;
+    });
+
     this.on('opt', (v) => this.addOpt(v));
     socket.emit('opt', { gameId: this.gameId, user: {} });
     window.addEventListener('keydown', this.evdown);
