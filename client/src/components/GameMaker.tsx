@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 const GameMaker = () => {
   const userId = getLogin();
   const nav = useNavigate();
-  const [gameId, setId] = useState('');
+  const [gameId, setGameId] = useState('');
   const [paddle, setPaddle] = useState('');
   const [ball, setBall] = useState('');
   useEffect(() => {
@@ -55,7 +55,7 @@ const GameMaker = () => {
         <Input
           placeholder="game id"
           value={gameId}
-          onChange={(e) => setId(e.target.value)}
+          onChange={(e) => setGameId(e.target.value)}
         ></Input>
         <Button onClick={() => socket.emit('create', {userId: userId, gameId: gameId})}>Create</Button>
       </Col>
