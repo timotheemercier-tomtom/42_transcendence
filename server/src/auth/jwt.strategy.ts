@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserService } from 'src/user/user.service';
 import { FourTwoStrategy } from './fourtwo.strategy';
+import { User } from 'src/user/user.entity';
 
 const extractJwtFromCookie = (req: Request): string | null => {
   return req.cookies?.['accessToken'] || null;
@@ -24,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any, req: any) {
-    return { login: payload.username };
+  async validate(payload: User, req: any) {
+    return payload;
   }
 }

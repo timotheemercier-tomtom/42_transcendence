@@ -33,7 +33,10 @@ export class UserService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async updateWinLossScore(loginWon: string, loginLost: string): Promise<boolean> {
+  async updateWinLossScore(
+    loginWon: string,
+    loginLost: string,
+  ): Promise<boolean> {
     const userWon = await this.usersRepository.findOneBy({
       login: loginWon,
     });
@@ -55,7 +58,7 @@ export class UserService {
   }
 
   async updateImage(login: string, base64Image: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({ username: login });
+    const user = await this.usersRepository.findOneBy({ login });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -64,7 +67,9 @@ export class UserService {
   }
 
   async update(login: string, updateUserDto: UserDto): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { username: login } });
+    const user = await this.usersRepository.findOne({
+      where: { login },
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -78,7 +83,7 @@ export class UserService {
   }
 
   async findOne(login: string): Promise<User | null> {
-    return await this.usersRepository.findOneBy({ username: login });
+    return await this.usersRepository.findOneBy({ login });
   }
 
   async findAll(): Promise<User[]> {
