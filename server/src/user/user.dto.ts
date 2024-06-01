@@ -14,7 +14,7 @@ export class UserDto {
 
   @IsOptional()
   @MinLength(3, { message: 'Username must have atleast 3 characters.' })
-  readonly username?: string;
+  username?: string;
 
   @IsOptional()
   @IsString()

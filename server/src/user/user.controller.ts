@@ -19,6 +19,8 @@ import { User } from './user.entity';
 import { UserService } from './user.service';
 import { FriendService } from './friend.service';
 import { Friend } from './friend.entity';
+import { Request, Response } from 'express';
+
 
 @Controller('user')
 export class UserController {

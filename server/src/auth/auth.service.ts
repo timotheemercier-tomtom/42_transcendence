@@ -31,3 +31,11 @@ export class AuthService {
     }
   }
 }
+
+export const getStatus = (req: Request, res: Response) => {
+    if (req.isAuthenticated()) {
+        res.json({ isLoggedIn: true, user: req.user });
+    } else {
+        res.json({ isLoggedIn: false });
+    }
+};

@@ -7,9 +7,9 @@ import React, {
 } from 'react';
 import { Avatar, Card, CircularProgress } from '@mui/material';
 import { Link, useParams } from 'react-router-dom';
-import Typography from './Typography';
 import Picture from './Picture';
 import FormWithValidation from './Form';
+
 
 type UserContextType = {
   user: any;
@@ -91,7 +91,7 @@ function User() {
   }, [login]);
 
   if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+//   if (error) return <Typography color="error">{error}</Typography>;
 
   if (!userData) return null;
 
@@ -118,8 +118,8 @@ function User() {
           }
         }}
       />
-      <Typography variant="h5">Account Details</Typography>
-      <Typography variant="h5">Intra Login: {userData.username}</Typography>
+      {/* <Typography variant="h5">Account Details</Typography> */}
+      {/* <Typography variant="h5">Intra Login: {userData.username}</Typography> */}
       <Link to={'/u/asaijers'}>Alfa Profile</Link>
       <br />
       <Link to={'/u/tmercier'}>Tim Profile</Link>
@@ -139,3 +139,4 @@ function User() {
   );
 }
 export default User;
+

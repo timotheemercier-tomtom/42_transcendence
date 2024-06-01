@@ -11,6 +11,8 @@ import Profile from './pages/Profile.tsx';
 import Room from './pages/Room.tsx';
 import theme from './theme.ts';
 import Home from './pages/Home.tsx';
+import { AuthProvider } from './components/AuthContext.tsx';
+import { Dashboard } from '@mui/icons-material';
 
 const router = createBrowserRouter([
   {
@@ -34,15 +36,21 @@ const router = createBrowserRouter([
         element: <Profile />,
         path: 'u/:login',
       },
+      {
+        element: <Dashboard />,
+        path: 'd',
+      }
     ],
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    {/* <ThemeProvider theme={theme}> */}
+    <CssBaseline />
+    <AuthProvider>
       <RouterProvider router={router} />
-    </ThemeProvider>
+    </AuthProvider>
+    {/* </ThemeProvider> */}
   </React.StrictMode>,
 );

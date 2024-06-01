@@ -1,12 +1,14 @@
-import { Container } from '@mui/material';
+import { Container, Switch } from '@mui/material';
 import React from 'react';
-import { Outlet } from 'react-router-dom';
-import ButtonLogin from './components/ButtonLogin';
+import { Outlet, Route, Router } from 'react-router-dom';
 import Col from './components/Col';
 import Row from './components/Row';
 import Status from './components/Status';
 import { API } from './util';
 import GameMaker from './components/GameMaker';
+import { Dashboard } from '@mui/icons-material';
+import Login from './components/Login';
+import { AuthProvider } from './components/AuthContext';
 
 const App: React.FC = () => {
   const handle42Login = () => {
@@ -21,12 +23,13 @@ const App: React.FC = () => {
     <Container className="root">
       <Col className="app">
         <header>
+          <meta name="viewport" content="initial-scale=1, width=device-width" />
           <Row>
-            <ButtonLogin onClick={handle42Login} text="Log In" />
-            <ButtonLogin onClick={anonlogin} text="anon Log In" />
+            <Dashboard />
+            {/* <Login onClick={handle42Login} text="Log In" /> */}
+            {/* <Login onClick={anonlogin} text="anon Log In" /> */}
             <Status />
             <GameMaker />
-
             {/* <Button onClick={handle42Login}>Log In</Button> */}
 
             {/* <Button onClick={handleAccountClick}>Account</Button>{' '} */}
