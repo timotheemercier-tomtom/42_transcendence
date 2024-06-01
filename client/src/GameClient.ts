@@ -1,4 +1,4 @@
-import { GameCommon, keyState } from './GameCommon';
+import { GameCommon, KeyState } from './GameCommon';
 import { socket } from './game.socket';
 
 export default class GameClient extends GameCommon {
@@ -31,7 +31,7 @@ export default class GameClient extends GameCommon {
         this.emit('key_change', {
           userId: userId,
           key: e.key,
-          keyState: keyState.Pressed,
+          keyState: KeyState.Pressed,
         });
       }
     }).bind(this);
@@ -42,7 +42,7 @@ export default class GameClient extends GameCommon {
         this.emit('key_change', {
           userId: userId,
           key: e.key,
-          keyState: keyState.Released,
+          keyState: KeyState.Released,
         });
       }
     }).bind(this);
@@ -55,10 +55,12 @@ export default class GameClient extends GameCommon {
     });
 
     this.on('frame', (e) => {
-      this.ball_xpos = e.ball_xpos;
-      this.ball_ypos = e.ball_ypos;
+      this.ballXpos = e.ballXpos;
+      this.ballYpos = e.ballYpos;
       this.pa = e.playerA;
       this.pb = e.playerB;
+      this.scoreA = e.scoreA;
+      this.scoreB = e.scoreB;
     });
 
     this.on('join', (v) => {
@@ -102,14 +104,17 @@ export default class GameClient extends GameCommon {
   _draw = this.draw.bind(this);
 
   draw() {
+    // field
     this.ctx.fillStyle = 'black';
     this.ctx.fillRect(0, 0, this.w, this.h);
     this.ctx.strokeStyle = 'white';
 
+    // paddle A
     let c = this.opt.user[this.userA!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
     this.ctx.fillRect(GameCommon.PPAD, this.pa, GameCommon.PW, GameCommon.PH);
 
+    // paddle B
     c = this.opt.user[this.userB!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
     this.ctx.fillRect(
@@ -119,18 +124,23 @@ export default class GameClient extends GameCommon {
       GameCommon.PH,
     );
 
+    // ball
     this.ctx.fillStyle = 'white';
-
     this.ctx.beginPath();
     this.ctx.arc(
-      this.ball_xpos,
-      this.ball_ypos,
+      this.ballXpos,
+      this.ballYpos,
       GameCommon.BRAD,
       0,
       2 * Math.PI,
       false,
     );
     this.ctx.fill();
+
+    // score
+    this.ctx.fillStyle = 'green';
+    this.ctx.font = 'bold italic 40px Arial';
+    this.ctx.fillText('Score: ' + this.scoreA + ' - ' + this.scoreB, 10, 50);
 
     this.frameid = requestAnimationFrame(this._draw);
   }

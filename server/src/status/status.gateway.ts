@@ -1,4 +1,4 @@
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { WebSocketGateway } from '@nestjs/websockets';
 import { StatusType } from 'common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
@@ -24,8 +24,8 @@ export class StatusGateway {
           return next(new Error('user does not exist'));
         }
 
-        this.userToClient.set(user.username, client);
-        this.idmap.set(client.id, user.username);
+        this.userToClient.set(user.login, client);
+        this.idmap.set(client.id, user.login);
       } catch (error) {
         return next(error);
       }
@@ -38,8 +38,8 @@ export class StatusGateway {
     const friends = await this.friends.getUsersWhoAddedAsFriend(user);
     console.log(friends);
 
-    friends.forEach(
-      (v) => this.userToClient.get(v.login)?.emit('state', [user, state]),
+    friends.forEach((v) =>
+      this.userToClient.get(v.login)?.emit('state', [user, state]),
     );
   }
 

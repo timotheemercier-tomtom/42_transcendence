@@ -25,26 +25,26 @@ export class User {
   @Column({ unique: true })
   login: string;
 
-  @Column({ length: 42 })
-  username: string;
+  @Column({ length: 42, unique: true })
+  displayName: string;
 
-//   @Column({unique:true})
-//   email: string;
+  //   @Column({unique:true})
+  //   email: string;
 
   @Column({ nullable: true })
   picture: string;
 
-//   @Column({length: 10, nullable: true })
-//   phone: number;
+  //   @Column({length: 10, nullable: true })
+  //   phone: number;
 
-//   @Column({ select: false, nullable: true })
-//   authConfirmToken: String
+  //   @Column({ select: false, nullable: true })
+  //   authConfirmToken: String
 
-//   @Column({ default: false, nullable: true })
-//   isVerified: Boolean;
+  //   @Column({ default: false, nullable: true })
+  //   isVerified: Boolean;
 
-//   @CreateDateColumn()
-//   createdAt: Date;
+  //   @CreateDateColumn()
+  //   createdAt: Date;
 
   @Column({ default: 0 })
   won: number;

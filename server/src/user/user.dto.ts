@@ -1,8 +1,13 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, MinLength } from 'class-validator';
-
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class UserDto {
-
   @IsNotEmpty()
   @IsString()
   login: string;
@@ -19,8 +24,6 @@ export class UserDto {
   @IsNumber()
   phone?: number;
 }
-
-
 
 // Add any additional properties you need to send to the frontend
 // Make sure to exclude sensitive information like passwords

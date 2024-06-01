@@ -58,8 +58,8 @@ export class ChatGateway
           return next(new Error('user does not exist'));
         }
 
-        this.userToClient.set(user.username, client);
-        this.idmap.set(client.id, user.username);
+        this.userToClient.set(user.login, client);
+        this.idmap.set(client.id, user.login);
       } catch (error) {
         return next(error);
       }

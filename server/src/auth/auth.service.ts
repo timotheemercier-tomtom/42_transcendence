@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class AuthService {
     private userService: UserService,
   ) {}
 
-  async validateUser(token: string): Promise<any> {
+  async validateUser(token: string): Promise<User | null> {
     try {
       // Ensure this matches the secret used in JwtStrategy
       const decoded = this.jwtService.verify(token, {
