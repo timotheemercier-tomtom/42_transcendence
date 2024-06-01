@@ -15,6 +15,7 @@ const Game = () => {
   const gameId: string = id!;
   const userId: string = getLogin();
   const [gameStateString, setGameStateStr] = useState('waiting for players');
+  const [gameState, setGameState] = useState(GameState.WaitingForPlayers);
 
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
@@ -24,6 +25,7 @@ const Game = () => {
 
   useEffect(() => {
     const onmessage = (e: GameEventData['game_state']) => {
+      setGameState(e);
       console.log('game event data (component!)', e);
       if (e == GameState.WaitingForPlayers)
         setGameStateStr('waiting for players');
@@ -41,7 +43,12 @@ const Game = () => {
 
   return (
     <Col>
-      <Button onClick={() => GC.start()}>Start</Button>
+      <Button
+        disabled={gameState != GameState.ReadyToStart}
+        onClick={() => GC.start()}
+      >
+        Start Game!
+      </Button>
       <Button onClick={() => GC.joinAnon()}>Join Anon</Button>
       <span>userId: {userId}</span>
       <span>gameId: {gameId}</span>
