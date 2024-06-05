@@ -65,9 +65,7 @@ export class AuthController {
     let user: User | null;
     if (!(user = await this.user.findOne(name)))
       user = await this.user.create({ login: name, displayName: name });
-    console.log("signing... ", user);
     const accessToken = this.jwt.sign({...user});
-    console.log("anon sign in: ", host, name, accessToken);
     res.redirect(this.redir(host, accessToken, name));
   }
 }
