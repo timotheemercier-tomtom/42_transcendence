@@ -39,7 +39,7 @@ const GameMaker = () => {
     <>
       <Row alignItems={'center'} gap={'1rem'}>
         <Col>
-          <Button onClick={() => socket.emit('create', {userId: userId, gameId: userId})}>Play PONG! with a friend!</Button>
+          <Button onClick={() => socket.emit('create', {userId: userId, gameId: (userId + '_game')})}>Play PONG! with a friend!</Button>
         </Col>
       </Row>
       <Row alignItems={'center'} gap={'1rem'}>
