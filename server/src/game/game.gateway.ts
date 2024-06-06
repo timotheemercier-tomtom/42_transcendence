@@ -126,6 +126,11 @@ export class GameGateway extends Eventer {
     gameId: GameEventData['request_game_state'],
   ) {
     const game = this.service.guardGame(gameId);
-    if (game) client.emit('game_state', game.gameState);
+    if (game)
+      client.emit('game_state', {
+        gameState: game.gameState,
+        playerA: game.userA,
+        playerB: game.userB,
+      });
   }
 }

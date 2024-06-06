@@ -45,15 +45,19 @@ export type GameEventData = {
   leave: GameUserGame;
   start: string;
   frame: {
-    playerA: number;
-    playerB: number;
+    playerA: number; // paddle postion of player A
+    playerB: number; // paddle postion of player B
     ballXpos: number;
     ballYpos: number;
     ballAngle: number;
     scoreA: number;
     scoreB: number;
   };
-  game_state: GameState;
+  game_state: {
+    gameState: GameState;
+    playerA: string | undefined;
+    playerB: string | undefined;
+  };
   request_game_state: string;
   key_change: { userId: string; key: string; keyState: KeyState };
   opt: GameOpt;

@@ -79,8 +79,10 @@ export default class GameClient extends GameCommon {
       }
     });
 
-    this.on('game_state', (gameState) => {
-      this.gameState = gameState;
+    this.on('game_state', (v) => {
+      this.gameState = v.gameState;
+      this.userA = v.playerA;
+      this.userB = v.playerB;
     });
 
     this.on('opt', (v) => this.addOpt(v));

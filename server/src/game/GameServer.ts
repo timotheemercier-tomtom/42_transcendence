@@ -46,8 +46,12 @@ export default class GameServer extends GameCommon {
     this.emit('join', { userId: userId, gameId: this.gameId });
     if (this.userA && this.userB) {
       this.gameState = GameState.ReadyToStart;
-      this.emit('game_state', this.gameState);
     }
+    this.emit('game_state', {
+      gameState: this.gameState,
+      playerA: this.userA,
+      playerB: this.userB,
+    });
   }
 
   leave(userId: string) {
@@ -86,14 +90,22 @@ export default class GameServer extends GameCommon {
     });
 
     this.gameState = GameState.Running;
-    this.emit('game_state', this.gameState);
+    this.emit('game_state', {
+      gameState: this.gameState,
+      playerA: this.userA,
+      playerB: this.userB,
+    });
 
     const gameRunner = () => {
       runPhysics.bind(this)();
       if (this.scoreA == 10 || this.scoreB == 10) {
         clearInterval(frameInterval);
         this.gameState = GameState.Finished;
-        this.emit('game_state', this.gameState);
+        this.emit('game_state', {
+          gameState: this.gameState,
+          playerA: this.userA,
+          playerB: this.userB,
+        });
         if (this.scoreA > this.scoreB) {
           this.userService.updateWinLossScore(this.userA!, this.userB!);
         } else {
