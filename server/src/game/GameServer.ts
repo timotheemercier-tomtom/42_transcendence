@@ -19,10 +19,12 @@ export default class GameServer extends GameCommon {
 
   constructor(
     gameId: string,
+    isPublic: boolean,
     private readonly userService: UserService,
   ) {
     super();
     this.gameId = gameId;
+    this.isPublic = isPublic;
   }
 
   addOpt(opt: GameOpt): void {

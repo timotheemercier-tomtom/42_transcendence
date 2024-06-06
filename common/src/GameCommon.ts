@@ -34,7 +34,11 @@ export type GameOpt = {
 };
 
 export type GameEventData = {
-  create: GameUserGame;
+  create: {
+    userId: string;
+    gameId: string;
+    isPublic: boolean;
+  };
   enque: string;
   join: GameUserGame;
   join_anon: GameUserGame;
@@ -100,6 +104,7 @@ export class GameCommon extends Eventer {
   ballAngle!: number; // angle in radians: [0, 2*PI]
   scoreA: number = 0;
   scoreB: number = 0;
+  isPublic: boolean = true;
 
   get pa() {
     return this.p[0];

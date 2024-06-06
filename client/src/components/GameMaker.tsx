@@ -20,12 +20,13 @@ const GameMaker = () => {
 
   useEffect(() => {
     const onjoin = (ug: GameEventData['join']) => {
-      console.log("'join' received; navigating to game page", ug);
       if (ug.userId == userId) nav('/r/' + ug.gameId);
     };
-    const oncreate = (ug: GameEventData['create']) => {
-      console.log("'create' received; emitting 'join'", ug + '_game');
-      socket.emit('join', ug);
+    const oncreate = (createMsg: GameEventData['create']) => {
+      socket.emit('join', {
+        userId: createMsg.userId,
+        gameId: createMsg.gameId,
+      });
     };
     socket.on('join', onjoin);
     socket.on('create', oncreate);
@@ -39,12 +40,24 @@ const GameMaker = () => {
     <>
       <Row alignItems={'center'} gap={'1rem'}>
         <Col>
-          <Button onClick={() => socket.emit('create', {userId: userId, gameId: (userId + '_game')})}>Play PONG! with a friend!</Button>
+          <Button
+            onClick={() =>
+              socket.emit('create', {
+                userId: userId,
+                gameId: userId + '_game',
+                isPublic: false,
+              })
+            }
+          >
+            Play PONG with a friend!
+          </Button>
         </Col>
       </Row>
       <Row alignItems={'center'} gap={'1rem'}>
         <Col>
-          <Button onClick={() => socket.emit('enque', userId)}>Play PONG! against a random opponent!</Button>
+          <Button onClick={() => socket.emit('enque', userId)}>
+            Play PONG with a random opponent!
+          </Button>
         </Col>
       </Row>
     </>

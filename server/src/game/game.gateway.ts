@@ -51,8 +51,8 @@ export class GameGateway extends Eventer {
       next();
     });
 
-    this.service.on('create', (ug) => {
-      const game = this.service.guardGame(ug.gameId);
+    this.service.on('create', (createMsg) => {
+      const game = this.service.guardGame(createMsg.gameId);
       game.onAny = (e, v) => {
         if (game.userA) {
           const clientA: Socket | undefined = this.userToClient.get(game.userA);
@@ -71,14 +71,18 @@ export class GameGateway extends Eventer {
         const client = this.userToClient.get(ug.userId)!;
         if (client) client.join(ug.gameId);
       });
-      this.userToClient.get(ug.userId)?.emit('create', ug);
+      this.userToClient.get(createMsg.userId)?.emit('create', createMsg);
     });
   }
 
   @SubscribeMessage('create')
-  _create(client: Socket, ug: GameEventData['create']) {
+  _create(client: Socket, createMsg: GameEventData['create']) {
     const userId = this.idmap.get(client.id)!;
-    this.service.create({ gameId: ug.gameId, userId: userId });
+    this.service.create({
+      userId: userId,
+      gameId: createMsg.gameId,
+      isPublic: createMsg.isPublic,
+    });
   }
 
   @SubscribeMessage('join')
