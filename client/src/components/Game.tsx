@@ -35,6 +35,7 @@ const Game = () => {
     };
 
     socket.on('game_state', onmessage);
+    socket.emit('request_game_state', gameId);
     return () => {
       console.log('removing listeneres');
       socket.off('game_state', onmessage);

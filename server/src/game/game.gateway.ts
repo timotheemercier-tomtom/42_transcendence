@@ -115,4 +115,13 @@ export class GameGateway extends Eventer {
   _opt(client: Socket, opt: GameEventData['opt']) {
     this.service.opt(opt);
   }
+
+  @SubscribeMessage('request_game_state')
+  _request_game_state(
+    client: Socket,
+    gameId: GameEventData['request_game_state'],
+  ) {
+    const game = this.service.guardGame(gameId);
+    if (game) client.emit('game_state', game.gameState);
+  }
 }

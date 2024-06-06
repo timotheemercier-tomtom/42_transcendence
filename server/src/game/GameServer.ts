@@ -41,11 +41,11 @@ export default class GameServer extends GameCommon {
       this.userB = userId;
       this.keysB = { up: false, down: false };
     }
+    this.emit('join', { userId: userId, gameId: this.gameId });
     if (this.userA && this.userB) {
       this.gameState = GameState.ReadyToStart;
       this.emit('game_state', this.gameState);
     }
-    this.emit('join', { userId: userId, gameId: this.gameId });
   }
 
   leave(userId: string) {

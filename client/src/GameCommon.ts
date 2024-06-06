@@ -19,6 +19,7 @@ export type GameEventType =
   | 'start'
   | 'frame'
   | 'game_state'
+  | 'request_game_state'
   | 'key_change'
   | 'opt';
 
@@ -49,6 +50,7 @@ export type GameEventData = {
     scoreB: number;
   };
   game_state: GameState;
+  request_game_state: string;
   key_change: { userId: string; key: string; keyState: KeyState };
   opt: GameOpt;
 };
