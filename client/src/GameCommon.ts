@@ -14,7 +14,6 @@ export type GameEventType =
   | 'create'
   | 'enque'
   | 'join'
-  | 'join_anon'
   | 'leave'
   | 'start'
   | 'frame'
@@ -41,7 +40,6 @@ export type GameEventData = {
   };
   enque: string;
   join: GameUserGame;
-  join_anon: GameUserGame;
   leave: GameUserGame;
   start: string;
   frame: {

@@ -103,8 +103,20 @@ export default class GameClient extends GameCommon {
     this.emit('start', this.gameId);
   }
 
-  joinAnon() {
-    this.emit('join_anon', this.ug);
+  join() {
+    // join as first player
+    if (!this.userA && !this.userB) {
+      this.emit('create', {
+        userId: this.userId,
+        gameId: this.gameId,
+        isPublic: this.isPublic,
+      });
+      this.emit('join', this.ug);
+    }
+    // join as second player
+    else if ((this.userA && !this.userB) || (!this.userA && this.userB)) {
+      this.emit('join', this.ug);
+    }
   }
 
   _draw = this.draw.bind(this);

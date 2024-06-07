@@ -61,7 +61,16 @@ const Game = () => {
       >
         Start Game!
       </Button>
-      <Button onClick={() => GC.joinAnon()}>Join Anon</Button>
+      <Button
+        disabled={
+          gameState != GameState.WaitingForPlayers ||
+          playerA == userId ||
+          playerB == userId
+        }
+        onClick={() => GC.join()}
+      >
+        Join Game!
+      </Button>
       <span>userId: {userId}</span>
       <span>gameId: {gameId}</span>
       <span>gameState: {gameStateString}</span>

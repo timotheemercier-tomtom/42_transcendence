@@ -91,11 +91,6 @@ export class GameGateway extends Eventer {
     this.service.join(ug.gameId, user);
   }
 
-  @SubscribeMessage('join_anon')
-  _join_anon(client: Socket, ug: GameEventData['join_anon']) {
-    this.service.join(ug.gameId, '$anon0');
-  }
-
   @SubscribeMessage('key_change')
   _key_change(client: Socket, key_change: GameEventData['key_change']) {
     const user = this.idmap.get(client.id)!;
