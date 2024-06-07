@@ -65,11 +65,17 @@ export class GameGateway extends Eventer {
       };
       game.on('leave', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
-        if (client) client.leave(ug.gameId);
+        // send final game_state to user who is no longer in the game
+        client.emit('game_state', {
+          gameState: game.gameState,
+          playerA: game.userA,
+          playerB: game.userB,
+        });
+        if (client) client.leave(ug.gameId); // leave socket.io 'room'
       });
       game.on('join', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
-        if (client) client.join(ug.gameId);
+        if (client) client.join(ug.gameId); // join socket.io 'room'
       });
       this.userToClient.get(createMsg.userId)?.emit('create', createMsg);
     });
@@ -89,6 +95,12 @@ export class GameGateway extends Eventer {
   _join(client: Socket, ug: GameEventData['join']) {
     const user = this.idmap.get(client.id)!;
     this.service.join(ug.gameId, user);
+  }
+
+  @SubscribeMessage('leave')
+  _leave(client: Socket, ug: GameEventData['leave']) {
+    const user = this.idmap.get(client.id)!;
+    this.service.leave(ug.gameId, user);
   }
 
   @SubscribeMessage('key_change')

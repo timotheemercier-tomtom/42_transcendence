@@ -47,11 +47,7 @@ export default class GameServer extends GameCommon {
     if (this.userA && this.userB) {
       this.gameState = GameState.ReadyToStart;
     }
-    this.emit('game_state', {
-      gameState: this.gameState,
-      playerA: this.userA,
-      playerB: this.userB,
-    });
+    this.emitGameState();
   }
 
   leave(userId: string) {
@@ -62,13 +58,17 @@ export default class GameServer extends GameCommon {
     } else {
       throw new WsException('user not in this game');
     }
+    if (this.gameState == GameState.ReadyToStart)
+      this.gameState = GameState.WaitingForPlayers;
+    else if (this.gameState == GameState.Running)
+      this.gameState = GameState.Finished;
+    this.emitGameState();
     this.emit('leave', { userId: userId, gameId: this.gameId });
   }
 
   start(gameId: string) {
-    console.log("starting game '" + gameId + "'!");
+    console.log("starting game '" + gameId + "'");
 
-    // listen to key-change messages
     this.on('key_change', (key_change: GameEventData['key_change']) => {
       let userKeys!: keyStatus;
       if (key_change.userId == this.userA) userKeys = this.keysA;
@@ -90,22 +90,14 @@ export default class GameServer extends GameCommon {
     });
 
     this.gameState = GameState.Running;
-    this.emit('game_state', {
-      gameState: this.gameState,
-      playerA: this.userA,
-      playerB: this.userB,
-    });
+    this.emitGameState();
 
     const gameRunner = () => {
       runPhysics.bind(this)();
       if (this.scoreA == 10 || this.scoreB == 10) {
         clearInterval(frameInterval);
         this.gameState = GameState.Finished;
-        this.emit('game_state', {
-          gameState: this.gameState,
-          playerA: this.userA,
-          playerB: this.userB,
-        });
+        this.emitGameState();
         if (this.scoreA > this.scoreB) {
           this.userService.updateWinLossScore(this.userA!, this.userB!);
         } else {
@@ -118,6 +110,14 @@ export default class GameServer extends GameCommon {
       () => gameRunner(),
       GameCommon.FRAMEDELAY,
     );
+  }
+
+  emitGameState(): void {
+    this.emit('game_state', {
+      gameState: this.gameState,
+      playerA: this.userA,
+      playerB: this.userB,
+    });
   }
 
   createFrame(): GameEventData['frame'] {

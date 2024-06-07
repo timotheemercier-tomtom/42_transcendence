@@ -56,12 +56,6 @@ const Game = () => {
   return (
     <Col>
       <Button
-        disabled={gameState != GameState.ReadyToStart}
-        onClick={() => GC.start()}
-      >
-        Start Game!
-      </Button>
-      <Button
         disabled={
           gameState != GameState.WaitingForPlayers ||
           playerA == userId ||
@@ -70,6 +64,18 @@ const Game = () => {
         onClick={() => GC.join()}
       >
         Join Game!
+      </Button>
+      <Button
+        disabled={playerA != userId && playerB != userId}
+        onClick={() => GC.leave()}
+      >
+        Leave Game!
+      </Button>
+      <Button
+        disabled={gameState != GameState.ReadyToStart}
+        onClick={() => GC.start()}
+      >
+        Start Game!
       </Button>
       <span>userId: {userId}</span>
       <span>gameId: {gameId}</span>

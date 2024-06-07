@@ -119,6 +119,10 @@ export default class GameClient extends GameCommon {
     }
   }
 
+  leave() {
+    this.emit('leave', this.ug);
+  }
+
   _draw = this.draw.bind(this);
 
   draw() {
