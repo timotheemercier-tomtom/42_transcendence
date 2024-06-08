@@ -79,6 +79,12 @@ export default class GameClient extends GameCommon {
       }
     });
 
+    this.on('game_state', (v) => {
+      this.gameState = v.gameState;
+      this.userA = v.playerA;
+      this.userB = v.playerB;
+    });
+
     this.on('opt', (v) => this.addOpt(v));
     socket.emit('opt', { gameId: this.gameId, user: {} });
     window.addEventListener('keydown', this.evdown);
@@ -97,8 +103,24 @@ export default class GameClient extends GameCommon {
     this.emit('start', this.gameId);
   }
 
-  joinAnon() {
-    this.emit('join_anon', this.ug);
+  join() {
+    // join as first player
+    if (!this.userA && !this.userB) {
+      this.emit('create', {
+        userId: this.userId,
+        gameId: this.gameId,
+        isPublic: this.isPublic,
+      });
+      this.emit('join', this.ug);
+    }
+    // join as second player
+    else if ((this.userA && !this.userB) || (!this.userA && this.userB)) {
+      this.emit('join', this.ug);
+    }
+  }
+
+  leave() {
+    this.emit('leave', this.ug);
   }
 
   _draw = this.draw.bind(this);

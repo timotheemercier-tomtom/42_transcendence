@@ -51,8 +51,8 @@ export class GameGateway extends Eventer {
       next();
     });
 
-    this.service.on('create', (ug) => {
-      const game = this.service.guardGame(ug.gameId);
+    this.service.on('create', (createMsg) => {
+      const game = this.service.guardGame(createMsg.gameId);
       game.onAny = (e, v) => {
         if (game.userA) {
           const clientA: Socket | undefined = this.userToClient.get(game.userA);
@@ -65,20 +65,30 @@ export class GameGateway extends Eventer {
       };
       game.on('leave', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
-        if (client) client.leave(ug.gameId);
+        // send final game_state to user who is no longer in the game
+        client.emit('game_state', {
+          gameState: game.gameState,
+          playerA: game.userA,
+          playerB: game.userB,
+        });
+        if (client) client.leave(ug.gameId); // leave socket.io 'room'
       });
       game.on('join', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
-        if (client) client.join(ug.gameId);
+        if (client) client.join(ug.gameId); // join socket.io 'room'
       });
-      this.userToClient.get(ug.userId)?.emit('create', ug);
+      this.userToClient.get(createMsg.userId)?.emit('create', createMsg);
     });
   }
 
   @SubscribeMessage('create')
-  _create(client: Socket, ug: GameEventData['create']) {
+  _create(client: Socket, createMsg: GameEventData['create']) {
     const userId = this.idmap.get(client.id)!;
-    this.service.create({ gameId: ug.gameId, userId: userId });
+    this.service.create({
+      userId: userId,
+      gameId: createMsg.gameId,
+      isPublic: createMsg.isPublic,
+    });
   }
 
   @SubscribeMessage('join')
@@ -87,9 +97,10 @@ export class GameGateway extends Eventer {
     this.service.join(ug.gameId, user);
   }
 
-  @SubscribeMessage('join_anon')
-  _join_anon(client: Socket, ug: GameEventData['join_anon']) {
-    this.service.join(ug.gameId, '$anon0');
+  @SubscribeMessage('leave')
+  _leave(client: Socket, ug: GameEventData['leave']) {
+    const user = this.idmap.get(client.id)!;
+    this.service.leave(ug.gameId, user);
   }
 
   @SubscribeMessage('key_change')
@@ -114,5 +125,19 @@ export class GameGateway extends Eventer {
   @SubscribeMessage('opt')
   _opt(client: Socket, opt: GameEventData['opt']) {
     this.service.opt(opt);
+  }
+
+  @SubscribeMessage('request_game_state')
+  _request_game_state(
+    client: Socket,
+    gameId: GameEventData['request_game_state'],
+  ) {
+    const game = this.service.guardGame(gameId);
+    if (game)
+      client.emit('game_state', {
+        gameState: game.gameState,
+        playerA: game.userA,
+        playerB: game.userB,
+      });
   }
 }

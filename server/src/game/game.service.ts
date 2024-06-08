@@ -5,7 +5,7 @@ import {
   GameEventData,
   GameEventType,
   GameOpt,
-  GameUserGame,
+  GameState,
 } from './GameCommon';
 import { randomUUID } from 'crypto';
 import { WsException } from '@nestjs/websockets';
@@ -31,12 +31,17 @@ export class GameService extends Eventer {
     throw new WsException('user not in game');
   }
 
-  create(ug: GameUserGame) {
-    if (this.games.has(ug.gameId)) throw new WsException('game already exists');
-    const game = new GameServer(ug.gameId, this.userService);
+  create(createMsg: GameEventData['create']) {
+    if (this.games.has(createMsg.gameId))
+      throw new WsException('game already exists');
+    const game = new GameServer(
+      createMsg.gameId,
+      createMsg.isPublic,
+      this.userService,
+    );
     game.create(GameServer.W, GameServer.H);
-    this.games.set(ug.gameId, game);
-    this.emit('create', ug);
+    this.games.set(createMsg.gameId, game);
+    this.emit('create', createMsg);
   }
 
   start(gameId: string) {
@@ -81,15 +86,19 @@ export class GameService extends Eventer {
     console.log('enque', user);
     if (this.userToGame.has(user))
       throw new WsException('user already in a game');
-    // join existing game
+    // join existing public game
     for (const [gameId, game] of this.games.entries()) {
-      if (!game.userA || !game.userB) {
+      if (
+        game.isPublic &&
+        game.gameState == GameState.WaitingForPlayers &&
+        (!game.userA || !game.userB)
+      ) {
         return this.join(gameId, user);
       }
     }
     // create new game
     const id = 'game-' + randomUUID();
-    this.create({ gameId: id, userId: user });
+    this.create({ gameId: id, userId: user, isPublic: true });
     this.join(id, user);
   }
 
