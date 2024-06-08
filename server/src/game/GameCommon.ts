@@ -14,10 +14,11 @@ export type GameEventType =
   | 'create'
   | 'enque'
   | 'join'
-  | 'join_anon'
   | 'leave'
   | 'start'
   | 'frame'
+  | 'game_state'
+  | 'request_game_state'
   | 'key_change'
   | 'opt';
 
@@ -32,22 +33,30 @@ export type GameOpt = {
 };
 
 export type GameEventData = {
-  create: GameUserGame;
+  create: {
+    userId: string;
+    gameId: string;
+    isPublic: boolean;
+  };
   enque: string;
   join: GameUserGame;
-  join_anon: GameUserGame;
   leave: GameUserGame;
   start: string;
   frame: {
-    gameState: GameState;
-    playerA: number;
-    playerB: number;
+    playerA: number; // paddle postion of player A
+    playerB: number; // paddle postion of player B
     ballXpos: number;
     ballYpos: number;
     ballAngle: number;
     scoreA: number;
     scoreB: number;
   };
+  game_state: {
+    gameState: GameState;
+    playerA: string | undefined;
+    playerB: string | undefined;
+  };
+  request_game_state: string;
   key_change: { userId: string; key: string; keyState: KeyState };
   opt: GameOpt;
 };
@@ -97,6 +106,7 @@ export class GameCommon extends Eventer {
   ballAngle!: number; // angle in radians: [0, 2*PI]
   scoreA: number = 0;
   scoreB: number = 0;
+  isPublic: boolean = true;
 
   get pa() {
     return this.p[0];

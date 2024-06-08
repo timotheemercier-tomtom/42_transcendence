@@ -19,10 +19,12 @@ export default class GameServer extends GameCommon {
 
   constructor(
     gameId: string,
+    isPublic: boolean,
     private readonly userService: UserService,
   ) {
     super();
     this.gameId = gameId;
+    this.isPublic = isPublic;
   }
 
   addOpt(opt: GameOpt): void {
@@ -41,8 +43,11 @@ export default class GameServer extends GameCommon {
       this.userB = userId;
       this.keysB = { up: false, down: false };
     }
-    if (this.userA && this.userB) this.gameState = GameState.ReadyToStart;
     this.emit('join', { userId: userId, gameId: this.gameId });
+    if (this.userA && this.userB) {
+      this.gameState = GameState.ReadyToStart;
+    }
+    this.emitGameState();
   }
 
   leave(userId: string) {
@@ -53,14 +58,17 @@ export default class GameServer extends GameCommon {
     } else {
       throw new WsException('user not in this game');
     }
+    if (this.gameState == GameState.ReadyToStart)
+      this.gameState = GameState.WaitingForPlayers;
+    else if (this.gameState == GameState.Running)
+      this.gameState = GameState.Finished;
+    this.emitGameState();
     this.emit('leave', { userId: userId, gameId: this.gameId });
   }
 
   start(gameId: string) {
-    console.log("starting game '" + gameId + "'!");
-    this.gameState = GameState.Running;
+    console.log("starting game '" + gameId + "'");
 
-    // listen to key-change messages
     this.on('key_change', (key_change: GameEventData['key_change']) => {
       let userKeys!: keyStatus;
       if (key_change.userId == this.userA) userKeys = this.keysA;
@@ -81,11 +89,15 @@ export default class GameServer extends GameCommon {
       }
     });
 
+    this.gameState = GameState.Running;
+    this.emitGameState();
+
     const gameRunner = () => {
       runPhysics.bind(this)();
       if (this.scoreA == 10 || this.scoreB == 10) {
-        this.gameState = GameState.Finished;
         clearInterval(frameInterval);
+        this.gameState = GameState.Finished;
+        this.emitGameState();
         if (this.scoreA > this.scoreB) {
           this.userService.updateWinLossScore(this.userA!, this.userB!);
         } else {
@@ -100,9 +112,16 @@ export default class GameServer extends GameCommon {
     );
   }
 
+  emitGameState(): void {
+    this.emit('game_state', {
+      gameState: this.gameState,
+      playerA: this.userA,
+      playerB: this.userB,
+    });
+  }
+
   createFrame(): GameEventData['frame'] {
     const frame: GameEventData['frame'] = {
-      gameState: this.gameState,
       playerA: this.pa,
       playerB: this.pb,
       ballXpos: this.ballXpos,

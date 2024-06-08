@@ -1,7 +1,7 @@
-import { Button, FormLabel, Input } from '@mui/material';
+import { Button } from '@mui/material';
 import Row from './Row';
 import Col from './Col';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { socket } from '../game.socket';
 import { GameEventData } from '../GameCommon';
 import { getLogin } from '../util';
@@ -10,9 +10,7 @@ import { useNavigate } from 'react-router-dom';
 const GameMaker = () => {
   const userId = getLogin();
   const nav = useNavigate();
-  const [gameId, setId] = useState('');
-  const [paddle, setPaddle] = useState('');
-  const [ball, setBall] = useState('');
+
   useEffect(() => {
     socket.connect();
     return () => {
@@ -24,9 +22,11 @@ const GameMaker = () => {
     const onjoin = (ug: GameEventData['join']) => {
       if (ug.userId == userId) nav('/r/' + ug.gameId);
     };
-    const oncreate = (ug: GameEventData['create']) => {
-      socket.emit('join', ug);
-      socket.emit('opt', { gameId: ug.gameId, user: { [ug.userId]: { paddle, ball } } });
+    const oncreate = (createMsg: GameEventData['create']) => {
+      socket.emit('join', {
+        userId: createMsg.userId,
+        gameId: createMsg.gameId,
+      });
     };
     socket.on('join', onjoin);
     socket.on('create', oncreate);
@@ -34,35 +34,33 @@ const GameMaker = () => {
       socket.off('join', onjoin);
       socket.off('create', oncreate);
     };
-  }, [ball, nav, paddle, userId]);
+  }, []);
 
   return (
-    <Row alignItems={'center'} gap={'1rem'}>
-      <Col>
-        <FormLabel>
-          paddle
-          <input
-            type="color"
-            onChange={(e) => setPaddle(e.target.value)}
-          ></input>
-        </FormLabel>
-        <FormLabel>
-          ball
-          <input type="color" onChange={(e) => setBall(e.target.value)}></input>
-        </FormLabel>
-      </Col>
-      <Col>
-        <Input
-          placeholder="game id"
-          value={gameId}
-          onChange={(e) => setId(e.target.value)}
-        ></Input>
-        <Button onClick={() => socket.emit('create', {userId: userId, gameId: gameId})}>Create</Button>
-      </Col>
-      <Col>
-        <Button onClick={() => socket.emit('enque', userId)}>Enqueue</Button>
-      </Col>
-    </Row>
+    <>
+      <Row alignItems={'center'} gap={'1rem'}>
+        <Col>
+          <Button
+            onClick={() =>
+              socket.emit('create', {
+                userId: userId,
+                gameId: userId + '_game',
+                isPublic: false,
+              })
+            }
+          >
+            Play PONG with a friend!
+          </Button>
+        </Col>
+      </Row>
+      <Row alignItems={'center'} gap={'1rem'}>
+        <Col>
+          <Button onClick={() => socket.emit('enque', userId)}>
+            Play PONG with a random opponent!
+          </Button>
+        </Col>
+      </Row>
+    </>
   );
 };
 
