@@ -19,19 +19,23 @@ const GameMaker = () => {
   }, []);
 
   useEffect(() => {
-    const onjoin = (ug: GameEventData['join']) => {
+    const onjoin_game_room = (ug: GameEventData['join_game_room']) => {
       if (ug.userId == userId) nav('/r/' + ug.gameId);
     };
     const oncreate = (createMsg: GameEventData['create']) => {
+      socket.emit('join_game_room', {
+        userId: createMsg.userId,
+        gameId: createMsg.gameId,
+      });
       socket.emit('join', {
         userId: createMsg.userId,
         gameId: createMsg.gameId,
       });
     };
-    socket.on('join', onjoin);
+    socket.on('join_game_room', onjoin_game_room);
     socket.on('create', oncreate);
     return () => {
-      socket.off('join', onjoin);
+      socket.off('join_game_room', onjoin_game_room);
       socket.off('create', oncreate);
     };
   }, []);

@@ -54,12 +54,19 @@ export class GameService extends Eventer {
     game.destroy();
   }
 
-  join(id: string, user: string) {
+  joinGameRoom(id: string, user: string) {
     const game = this.guardGame(id);
     if (this.userToGame.get(user))
       throw new WsException('user already in a game');
-    game.join(user);
+    game.joinGameRoom(user);
     this.userToGame.set(user, id);
+  }
+  
+  join(id: string, user: string) {
+    const game = this.guardGame(id);
+    if (!this.userToGame.get(user))
+      throw new WsException('user is not yet in the game room');
+    game.join(user);
   }
 
   leave(id: string, user: string) {
@@ -93,12 +100,15 @@ export class GameService extends Eventer {
         game.gameState == GameState.WaitingForPlayers &&
         (!game.userA || !game.userB)
       ) {
-        return this.join(gameId, user);
+        this.joinGameRoom(gameId, user);
+        this.join(gameId, user);
+        return ;
       }
     }
     // create new game
     const id = 'game-' + randomUUID();
     this.create({ gameId: id, userId: user, isPublic: true });
+    this.joinGameRoom(id, user);
     this.join(id, user);
   }
 

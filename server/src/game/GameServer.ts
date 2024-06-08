@@ -16,6 +16,7 @@ export default class GameServer extends GameCommon {
   keysB: keyStatus = { up: false, down: false };
   pausingAfterGoal: boolean = false;
   goalTimeStamp: number = 0;
+  spectators: Set<string> = new Set<string>();
 
   constructor(
     gameId: string,
@@ -30,6 +31,11 @@ export default class GameServer extends GameCommon {
   addOpt(opt: GameOpt): void {
     super.addOpt(opt);
     this.emit('opt', this.opt);
+  }
+
+  joinGameRoom(userId: string) {
+    this.spectators.add(userId);
+    this.emit('join_game_room', { userId: userId, gameId: this.gameId });
   }
 
   join(userId: string) {

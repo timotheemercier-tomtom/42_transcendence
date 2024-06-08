@@ -53,15 +53,27 @@ export class GameGateway extends Eventer {
 
     this.service.on('create', (createMsg) => {
       const game = this.service.guardGame(createMsg.gameId);
+
+      // send outgoing messages to all users in the game room
       game.onAny = (e, v) => {
-        if (game.userA) {
-          const clientA: Socket | undefined = this.userToClient.get(game.userA);
-          if (clientA) clientA.emit(e, v);
+        // if (e != 'frame') {
+        //   console.log('emtting (external) with "onany"', e, v);
+        // }
+        for (const spectator of game.spectators) {
+          const client: Socket | undefined = this.userToClient.get(spectator);
+          if (client) {
+            console.log('sending to spectator: ', spectator, e, v);
+            client.emit(e, v);
+          }
         }
-        if (game.userB) {
-          const clientB: Socket | undefined = this.userToClient.get(game.userB);
-          if (clientB) clientB.emit(e, v);
-        }
+        // if (game.userA) {
+        //   const clientA: Socket | undefined = this.userToClient.get(game.userA);
+        //   if (clientA) clientA.emit(e, v);
+        // }
+        // if (game.userB) {
+        //   const clientB: Socket | undefined = this.userToClient.get(game.userB);
+        //   if (clientB) clientB.emit(e, v);
+        // }
       };
       game.on('leave', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
@@ -73,11 +85,10 @@ export class GameGateway extends Eventer {
         });
         if (client) client.leave(ug.gameId); // leave socket.io 'room'
       });
-      game.on('join', (ug) => {
+      game.on('join_game_room', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
         if (client) client.join(ug.gameId); // join socket.io 'room'
       });
-      this.userToClient.get(createMsg.userId)?.emit('create', createMsg);
     });
   }
 
@@ -95,6 +106,12 @@ export class GameGateway extends Eventer {
   _join(client: Socket, ug: GameEventData['join']) {
     const user = this.idmap.get(client.id)!;
     this.service.join(ug.gameId, user);
+  }
+
+  @SubscribeMessage('join_game_room')
+  _joinGameRoom(client: Socket, ug: GameEventData['join']) {
+    const user = this.idmap.get(client.id)!;
+    this.service.joinGameRoom(ug.gameId, user);
   }
 
   @SubscribeMessage('leave')

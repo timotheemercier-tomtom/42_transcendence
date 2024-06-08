@@ -86,6 +86,8 @@ export default class GameClient extends GameCommon {
     });
 
     this.on('opt', (v) => this.addOpt(v));
+
+    socket.emit('join_game_room', this.ug);
     socket.emit('opt', { gameId: this.gameId, user: {} });
     window.addEventListener('keydown', this.evdown);
     window.addEventListener('keyup', this.evup);
