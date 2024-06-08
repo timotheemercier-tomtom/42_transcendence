@@ -55,7 +55,7 @@ export class ChatService {
   }
 
   guardPass(room: string, pass: string) {
-    if ((this.pass.get(room) ?? '') != pass)
+    if (this.pass.get(room) && this.pass.get(room) != pass)
       throw Error(`incorrect password for room ${room}`);
   }
 
