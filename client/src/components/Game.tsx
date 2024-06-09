@@ -19,13 +19,6 @@ const Game = () => {
   const [playerA, setPlayerA] = useState<string | undefined>(undefined);
   const [playerB, setPlayerB] = useState<string | undefined>(undefined);
 
-  // useEffect(() => {
-  //   socket.connect();
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
-
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
     if (!ctx) return;
@@ -72,7 +65,10 @@ const Game = () => {
         Leave Game!
       </Button>
       <Button
-        disabled={gameState != GameState.ReadyToStart}
+        disabled={
+          gameState != GameState.ReadyToStart ||
+          (playerA != userId && playerB != userId)
+        }
         onClick={() => GC.start()}
       >
         Start Game!
