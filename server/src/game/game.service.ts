@@ -41,7 +41,9 @@ export class GameService extends Eventer {
     );
     game.create(GameServer.W, GameServer.H);
     this.games.set(createMsg.gameId, game);
-    this.emit('create', createMsg);
+    this.emit('create', createMsg);  // adds listeners in gateway
+    game.joinGameRoom(createMsg.userId);
+    game.join(createMsg.userId);
   }
 
   start(gameId: string) {

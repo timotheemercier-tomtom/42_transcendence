@@ -36,6 +36,7 @@ export default class GameServer extends GameCommon {
   joinGameRoom(userId: string) {
     this.spectators.add(userId);
     this.emit('join_game_room', { userId: userId, gameId: this.gameId });
+    this.emitGameState();
   }
 
   join(userId: string) {
