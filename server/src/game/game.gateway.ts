@@ -82,6 +82,7 @@ export class GameGateway extends Eventer {
           gameState: game.gameState,
           playerA: game.userA,
           playerB: game.userB,
+          spectators: Array.from(game.spectators)
         });
         if (client) client.leave(ug.gameId); // leave socket.io 'room'
       });
@@ -150,11 +151,14 @@ export class GameGateway extends Eventer {
     gameId: GameEventData['request_game_state'],
   ) {
     const game = this.service.guardGame(gameId);
+    const user = this.idmap.get(client.id)!;
+    game.spectators.add(user);
     if (game)
       client.emit('game_state', {
         gameState: game.gameState,
         playerA: game.userA,
         playerB: game.userB,
+        spectators: Array.from(game.spectators)
       });
   }
 }

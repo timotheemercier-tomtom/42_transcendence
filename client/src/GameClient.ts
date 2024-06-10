@@ -83,6 +83,7 @@ export default class GameClient extends GameCommon {
       this.gameState = v.gameState;
       this.userA = v.playerA;
       this.userB = v.playerB;
+      this.spectators =  new Set([...(v.spectators)]);
     });
 
     this.on('opt', (v) => this.addOpt(v));

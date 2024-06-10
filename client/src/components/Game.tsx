@@ -18,6 +18,7 @@ const Game = () => {
   const [gameState, setGameState] = useState(GameState.WaitingForPlayers);
   const [playerA, setPlayerA] = useState<string | undefined>(undefined);
   const [playerB, setPlayerB] = useState<string | undefined>(undefined);
+  const [spectators, setSpectators] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
@@ -30,6 +31,7 @@ const Game = () => {
       setGameState(e.gameState);
       setPlayerA(e.playerA);
       setPlayerB(e.playerB);
+      setSpectators([...(e.spectators)].join(', '));
       if (e.gameState == GameState.WaitingForPlayers)
         setGameStateStr('waiting for players');
       if (e.gameState == GameState.ReadyToStart)
@@ -78,6 +80,7 @@ const Game = () => {
       <span>gameState: {gameStateString}</span>
       <span>player A: {playerA}</span>
       <span>player B: {playerB}</span>
+      <span>People in the room: {spectators}</span>
       <canvas ref={cr} width={GameClient.W} height={GameClient.H}></canvas>
     </Col>
   );

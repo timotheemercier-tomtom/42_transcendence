@@ -57,6 +57,7 @@ export type GameEventData = {
     gameState: GameState;
     playerA: string | undefined;
     playerB: string | undefined;
+    spectators: Array<string>;
   };
   request_game_state: string;
   key_change: { userId: string; key: string; keyState: KeyState };
@@ -102,6 +103,7 @@ export class GameCommon extends Eventer {
   gameState: GameState = GameState.WaitingForPlayers;
   userA: string | undefined = undefined;
   userB: string | undefined = undefined;
+  spectators: Set<string> = new Set<string>();
   p: number[] = [];
   ballXpos!: number;
   ballYpos!: number;

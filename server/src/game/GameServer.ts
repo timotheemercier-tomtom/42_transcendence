@@ -16,7 +16,6 @@ export default class GameServer extends GameCommon {
   keysB: keyStatus = { up: false, down: false };
   pausingAfterGoal: boolean = false;
   goalTimeStamp: number = 0;
-  spectators: Set<string> = new Set<string>();
 
   constructor(
     gameId: string,
@@ -124,6 +123,7 @@ export default class GameServer extends GameCommon {
       gameState: this.gameState,
       playerA: this.userA,
       playerB: this.userB,
+      spectators: Array.from(this.spectators)
     });
   }
 
