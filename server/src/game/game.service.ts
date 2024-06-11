@@ -83,7 +83,6 @@ export class GameService extends Eventer {
   leave(id: string, user: string) {
     const game = this.guardGame(id);
     game.leave(user);
-    this.userToGame.delete(user);
   }
 
   key_change(userId: string, key_change: GameEventData['key_change']) {
