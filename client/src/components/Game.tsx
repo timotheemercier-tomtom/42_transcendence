@@ -1,4 +1,4 @@
-import { createRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import GameClient from '../GameClient';
 import Col from './Col';
 import { getLogin } from '../util';
@@ -11,7 +11,7 @@ const GC = new GameClient();
 
 const Game = () => {
   const { id } = useParams(); // this is the room ID!
-  const cr = createRef<HTMLCanvasElement>();
+  const cr = useRef<HTMLCanvasElement>(null);
   const gameId: string = id!;
   const userId: string = getLogin();
   const [gameStateString, setGameStateStr] = useState('waiting for players');

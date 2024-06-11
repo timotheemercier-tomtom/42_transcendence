@@ -63,7 +63,16 @@ export class GameService extends Eventer {
     game.joinGameRoom(user);
     this.userToGame.set(user, id);
   }
-  
+
+  leaveGameRoom(leftGameId: string, userId: string ) {
+    const game = this.guardGame(leftGameId);
+    if (this.userToGame.get(userId) != leftGameId)
+      throw new WsException('user already left the game');
+    this.userToGame.delete(userId);
+    game.spectators.delete(userId);
+    game.emitGameState();
+  }
+
   join(id: string, user: string) {
     const game = this.guardGame(id);
     if (!this.userToGame.get(user))
