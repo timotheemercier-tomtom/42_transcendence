@@ -71,6 +71,9 @@ export class GameService extends Eventer {
       throw new WsException('user already left the game');
     game.leaveGameRoom(userId);
     this.userToGame.delete(userId);
+    if (game.spectators.size == 0) {
+      this.games.delete(leftGameId)
+    }
   }
 
   join(id: string, user: string) {

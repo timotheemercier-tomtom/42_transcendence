@@ -16,6 +16,7 @@ export default class GameServer extends GameCommon {
   keysB: keyStatus = { up: false, down: false };
   pausingAfterGoal: boolean = false;
   goalTimeStamp: number = 0;
+  frameInterval!: NodeJS.Timeout;
 
   constructor(
     gameId: string,
@@ -40,6 +41,7 @@ export default class GameServer extends GameCommon {
 
   leaveGameRoom(userId: string) {
     this.spectators.delete(userId);
+    if (this.userA == userId || this.userB == userId) this.leave(userId);
     this.emitGameState();
   }
 
@@ -61,23 +63,28 @@ export default class GameServer extends GameCommon {
   }
 
   leave(userId: string) {
+    let winner: string | undefined;
     if (this.userA == userId) {
       this.userA = undefined;
+      winner = this.userB;
     } else if (this.userB == userId) {
       this.userB = undefined;
+      winner = this.userA;
     } else {
       throw new WsException('user not in this game');
     }
     if (this.gameState == GameState.ReadyToStart)
       this.gameState = GameState.WaitingForPlayers;
-    else if (this.gameState == GameState.Running)
+    else if (this.gameState == GameState.Running) {
       this.gameState = GameState.Finished;
+      clearInterval(this.frameInterval);
+      if (winner) this.userService.updateWinLossScore(winner, userId);
+    }
     this.emitGameState();
   }
 
   start(gameId: string) {
     console.log("starting game '" + gameId + "'");
-
     this.on('key_change', (key_change: GameEventData['key_change']) => {
       let userKeys!: keyStatus;
       if (key_change.userId == this.userA) userKeys = this.keysA;
@@ -97,36 +104,35 @@ export default class GameServer extends GameCommon {
         userKeys.down = false;
       }
     });
-
     this.gameState = GameState.Running;
     this.emitGameState();
-
-    const gameRunner = () => {
-      runPhysics.bind(this)();
-      if (this.scoreA == 10 || this.scoreB == 10) {
-        clearInterval(frameInterval);
-        this.gameState = GameState.Finished;
-        this.emitGameState();
-        if (this.scoreA > this.scoreB) {
-          this.userService.updateWinLossScore(this.userA!, this.userB!);
-        } else {
-          this.userService.updateWinLossScore(this.userB!, this.userA!);
-        }
-      }
-      this.emit('frame', this.createFrame());
-    };
-    const frameInterval: NodeJS.Timeout = setInterval(
-      () => gameRunner(),
+    this.frameInterval = setInterval(
+      () => this.gameRunner(),
       GameCommon.FRAMEDELAY,
     );
   }
+
+  gameRunner(): void {
+    runPhysics.bind(this)();
+    if (this.scoreA == 10 || this.scoreB == 10) {
+      clearInterval(this.frameInterval);
+      this.gameState = GameState.Finished;
+      this.emitGameState();
+      if (this.scoreA > this.scoreB) {
+        this.userService.updateWinLossScore(this.userA!, this.userB!);
+      } else {
+        this.userService.updateWinLossScore(this.userB!, this.userA!);
+      }
+    }
+    this.emit('frame', this.createFrame());
+  };
 
   emitGameState(): void {
     this.emit('game_state', {
       gameState: this.gameState,
       playerA: this.userA,
       playerB: this.userB,
-      spectators: Array.from(this.spectators)
+      spectators: Array.from(this.spectators),
     });
   }
 

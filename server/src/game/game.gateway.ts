@@ -62,7 +62,6 @@ export class GameGateway extends Eventer {
         for (const spectator of game.spectators) {
           const client: Socket | undefined = this.userToClient.get(spectator);
           if (client) {
-            console.log('sending to spectator: ', spectator, e, v);
             client.emit(e, v);
           }
         }
