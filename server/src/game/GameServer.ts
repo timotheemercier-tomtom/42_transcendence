@@ -26,37 +26,40 @@ export default class GameServer extends GameCommon {
     super();
     this.gameId = gameId;
     this.isPublic = isPublic;
+    console.log(`game created: '${gameId}'`);
   }
 
   addOpt(opt: GameOpt): void {
     super.addOpt(opt);
-    this.emit('opt', this.opt);
+    // this.emit('opt', this.opt);
   }
 
   joinGameRoom(userId: string) {
     this.spectators.add(userId);
+    console.log(`'${userId}' joined game room: '${this.gameId}'`);
     this.emit('join_game_room', { userId: userId, gameId: this.gameId });
     this.emitGameState();
   }
 
   leaveGameRoom(userId: string) {
+    console.log(`'${userId}' left game room: '${this.gameId}'`);
     this.spectators.delete(userId);
-    if (this.userA == userId || this.userB == userId) this.leave(userId);
+    if (this.playerA == userId || this.playerB == userId) this.leave(userId);
     this.emitGameState();
   }
 
   join(userId: string) {
-    if (this.userA == userId || this.userB == userId)
+    if (this.playerA == userId || this.playerB == userId)
       throw new WsException('user already in this game');
-    if (this.userA && this.userB) throw new WsException('game is full');
-    if (!this.userA) {
-      this.userA = userId;
+    if (this.playerA && this.playerB) throw new WsException('game is full');
+    if (!this.playerA) {
+      this.playerA = userId;
       this.keysA = { up: false, down: false };
-    } else if (!this.userB) {
-      this.userB = userId;
+    } else if (!this.playerB) {
+      this.playerB = userId;
       this.keysB = { up: false, down: false };
     }
-    if (this.userA && this.userB) {
+    if (this.playerA && this.playerB) {
       this.gameState = GameState.ReadyToStart;
     }
     this.emitGameState();
@@ -64,12 +67,12 @@ export default class GameServer extends GameCommon {
 
   leave(userId: string) {
     let winner: string | undefined;
-    if (this.userA == userId) {
-      this.userA = undefined;
-      winner = this.userB;
-    } else if (this.userB == userId) {
-      this.userB = undefined;
-      winner = this.userA;
+    if (this.playerA == userId) {
+      this.playerA = undefined;
+      winner = this.playerB;
+    } else if (this.playerB == userId) {
+      this.playerB = undefined;
+      winner = this.playerA;
     } else {
       throw new WsException('user not in this game');
     }
@@ -83,12 +86,12 @@ export default class GameServer extends GameCommon {
     this.emitGameState();
   }
 
-  start(gameId: string) {
-    console.log("starting game '" + gameId + "'");
+  start() {
+    console.log(`game '${this.gameId}' starts!'`);
     this.on('key_change', (key_change: GameEventData['key_change']) => {
       let userKeys!: keyStatus;
-      if (key_change.userId == this.userA) userKeys = this.keysA;
-      if (key_change.userId == this.userB) userKeys = this.keysB;
+      if (key_change.userId == this.playerA) userKeys = this.keysA;
+      if (key_change.userId == this.playerB) userKeys = this.keysB;
       if (key_change.key == 'w' && key_change.keyState == KeyState.Pressed) {
         userKeys.up = true;
         userKeys.down = false;
@@ -115,13 +118,14 @@ export default class GameServer extends GameCommon {
   gameRunner(): void {
     runPhysics.bind(this)();
     if (this.scoreA == 10 || this.scoreB == 10) {
+      console.log(`game '${this.gameId}' finished!'`);
       clearInterval(this.frameInterval);
       this.gameState = GameState.Finished;
       this.emitGameState();
       if (this.scoreA > this.scoreB) {
-        this.userService.updateWinLossScore(this.userA!, this.userB!);
+        this.userService.updateWinLossScore(this.playerA!, this.playerB!);
       } else {
-        this.userService.updateWinLossScore(this.userB!, this.userA!);
+        this.userService.updateWinLossScore(this.playerB!, this.playerA!);
       }
     }
     this.emit('frame', this.createFrame());
@@ -130,8 +134,8 @@ export default class GameServer extends GameCommon {
   emitGameState(): void {
     this.emit('game_state', {
       gameState: this.gameState,
-      playerA: this.userA,
-      playerB: this.userB,
+      playerA: this.playerA,
+      playerB: this.playerB,
       spectators: Array.from(this.spectators),
     });
   }

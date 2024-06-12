@@ -42,14 +42,14 @@ export class GameService extends Eventer {
     game.create(GameServer.W, GameServer.H);
     this.games.set(createMsg.gameId, game);
     this.userToGame.set(createMsg.userId, createMsg.gameId);
-    this.emit('create', createMsg);  // adds listeners in gateway
+    this.emit('create', createMsg); // adds listeners in gateway
     game.joinGameRoom(createMsg.userId);
     game.join(createMsg.userId);
   }
 
   start(gameId: string) {
     const game = this.guardGame(gameId);
-    game.start(gameId);
+    game.start();
   }
 
   destroy(id: string) {
@@ -63,16 +63,19 @@ export class GameService extends Eventer {
       throw new WsException('user already in a game');
     this.userToGame.set(user, gameId);
     game.joinGameRoom(user);
+    // console.log("games: ", this.games);
+    // console.log("userToGame: ", this.userToGame);
   }
 
-  leaveGameRoom(leftGameId: string, userId: string ) {
+  leaveGameRoom(leftGameId: string, userId: string) {
     const game = this.guardGame(leftGameId);
     if (this.userToGame.get(userId) != leftGameId)
       throw new WsException('user already left the game');
     game.leaveGameRoom(userId);
     this.userToGame.delete(userId);
     if (game.spectators.size == 0) {
-      this.games.delete(leftGameId)
+      this.games.delete(leftGameId);
+      console.log(`game '${leftGameId}' removed from server'`);
     }
   }
 
@@ -110,11 +113,11 @@ export class GameService extends Eventer {
       if (
         game.isPublic &&
         game.gameState == GameState.WaitingForPlayers &&
-        (!game.userA || !game.userB)
+        (!game.playerA || !game.playerB)
       ) {
         this.joinGameRoom(gameId, user);
         this.join(gameId, user);
-        return ;
+        return;
       }
     }
     // create new public game

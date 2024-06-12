@@ -51,6 +51,7 @@ export default class GameClient extends GameCommon {
 
     this.onAny = socket.emit.bind(socket);
     socket.onAny((e, v) => {
+      if (e != 'frame') console.log('Received: ', e, v);
       this.emit(e, v, false);
     });
 
@@ -65,15 +66,15 @@ export default class GameClient extends GameCommon {
 
     this.on('game_state', (v) => {
       this.gameState = v.gameState;
-      this.userA = v.playerA;
-      this.userB = v.playerB;
+      this.playerA = v.playerA;
+      this.playerB = v.playerB;
       this.spectators = new Set([...v.spectators]);
     });
 
-    this.on('opt', (v) => this.addOpt(v));
-
+    // this.on('opt', (v) => this.addOpt(v));
+    // socket.emit('opt', { gameId: this.gameId, user: {} });
     socket.emit('join_game_room', this.ug);
-    socket.emit('opt', { gameId: this.gameId, user: {} });
+    socket.emit('request_game_state', gameId);
     window.addEventListener('keydown', this.evdown);
     window.addEventListener('keyup', this.evup);
     this.draw();
@@ -83,6 +84,7 @@ export default class GameClient extends GameCommon {
     window.removeEventListener('keydown', this.evdown);
     window.removeEventListener('keyup', this.evup);
     cancelAnimationFrame(this.frameid);
+    console.log('Disconnected GameClient');
     socket.disconnect();
   }
 
@@ -107,12 +109,12 @@ export default class GameClient extends GameCommon {
     this.ctx.strokeStyle = 'white';
 
     // paddle A
-    let c = this.opt.user[this.userA!]?.paddle ?? 'white';
+    let c = this.opt.user[this.playerA!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
     this.ctx.fillRect(GameCommon.PPAD, this.pa, GameCommon.PW, GameCommon.PH);
 
     // paddle B
-    c = this.opt.user[this.userB!]?.paddle ?? 'white';
+    c = this.opt.user[this.playerB!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
     this.ctx.fillRect(
       GameCommon.W - (GameCommon.PPAD + GameCommon.PW),

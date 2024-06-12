@@ -40,6 +40,7 @@ export class UserService {
     const userWon = await this.usersRepository.findOneBy({
       login: loginWon,
     });
+    console.log(`Game ended. Player '${loginWon}' won from '${loginLost}'`);
     if (!userWon) {
       throw new NotFoundException('User not found');
     }

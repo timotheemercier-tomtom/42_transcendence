@@ -101,8 +101,8 @@ export class GameCommon extends Eventer {
   static FRAMEDELAY: number = 1000 / 60; // milli seconds per frame
 
   gameState: GameState = GameState.WaitingForPlayers;
-  userA: string | undefined = undefined;
-  userB: string | undefined = undefined;
+  playerA: string | undefined = undefined;
+  playerB: string | undefined = undefined;
   spectators: Set<string> = new Set<string>();
   p: number[] = [];
   ballXpos!: number;

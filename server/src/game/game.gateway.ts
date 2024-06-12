@@ -51,13 +51,15 @@ export class GameGateway extends Eventer {
       next();
     });
 
+    // adding internal listeners
     this.service.on('create', (createMsg) => {
       const game = this.service.guardGame(createMsg.gameId);
 
       // send outgoing messages to all users in the game room
       game.onAny = (e, v) => {
         // if (e != 'frame') {
-        //   console.log('emtting (external) with "onany"', e, v);
+          // console.log('emtting: ', e, v);
+          // console.log('to spectators: ', game.spectators);
         // }
         for (const spectator of game.spectators) {
           const client: Socket | undefined = this.userToClient.get(spectator);
@@ -77,7 +79,6 @@ export class GameGateway extends Eventer {
     const user = this.idmap.get(client.id)!;
     const leftGameId = this.service.userToGame.get(user);
     if (user && leftGameId) {
-      console.log(`game disconnected: ${client.id} ${user} ${leftGameId}`);
       this.service.leaveGameRoom(leftGameId, user);
     }
   }
@@ -100,7 +101,6 @@ export class GameGateway extends Eventer {
 
   @SubscribeMessage('join_game_room')
   _joinGameRoom(client: Socket, ug: GameEventData['join']) {
-    console.log("received 'join_game_room' (gateway)", ug);
     const user = this.idmap.get(client.id)!;
     if (!this.service.games.has(ug.gameId)) {
       this.service.createAndJoin({ userId: ug.userId, gameId: ug.gameId, isPublic: true })
@@ -151,8 +151,8 @@ export class GameGateway extends Eventer {
     if (game)
       client.emit('game_state', {
         gameState: game.gameState,
-        playerA: game.userA,
-        playerB: game.userB,
+        playerA: game.playerA,
+        playerB: game.playerB,
         spectators: Array.from(game.spectators)
       });
   }
