@@ -40,9 +40,7 @@ const Game = () => {
       if (e.gameState == GameState.Finished) setGameStateStr('finished');
     };
 
-    // request state, to sync after page load
     socket.on('game_state', onStateChange);
-    socket.emit('request_game_state', gameId);
     return () => {
       socket.off('game_state', onStateChange);
     };
