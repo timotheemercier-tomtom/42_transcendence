@@ -14,7 +14,7 @@ const Game = () => {
   const cr = useRef<HTMLCanvasElement>(null);
   const gameId: string = id!;
   const userId: string = getLogin();
-  const [gameStateString, setGameStateStr] = useState('waiting for players');
+  const [gameStateString, setGameStateStr] = useState('loading game');
   const [gameState, setGameState] = useState(GameState.WaitingForPlayers);
   const [playerA, setPlayerA] = useState<string | undefined>(undefined);
   const [playerB, setPlayerB] = useState<string | undefined>(undefined);
@@ -31,7 +31,7 @@ const Game = () => {
       setGameState(e.gameState);
       setPlayerA(e.playerA);
       setPlayerB(e.playerB);
-      setSpectators([...(e.spectators)].join(', '));
+      setSpectators([...e.spectators].join(', '));
       if (e.gameState == GameState.WaitingForPlayers)
         setGameStateStr('waiting for players');
       if (e.gameState == GameState.ReadyToStart)

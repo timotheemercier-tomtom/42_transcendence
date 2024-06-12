@@ -25,13 +25,13 @@ export class GameService extends Eventer {
     return this.games.get(id)!;
   }
 
-  guardUserInGame(user: string): GameServer {
+  guardUserInGameRoom(user: string): GameServer {
     const gameid = this.userToGame.get(user);
     if (gameid) return this.guardGame(gameid);
     throw new WsException('user not in game');
   }
 
-  create(createMsg: GameEventData['create']) {
+  createAndJoin(createMsg: GameEventData['create']) {
     if (this.games.has(createMsg.gameId))
       throw new WsException('game already exists');
     const game = new GameServer(
@@ -41,6 +41,7 @@ export class GameService extends Eventer {
     );
     game.create(GameServer.W, GameServer.H);
     this.games.set(createMsg.gameId, game);
+    this.userToGame.set(createMsg.userId, createMsg.gameId);
     this.emit('create', createMsg);  // adds listeners in gateway
     game.joinGameRoom(createMsg.userId);
     game.join(createMsg.userId);
@@ -85,7 +86,7 @@ export class GameService extends Eventer {
   }
 
   key_change(userId: string, key_change: GameEventData['key_change']) {
-    const game = this.guardUserInGame(userId);
+    const game = this.guardUserInGameRoom(userId);
     game.emit('key_change', key_change);
   }
 
@@ -94,12 +95,11 @@ export class GameService extends Eventer {
     e: E,
     v: GameEventData[E],
   ) {
-    const game = this.guardUserInGame(user);
+    const game = this.guardUserInGameRoom(user);
     game.emit(e, v);
   }
 
   enque(user: string) {
-    console.log('enque', user);
     if (this.userToGame.has(user))
       throw new WsException('user already in a game');
     // join existing public game
@@ -114,11 +114,9 @@ export class GameService extends Eventer {
         return ;
       }
     }
-    // create new game
+    // create new public game
     const id = 'game-' + randomUUID();
-    this.create({ gameId: id, userId: user, isPublic: true });
-    this.joinGameRoom(id, user);
-    this.join(id, user);
+    this.createAndJoin({ gameId: id, userId: user, isPublic: true });
   }
 
   opt(opt: GameOpt) {

@@ -54,7 +54,6 @@ export default class GameServer extends GameCommon {
       this.userB = userId;
       this.keysB = { up: false, down: false };
     }
-    this.emit('join', { userId: userId, gameId: this.gameId });
     if (this.userA && this.userB) {
       this.gameState = GameState.ReadyToStart;
     }
@@ -74,7 +73,6 @@ export default class GameServer extends GameCommon {
     else if (this.gameState == GameState.Running)
       this.gameState = GameState.Finished;
     this.emitGameState();
-    this.emit('leave', { userId: userId, gameId: this.gameId });
   }
 
   start(gameId: string) {

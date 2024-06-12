@@ -63,27 +63,11 @@ export default class GameClient extends GameCommon {
       this.scoreB = e.scoreB;
     });
 
-    this.on('join', (v) => {
-      if (this.userA == undefined) {
-        this.userA = v.userId;
-      } else if (this.userB == undefined) {
-        this.userB = v.userId;
-      }
-    });
-
-    this.on('leave', (v) => {
-      if (this.userA == v.userId) {
-        this.userA = undefined;
-      } else if (this.userB == v.userId) {
-        this.userB = undefined;
-      }
-    });
-
     this.on('game_state', (v) => {
       this.gameState = v.gameState;
       this.userA = v.playerA;
       this.userB = v.playerB;
-      this.spectators =  new Set([...(v.spectators)]);
+      this.spectators = new Set([...v.spectators]);
     });
 
     this.on('opt', (v) => this.addOpt(v));
@@ -107,19 +91,7 @@ export default class GameClient extends GameCommon {
   }
 
   join() {
-    // join as first player
-    if (!this.userA && !this.userB) {
-      this.emit('create', {
-        userId: this.userId,
-        gameId: this.gameId,
-        isPublic: this.isPublic,
-      });
-      this.emit('join', this.ug);
-    }
-    // join as second player
-    else if ((this.userA && !this.userB) || (!this.userA && this.userB)) {
-      this.emit('join', this.ug);
-    }
+    this.emit('join', this.ug);
   }
 
   leave() {
