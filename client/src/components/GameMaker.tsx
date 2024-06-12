@@ -6,7 +6,7 @@ import { socket } from '../game.socket';
 import { GameEventData } from '../GameCommon';
 import { getLogin } from '../util';
 import { useNavigate } from 'react-router-dom';
-import { randomUUID } from 'crypto';
+import { randomUUID } from '../util';
 
 const GameMaker = () => {
   const userId = getLogin();

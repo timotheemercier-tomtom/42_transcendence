@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export function getCookie(name: string) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -23,7 +25,7 @@ export const getJWTPayload = () => {
   function decodeJWT(token: string) {
     const parts = token.split('.');
     if (parts.length !== 3) {
-      return {payload:{},header:{}}
+      return { payload: {}, header: {} };
     }
     const header = JSON.parse(atob(base64UrlToBase64(parts[0])));
     const payload = JSON.parse(atob(base64UrlToBase64(parts[1])));
@@ -35,3 +37,7 @@ export const getJWTPayload = () => {
 };
 
 export const getLogin = () => getJWTPayload()?.login;
+
+export const randomUUID = () => {
+  return uuidv4();
+}
