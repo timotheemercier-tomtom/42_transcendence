@@ -6,6 +6,7 @@ import { socket } from '../game.socket';
 import { GameEventData } from '../GameCommon';
 import { getLogin } from '../util';
 import { useNavigate } from 'react-router-dom';
+import { randomUUID } from 'crypto';
 
 const GameMaker = () => {
   const userId = getLogin();
@@ -48,7 +49,7 @@ const GameMaker = () => {
             onClick={() =>
               socket.emit('create', {
                 userId: userId,
-                gameId: userId + '_game',
+                gameId: 'game-' + randomUUID(),
                 isPublic: false,
               })
             }
