@@ -38,6 +38,11 @@ export default class GameServer extends GameCommon {
     this.emitGameState();
   }
 
+  leaveGameRoom(userId: string) {
+    this.spectators.delete(userId);
+    this.emitGameState();
+  }
+
   join(userId: string) {
     if (this.userA == userId || this.userB == userId)
       throw new WsException('user already in this game');

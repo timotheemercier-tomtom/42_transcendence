@@ -66,26 +66,7 @@ export class GameGateway extends Eventer {
             client.emit(e, v);
           }
         }
-        // if (game.userA) {
-        //   const clientA: Socket | undefined = this.userToClient.get(game.userA);
-        //   if (clientA) clientA.emit(e, v);
-        // }
-        // if (game.userB) {
-        //   const clientB: Socket | undefined = this.userToClient.get(game.userB);
-        //   if (clientB) clientB.emit(e, v);
-        // }
       };
-      game.on('leave', (ug) => {
-        const client = this.userToClient.get(ug.userId)!;
-        // send final game_state to user who is no longer in the game
-        client.emit('game_state', {
-          gameState: game.gameState,
-          playerA: game.userA,
-          playerB: game.userB,
-          spectators: Array.from(game.spectators)
-        });
-        if (client) client.leave(ug.gameId); // leave socket.io 'room'
-      });
       game.on('join_game_room', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
         if (client) client.join(ug.gameId); // join socket.io 'room'

@@ -56,21 +56,20 @@ export class GameService extends Eventer {
     game.destroy();
   }
 
-  joinGameRoom(id: string, user: string) {
-    const game = this.guardGame(id);
+  joinGameRoom(gameId: string, user: string) {
+    const game = this.guardGame(gameId);
     if (this.userToGame.get(user))
       throw new WsException('user already in a game');
+    this.userToGame.set(user, gameId);
     game.joinGameRoom(user);
-    this.userToGame.set(user, id);
   }
 
   leaveGameRoom(leftGameId: string, userId: string ) {
     const game = this.guardGame(leftGameId);
     if (this.userToGame.get(userId) != leftGameId)
       throw new WsException('user already left the game');
+    game.leaveGameRoom(userId);
     this.userToGame.delete(userId);
-    game.spectators.delete(userId);
-    game.emitGameState();
   }
 
   join(id: string, user: string) {
