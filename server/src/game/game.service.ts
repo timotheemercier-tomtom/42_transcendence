@@ -25,13 +25,13 @@ export class GameService extends Eventer {
     return this.games.get(id)!;
   }
 
-  guardUserInGame(user: string): GameServer {
+  guardUserInGameRoom(user: string): GameServer {
     const gameid = this.userToGame.get(user);
     if (gameid) return this.guardGame(gameid);
-    throw new WsException('user not in game');
+    throw new WsException('user not in any game room');
   }
 
-  create(createMsg: GameEventData['create']) {
+  createAndJoin(createMsg: GameEventData['create']) {
     if (this.games.has(createMsg.gameId))
       throw new WsException('game already exists');
     const game = new GameServer(
@@ -41,12 +41,15 @@ export class GameService extends Eventer {
     );
     game.create(GameServer.W, GameServer.H);
     this.games.set(createMsg.gameId, game);
-    this.emit('create', createMsg);
+    this.userToGame.set(createMsg.userId, createMsg.gameId);
+    this.emit('create', createMsg); // adds listeners in gateway
+    game.joinGameRoom(createMsg.userId);
+    game.join(createMsg.userId);
   }
 
   start(gameId: string) {
     const game = this.guardGame(gameId);
-    game.start(gameId);
+    game.start();
   }
 
   destroy(id: string) {
@@ -54,23 +57,47 @@ export class GameService extends Eventer {
     game.destroy();
   }
 
+  joinGameRoom(gameId: string, user: string) {
+    const game = this.guardGame(gameId);
+    const currentGameRoom: string | undefined = this.userToGame.get(user);
+    if (currentGameRoom == undefined) {
+      this.userToGame.set(user, gameId);
+      game.joinGameRoom(user);
+    }
+    else if (currentGameRoom != gameId) {
+      throw new WsException(`user already in a game`);
+    }
+    // console.log("games: ", this.games);
+    // console.log("userToGame: ", this.userToGame);
+  }
+
+  leaveGameRoom(leftGameId: string, userId: string) {
+    const game = this.guardGame(leftGameId);
+    if (this.userToGame.get(userId) != leftGameId)
+      throw new WsException('user already left the game');
+    game.leaveGameRoom(userId);
+    this.userToGame.delete(userId);
+    if (game.spectators.size == 0) {
+      this.games.delete(leftGameId);
+      console.log(`game '${leftGameId}' removed from server'`);
+    }
+  }
+
   join(id: string, user: string) {
     const game = this.guardGame(id);
-    if (this.userToGame.get(user))
-      throw new WsException('user already in a game');
+    if (!this.userToGame.get(user))
+      throw new WsException('user is not yet in the game room');
     game.join(user);
-    this.userToGame.set(user, id);
   }
 
   leave(id: string, user: string) {
     const game = this.guardGame(id);
     game.leave(user);
-    this.userToGame.delete(user);
   }
 
   key_change(userId: string, key_change: GameEventData['key_change']) {
-    const game = this.guardUserInGame(userId);
-    game.emit('key_change', key_change);
+    const game = this.guardUserInGameRoom(userId);
+    game.emit('key_change', key_change, false);
   }
 
   passGameEvent<E extends GameEventType>(
@@ -78,12 +105,11 @@ export class GameService extends Eventer {
     e: E,
     v: GameEventData[E],
   ) {
-    const game = this.guardUserInGame(user);
+    const game = this.guardUserInGameRoom(user);
     game.emit(e, v);
   }
 
   enque(user: string) {
-    console.log('enque', user);
     if (this.userToGame.has(user))
       throw new WsException('user already in a game');
     // join existing public game
@@ -91,15 +117,16 @@ export class GameService extends Eventer {
       if (
         game.isPublic &&
         game.gameState == GameState.WaitingForPlayers &&
-        (!game.userA || !game.userB)
+        (!game.playerA || !game.playerB)
       ) {
-        return this.join(gameId, user);
+        this.joinGameRoom(gameId, user);
+        this.join(gameId, user);
+        return;
       }
     }
-    // create new game
+    // create new public game
     const id = 'game-' + randomUUID();
-    this.create({ gameId: id, userId: user, isPublic: true });
-    this.join(id, user);
+    this.createAndJoin({ gameId: id, userId: user, isPublic: true });
   }
 
   opt(opt: GameOpt) {

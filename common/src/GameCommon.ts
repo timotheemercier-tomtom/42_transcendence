@@ -14,6 +14,7 @@ export type GameEventType =
   | 'create'
   | 'enque'
   | 'join'
+  | 'join_game_room'
   | 'leave'
   | 'start'
   | 'frame'
@@ -40,6 +41,7 @@ export type GameEventData = {
   };
   enque: string;
   join: GameUserGame;
+  join_game_room: GameUserGame;
   leave: GameUserGame;
   start: string;
   frame: {
@@ -55,6 +57,8 @@ export type GameEventData = {
     gameState: GameState;
     playerA: string | undefined;
     playerB: string | undefined;
+    spectators: Array<string>;
+    textMsg: string | undefined;
   };
   request_game_state: string;
   key_change: { userId: string; key: string; keyState: KeyState };
@@ -98,8 +102,9 @@ export class GameCommon extends Eventer {
   static FRAMEDELAY: number = 1000 / 60; // milli seconds per frame
 
   gameState: GameState = GameState.WaitingForPlayers;
-  userA: string | undefined = undefined;
-  userB: string | undefined = undefined;
+  playerA: string | undefined = undefined;
+  playerB: string | undefined = undefined;
+  spectators: Set<string> = new Set<string>();
   p: number[] = [];
   ballXpos!: number;
   ballYpos!: number;

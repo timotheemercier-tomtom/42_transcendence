@@ -6,33 +6,20 @@ import { socket } from '../game.socket';
 import { GameEventData } from '../GameCommon';
 import { getLogin } from '../util';
 import { useNavigate } from 'react-router-dom';
+import { randomUUID } from '../util';
 
 const GameMaker = () => {
   const userId = getLogin();
   const nav = useNavigate();
 
   useEffect(() => {
-    socket.connect();
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    const onjoin = (ug: GameEventData['join']) => {
+    const onjoin_game_room = (ug: GameEventData['join_game_room']) => {
       if (ug.userId == userId) nav('/r/' + ug.gameId);
     };
-    const oncreate = (createMsg: GameEventData['create']) => {
-      socket.emit('join', {
-        userId: createMsg.userId,
-        gameId: createMsg.gameId,
-      });
-    };
-    socket.on('join', onjoin);
-    socket.on('create', oncreate);
+    socket.connect();
+    socket.on('join_game_room', onjoin_game_room);
     return () => {
-      socket.off('join', onjoin);
-      socket.off('create', oncreate);
+      socket.off('join_game_room', onjoin_game_room);
     };
   }, []);
 
@@ -44,7 +31,7 @@ const GameMaker = () => {
             onClick={() =>
               socket.emit('create', {
                 userId: userId,
-                gameId: userId + '_game',
+                gameId: 'game-' + randomUUID(),
                 isPublic: false,
               })
             }

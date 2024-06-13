@@ -16,6 +16,7 @@ export default class GameServer extends GameCommon {
   keysB: keyStatus = { up: false, down: false };
   pausingAfterGoal: boolean = false;
   goalTimeStamp: number = 0;
+  frameInterval!: NodeJS.Timeout;
 
   constructor(
     gameId: string,
@@ -25,98 +26,127 @@ export default class GameServer extends GameCommon {
     super();
     this.gameId = gameId;
     this.isPublic = isPublic;
+    console.log(`game created: '${gameId}'`);
   }
 
   addOpt(opt: GameOpt): void {
     super.addOpt(opt);
-    this.emit('opt', this.opt);
+    // this.emit('opt', this.opt);
+  }
+
+  joinGameRoom(userId: string) {
+    this.spectators.add(userId);
+    console.log(`'${userId}' joined game room: '${this.gameId}'`);
+    this.emit('join_game_room', { userId: userId, gameId: this.gameId });
+    this.emitGameState();
+  }
+
+  leaveGameRoom(userId: string) {
+    console.log(`'${userId}' left game room: '${this.gameId}'`);
+    this.spectators.delete(userId);
+    if (this.playerA == userId || this.playerB == userId) this.leave(userId);
+    else this.emitGameState();
   }
 
   join(userId: string) {
-    if (this.userA == userId || this.userB == userId)
+    if (this.playerA == userId || this.playerB == userId)
       throw new WsException('user already in this game');
-    if (this.userA && this.userB) throw new WsException('game is full');
-    if (!this.userA) {
-      this.userA = userId;
+    if (this.playerA && this.playerB) throw new WsException('game is full');
+    if (!this.playerA) {
+      this.playerA = userId;
       this.keysA = { up: false, down: false };
-    } else if (!this.userB) {
-      this.userB = userId;
+    } else if (!this.playerB) {
+      this.playerB = userId;
       this.keysB = { up: false, down: false };
     }
-    this.emit('join', { userId: userId, gameId: this.gameId });
-    if (this.userA && this.userB) {
+    if (this.playerA && this.playerB) {
       this.gameState = GameState.ReadyToStart;
     }
     this.emitGameState();
   }
 
   leave(userId: string) {
-    if (this.userA == userId) {
-      this.userA = undefined;
-    } else if (this.userB == userId) {
-      this.userB = undefined;
+    let winner: string | undefined;
+    if (this.playerA == userId) {
+      this.playerA = undefined;
+      winner = this.playerB;
+    } else if (this.playerB == userId) {
+      this.playerB = undefined;
+      winner = this.playerA;
     } else {
       throw new WsException('user not in this game');
     }
     if (this.gameState == GameState.ReadyToStart)
       this.gameState = GameState.WaitingForPlayers;
-    else if (this.gameState == GameState.Running)
+    else if (this.gameState == GameState.Running) {
       this.gameState = GameState.Finished;
+      clearInterval(this.frameInterval);
+      if (winner) {
+        this.userService.updateWinLossScore(winner, userId);
+        this.emitGameState(`Player '${winner}' won, because '${userId}' left!!`);
+        setTimeout(this.resetGame.bind(this), 5000);
+        return;
+      }
+    }
     this.emitGameState();
-    this.emit('leave', { userId: userId, gameId: this.gameId });
   }
 
-  start(gameId: string) {
-    console.log("starting game '" + gameId + "'");
-
+  start() {
+    console.log(`game '${this.gameId}' starts!'`);
     this.on('key_change', (key_change: GameEventData['key_change']) => {
-      let userKeys!: keyStatus;
-      if (key_change.userId == this.userA) userKeys = this.keysA;
-      if (key_change.userId == this.userB) userKeys = this.keysB;
-      if (key_change.key == 'w' && key_change.keyState == KeyState.Pressed) {
-        userKeys.up = true;
-        userKeys.down = false;
-      }
-      if (key_change.key == 's' && key_change.keyState == KeyState.Pressed) {
-        userKeys.up = false;
-        userKeys.down = true;
-      }
-      if (key_change.key == 'w' && key_change.keyState == KeyState.Released) {
-        userKeys.up = false;
-      }
-      if (key_change.key == 's' && key_change.keyState == KeyState.Released) {
-        userKeys.down = false;
-      }
-    });
-
-    this.gameState = GameState.Running;
-    this.emitGameState();
-
-    const gameRunner = () => {
-      runPhysics.bind(this)();
-      if (this.scoreA == 10 || this.scoreB == 10) {
-        clearInterval(frameInterval);
-        this.gameState = GameState.Finished;
-        this.emitGameState();
-        if (this.scoreA > this.scoreB) {
-          this.userService.updateWinLossScore(this.userA!, this.userB!);
-        } else {
-          this.userService.updateWinLossScore(this.userB!, this.userA!);
+      if (this.gameState == GameState.Running) {
+        let userKeys!: keyStatus;
+        if (key_change.userId == this.playerA) userKeys = this.keysA;
+        if (key_change.userId == this.playerB) userKeys = this.keysB;
+        if (key_change.key == 'w' && key_change.keyState == KeyState.Pressed) {
+          userKeys.up = true;
+          userKeys.down = false;
+        }
+        if (key_change.key == 's' && key_change.keyState == KeyState.Pressed) {
+          userKeys.up = false;
+          userKeys.down = true;
+        }
+        if (key_change.key == 'w' && key_change.keyState == KeyState.Released) {
+          userKeys.up = false;
+        }
+        if (key_change.key == 's' && key_change.keyState == KeyState.Released) {
+          userKeys.down = false;
         }
       }
-      this.emit('frame', this.createFrame());
-    };
-    const frameInterval: NodeJS.Timeout = setInterval(
-      () => gameRunner(),
+    });
+    this.gameState = GameState.Running;
+    this.emitGameState();
+    this.frameInterval = setInterval(
+      () => this.gameRunner(),
       GameCommon.FRAMEDELAY,
     );
   }
 
-  emitGameState(): void {
+  gameRunner(): void {
+    runPhysics.bind(this)();
+    if (this.scoreA == 10 || this.scoreB == 10) {
+      console.log(`game '${this.gameId}' finished!'`);
+      clearInterval(this.frameInterval);
+      this.gameState = GameState.Finished;
+      if (this.scoreA > this.scoreB) {
+        this.emitGameState(`Player '${this.playerA}' Won!'`);
+        this.userService.updateWinLossScore(this.playerA!, this.playerB!);
+      } else {
+        this.userService.updateWinLossScore(this.playerB!, this.playerA!);
+        this.emitGameState(`Player '${this.playerB}' Won!'`);
+      }
+      setTimeout(this.resetGame.bind(this), 5000);
+    }
+    this.emit('frame', this.createFrame());
+  };
+
+  emitGameState(textMsg: string | undefined = undefined): void {
     this.emit('game_state', {
       gameState: this.gameState,
-      playerA: this.userA,
-      playerB: this.userB,
+      playerA: this.playerA,
+      playerB: this.playerB,
+      spectators: Array.from(this.spectators),
+      textMsg: textMsg
     });
   }
 
@@ -135,5 +165,22 @@ export default class GameServer extends GameCommon {
 
   destroy(): void {
     super.destroy();
+  }
+
+  resetGame() {
+    console.log("Getting ready for new game...")
+    this.playerA = undefined;
+    this.playerB = undefined;
+    this.pausingAfterGoal = false;
+    this.scoreA = 0;
+    this.scoreB = 0;
+    this.pa = this.h / 2 - GameCommon.PH / 2;
+    this.pb = this.h / 2 - GameCommon.PH / 2;
+    this.ballAngle = 1.5 * Math.PI;
+    this.ballXpos
+    this.ballYpos
+    this.gameState = GameState.WaitingForPlayers;
+    this.emit('frame', this.createFrame());
+    this.emitGameState();
   }
 }

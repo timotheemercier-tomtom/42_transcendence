@@ -1,4 +1,4 @@
-import { GameCommon, KeyState } from './GameCommon';
+import { GameCommon, GameState, KeyState } from './GameCommon';
 import { socket } from './game.socket';
 
 export default class GameClient extends GameCommon {
@@ -12,13 +12,13 @@ export default class GameClient extends GameCommon {
   userId!: string;
   frameid!: number;
   iv!: unknown;
+  textMsg: string | undefined = undefined;
 
   get ug() {
     return { userId: this.userId, gameId: this.gameId };
   }
 
   load(ctx: CanvasRenderingContext2D, userId: string, gameId: string) {
-    this.unload();
     this.ctx = ctx;
     this.userId = userId;
     this.create(GameClient.W, GameClient.H);
@@ -27,7 +27,7 @@ export default class GameClient extends GameCommon {
 
     this.evdown = ((e: KeyboardEvent) => {
       if (e.repeat) return;
-      if (e.key in this.keys) {
+      if (e.key in this.keys && this.gameState == GameState.Running) {
         this.emit('key_change', {
           userId: userId,
           key: e.key,
@@ -38,7 +38,7 @@ export default class GameClient extends GameCommon {
 
     this.evup = ((e: KeyboardEvent) => {
       if (e.repeat) return;
-      if (e.key in this.keys) {
+      if (e.key in this.keys && this.gameState == GameState.Running) {
         this.emit('key_change', {
           userId: userId,
           key: e.key,
@@ -47,10 +47,13 @@ export default class GameClient extends GameCommon {
       }
     }).bind(this);
 
-    socket.connect();
+    this.onAny = (e, v) => {
+      console.log('emitting to server: ', e, v);
+      socket.emit.bind(socket)(e, v);
+    };
 
-    this.onAny = socket.emit.bind(socket);
     socket.onAny((e, v) => {
+      if (e != 'frame') console.log('Received: ', e, v);
       this.emit(e, v, false);
     });
 
@@ -63,30 +66,18 @@ export default class GameClient extends GameCommon {
       this.scoreB = e.scoreB;
     });
 
-    this.on('join', (v) => {
-      if (this.userA == undefined) {
-        this.userA = v.userId;
-      } else if (this.userB == undefined) {
-        this.userB = v.userId;
-      }
-    });
-
-    this.on('leave', (v) => {
-      if (this.userA == v.userId) {
-        this.userA = undefined;
-      } else if (this.userB == v.userId) {
-        this.userB = undefined;
-      }
-    });
-
     this.on('game_state', (v) => {
       this.gameState = v.gameState;
-      this.userA = v.playerA;
-      this.userB = v.playerB;
+      this.playerA = v.playerA;
+      this.playerB = v.playerB;
+      this.spectators = new Set([...v.spectators]);
+      this.textMsg = v.textMsg;
     });
 
-    this.on('opt', (v) => this.addOpt(v));
-    socket.emit('opt', { gameId: this.gameId, user: {} });
+    // this.on('opt', (v) => this.addOpt(v));
+    // socket.emit('opt', { gameId: this.gameId, user: {} });
+    socket.emit('join_game_room', this.ug);
+    socket.emit('request_game_state', gameId);
     window.addEventListener('keydown', this.evdown);
     window.addEventListener('keyup', this.evup);
     this.draw();
@@ -96,7 +87,6 @@ export default class GameClient extends GameCommon {
     window.removeEventListener('keydown', this.evdown);
     window.removeEventListener('keyup', this.evup);
     cancelAnimationFrame(this.frameid);
-    socket.disconnect();
   }
 
   start() {
@@ -104,19 +94,7 @@ export default class GameClient extends GameCommon {
   }
 
   join() {
-    // join as first player
-    if (!this.userA && !this.userB) {
-      this.emit('create', {
-        userId: this.userId,
-        gameId: this.gameId,
-        isPublic: this.isPublic,
-      });
-      this.emit('join', this.ug);
-    }
-    // join as second player
-    else if ((this.userA && !this.userB) || (!this.userA && this.userB)) {
-      this.emit('join', this.ug);
-    }
+    this.emit('join', this.ug);
   }
 
   leave() {
@@ -132,12 +110,12 @@ export default class GameClient extends GameCommon {
     this.ctx.strokeStyle = 'white';
 
     // paddle A
-    let c = this.opt.user[this.userA!]?.paddle ?? 'white';
+    let c = this.opt.user[this.playerA!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
     this.ctx.fillRect(GameCommon.PPAD, this.pa, GameCommon.PW, GameCommon.PH);
 
     // paddle B
-    c = this.opt.user[this.userB!]?.paddle ?? 'white';
+    c = this.opt.user[this.playerB!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
     this.ctx.fillRect(
       GameCommon.W - (GameCommon.PPAD + GameCommon.PW),
@@ -163,6 +141,11 @@ export default class GameClient extends GameCommon {
     this.ctx.fillStyle = 'green';
     this.ctx.font = 'bold italic 40px Arial';
     this.ctx.fillText('Score: ' + this.scoreA + ' - ' + this.scoreB, 10, 50);
+
+    // extra msg
+    this.ctx.fillStyle = 'blue';
+    this.ctx.font = 'bold 25px Arial';
+    if (this.textMsg) this.ctx.fillText(this.textMsg, 50, 250);
 
     this.frameid = requestAnimationFrame(this._draw);
   }

@@ -1,4 +1,4 @@
-import { createRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import GameClient from '../GameClient';
 import Col from './Col';
 import { getLogin } from '../util';
@@ -11,25 +11,25 @@ const GC = new GameClient();
 
 const Game = () => {
   const { id } = useParams(); // this is the room ID!
-  const cr = createRef<HTMLCanvasElement>();
+  const cr = useRef<HTMLCanvasElement>(null);
   const gameId: string = id!;
   const userId: string = getLogin();
-  const [gameStateString, setGameStateStr] = useState('waiting for players');
+  const [gameStateString, setGameStateStr] = useState('loading game');
   const [gameState, setGameState] = useState(GameState.WaitingForPlayers);
   const [playerA, setPlayerA] = useState<string | undefined>(undefined);
   const [playerB, setPlayerB] = useState<string | undefined>(undefined);
-
-  // useEffect(() => {
-  //   socket.connect();
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
+  const [spectators, setSpectators] = useState<string | undefined>(undefined);
+  const [textMsg, setTextMsg] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
     if (!ctx) return;
+    socket.connect();
     GC.load(ctx, getLogin(), id!);
+    return () => {
+      GC.unload();
+      socket.disconnect();
+    };
   }, [cr, id]);
 
   useEffect(() => {
@@ -37,6 +37,8 @@ const Game = () => {
       setGameState(e.gameState);
       setPlayerA(e.playerA);
       setPlayerB(e.playerB);
+      setSpectators([...e.spectators].join(', '));
+      setTextMsg(e.textMsg);
       if (e.gameState == GameState.WaitingForPlayers)
         setGameStateStr('waiting for players');
       if (e.gameState == GameState.ReadyToStart)
@@ -45,9 +47,7 @@ const Game = () => {
       if (e.gameState == GameState.Finished) setGameStateStr('finished');
     };
 
-    // request state, to sync after page load
     socket.on('game_state', onStateChange);
-    socket.emit('request_game_state', gameId);
     return () => {
       socket.off('game_state', onStateChange);
     };
@@ -72,7 +72,10 @@ const Game = () => {
         Leave Game!
       </Button>
       <Button
-        disabled={gameState != GameState.ReadyToStart}
+        disabled={
+          gameState != GameState.ReadyToStart ||
+          (playerA != userId && playerB != userId)
+        }
         onClick={() => GC.start()}
       >
         Start Game!
@@ -82,6 +85,8 @@ const Game = () => {
       <span>gameState: {gameStateString}</span>
       <span>player A: {playerA}</span>
       <span>player B: {playerB}</span>
+      <span>People in the room: {spectators}</span>
+      <span>Extra message: {textMsg}</span>
       <canvas ref={cr} width={GameClient.W} height={GameClient.H}></canvas>
     </Col>
   );

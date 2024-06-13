@@ -16,7 +16,7 @@ type paddle = {
   maxBallAngleDown: number;
 };
 
-// NOTE: the "this" of the GameServer object should be bound the function call!
+// NOTE: the "this" of the GameServer instance should be bound to the function call!
 export function runPhysics(): void {
   // Unpause after a second.
   if (this.pausingAfterGoal && Date.now() - this.goalTimeStamp > 1000) {
@@ -79,7 +79,6 @@ function handleGoal(newX: number): boolean {
     this.ballYpos = GameCommon.H / 2;
     this.pausingAfterGoal = true;
     this.goalTimeStamp = Date.now();
-    console.log('score: ', this.scoreA, this.scoreB);
     return true;
   } else {
     return false;

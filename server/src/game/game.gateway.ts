@@ -51,40 +51,42 @@ export class GameGateway extends Eventer {
       next();
     });
 
+    // adding internal listeners
     this.service.on('create', (createMsg) => {
       const game = this.service.guardGame(createMsg.gameId);
+
+      // send outgoing messages to all users in the game room
       game.onAny = (e, v) => {
-        if (game.userA) {
-          const clientA: Socket | undefined = this.userToClient.get(game.userA);
-          if (clientA) clientA.emit(e, v);
-        }
-        if (game.userB) {
-          const clientB: Socket | undefined = this.userToClient.get(game.userB);
-          if (clientB) clientB.emit(e, v);
+        // if (e != 'frame') {
+          // console.log('emtting: ', e, v);
+          // console.log('to spectators: ', game.spectators);
+        // }
+        for (const spectator of game.spectators) {
+          const client: Socket | undefined = this.userToClient.get(spectator);
+          if (client) {
+            client.emit(e, v);
+          }
         }
       };
-      game.on('leave', (ug) => {
-        const client = this.userToClient.get(ug.userId)!;
-        // send final game_state to user who is no longer in the game
-        client.emit('game_state', {
-          gameState: game.gameState,
-          playerA: game.userA,
-          playerB: game.userB,
-        });
-        if (client) client.leave(ug.gameId); // leave socket.io 'room'
-      });
-      game.on('join', (ug) => {
+      game.on('join_game_room', (ug) => {
         const client = this.userToClient.get(ug.userId)!;
         if (client) client.join(ug.gameId); // join socket.io 'room'
       });
-      this.userToClient.get(createMsg.userId)?.emit('create', createMsg);
     });
+  }
+
+  handleDisconnect(client: Socket) {
+    const user = this.idmap.get(client.id)!;
+    const leftGameId = this.service.userToGame.get(user);
+    if (user && leftGameId) {
+      this.service.leaveGameRoom(leftGameId, user);
+    }
   }
 
   @SubscribeMessage('create')
   _create(client: Socket, createMsg: GameEventData['create']) {
     const userId = this.idmap.get(client.id)!;
-    this.service.create({
+    this.service.createAndJoin({
       userId: userId,
       gameId: createMsg.gameId,
       isPublic: createMsg.isPublic,
@@ -95,6 +97,17 @@ export class GameGateway extends Eventer {
   _join(client: Socket, ug: GameEventData['join']) {
     const user = this.idmap.get(client.id)!;
     this.service.join(ug.gameId, user);
+  }
+
+  @SubscribeMessage('join_game_room')
+  _joinGameRoom(client: Socket, ug: GameEventData['join_game_room']) {
+    const user = this.idmap.get(client.id)!;
+    if (!this.service.games.has(ug.gameId)) {
+      this.service.createAndJoin({ userId: ug.userId, gameId: ug.gameId, isPublic: true })
+    }
+    else {
+      this.service.joinGameRoom(ug.gameId, user);
+    }
   }
 
   @SubscribeMessage('leave')
@@ -133,11 +146,15 @@ export class GameGateway extends Eventer {
     gameId: GameEventData['request_game_state'],
   ) {
     const game = this.service.guardGame(gameId);
+    const user = this.idmap.get(client.id)!;
+    game.spectators.add(user);
     if (game)
       client.emit('game_state', {
         gameState: game.gameState,
-        playerA: game.userA,
-        playerB: game.userB,
+        playerA: game.playerA,
+        playerB: game.playerB,
+        spectators: Array.from(game.spectators),
+        textMsg: undefined
       });
   }
 }
