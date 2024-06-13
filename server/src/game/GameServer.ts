@@ -93,22 +93,24 @@ export default class GameServer extends GameCommon {
   start() {
     console.log(`game '${this.gameId}' starts!'`);
     this.on('key_change', (key_change: GameEventData['key_change']) => {
-      let userKeys!: keyStatus;
-      if (key_change.userId == this.playerA) userKeys = this.keysA;
-      if (key_change.userId == this.playerB) userKeys = this.keysB;
-      if (key_change.key == 'w' && key_change.keyState == KeyState.Pressed) {
-        userKeys.up = true;
-        userKeys.down = false;
-      }
-      if (key_change.key == 's' && key_change.keyState == KeyState.Pressed) {
-        userKeys.up = false;
-        userKeys.down = true;
-      }
-      if (key_change.key == 'w' && key_change.keyState == KeyState.Released) {
-        userKeys.up = false;
-      }
-      if (key_change.key == 's' && key_change.keyState == KeyState.Released) {
-        userKeys.down = false;
+      if (this.gameState == GameState.Running) {
+        let userKeys!: keyStatus;
+        if (key_change.userId == this.playerA) userKeys = this.keysA;
+        if (key_change.userId == this.playerB) userKeys = this.keysB;
+        if (key_change.key == 'w' && key_change.keyState == KeyState.Pressed) {
+          userKeys.up = true;
+          userKeys.down = false;
+        }
+        if (key_change.key == 's' && key_change.keyState == KeyState.Pressed) {
+          userKeys.up = false;
+          userKeys.down = true;
+        }
+        if (key_change.key == 'w' && key_change.keyState == KeyState.Released) {
+          userKeys.up = false;
+        }
+        if (key_change.key == 's' && key_change.keyState == KeyState.Released) {
+          userKeys.down = false;
+        }
       }
     });
     this.gameState = GameState.Running;

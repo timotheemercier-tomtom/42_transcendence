@@ -97,7 +97,7 @@ export class GameService extends Eventer {
 
   key_change(userId: string, key_change: GameEventData['key_change']) {
     const game = this.guardUserInGameRoom(userId);
-    game.emit('key_change', key_change);
+    game.emit('key_change', key_change, false);
   }
 
   passGameEvent<E extends GameEventType>(

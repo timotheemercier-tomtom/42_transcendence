@@ -1,4 +1,4 @@
-import { GameCommon, KeyState } from './GameCommon';
+import { GameCommon, GameState, KeyState } from './GameCommon';
 import { socket } from './game.socket';
 
 export default class GameClient extends GameCommon {
@@ -27,7 +27,7 @@ export default class GameClient extends GameCommon {
 
     this.evdown = ((e: KeyboardEvent) => {
       if (e.repeat) return;
-      if (e.key in this.keys) {
+      if (e.key in this.keys && this.gameState == GameState.Running) {
         this.emit('key_change', {
           userId: userId,
           key: e.key,
@@ -38,7 +38,7 @@ export default class GameClient extends GameCommon {
 
     this.evup = ((e: KeyboardEvent) => {
       if (e.repeat) return;
-      if (e.key in this.keys) {
+      if (e.key in this.keys && this.gameState == GameState.Running) {
         this.emit('key_change', {
           userId: userId,
           key: e.key,
