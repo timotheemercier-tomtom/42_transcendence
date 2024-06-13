@@ -100,7 +100,7 @@ export class GameGateway extends Eventer {
   }
 
   @SubscribeMessage('join_game_room')
-  _joinGameRoom(client: Socket, ug: GameEventData['join']) {
+  _joinGameRoom(client: Socket, ug: GameEventData['join_game_room']) {
     const user = this.idmap.get(client.id)!;
     if (!this.service.games.has(ug.gameId)) {
       this.service.createAndJoin({ userId: ug.userId, gameId: ug.gameId, isPublic: true })
