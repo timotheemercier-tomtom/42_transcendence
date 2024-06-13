@@ -84,6 +84,7 @@ export default class GameServer extends GameCommon {
       if (winner) {
         this.userService.updateWinLossScore(winner, userId);
         this.emitGameState(`Player '${winner}' won, because '${userId}' left!!`);
+        setTimeout(this.resetGame.bind(this), 5000);
         return;
       }
     }
@@ -134,6 +135,7 @@ export default class GameServer extends GameCommon {
         this.userService.updateWinLossScore(this.playerB!, this.playerA!);
         this.emitGameState(`Player '${this.playerB}' Won!'`);
       }
+      setTimeout(this.resetGame.bind(this), 5000);
     }
     this.emit('frame', this.createFrame());
   };
@@ -163,5 +165,22 @@ export default class GameServer extends GameCommon {
 
   destroy(): void {
     super.destroy();
+  }
+
+  resetGame() {
+    console.log("Getting ready for new game...")
+    this.playerA = undefined;
+    this.playerB = undefined;
+    this.pausingAfterGoal = false;
+    this.scoreA = 0;
+    this.scoreB = 0;
+    this.pa = this.h / 2 - GameCommon.PH / 2;
+    this.pb = this.h / 2 - GameCommon.PH / 2;
+    this.ballAngle = 1.5 * Math.PI;
+    this.ballXpos
+    this.ballYpos
+    this.gameState = GameState.WaitingForPlayers;
+    this.emit('frame', this.createFrame());
+    this.emitGameState();
   }
 }

@@ -79,7 +79,6 @@ function handleGoal(newX: number): boolean {
     this.ballYpos = GameCommon.H / 2;
     this.pausingAfterGoal = true;
     this.goalTimeStamp = Date.now();
-    console.log('score: ', this.scoreA, this.scoreB);
     return true;
   } else {
     return false;
