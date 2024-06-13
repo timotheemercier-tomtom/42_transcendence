@@ -23,7 +23,12 @@ const Game = () => {
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
     if (!ctx) return;
+    socket.connect();
     GC.load(ctx, getLogin(), id!);
+    return () => {
+      GC.unload();
+      socket.disconnect();
+    };
   }, [cr, id]);
 
   useEffect(() => {

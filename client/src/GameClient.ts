@@ -18,7 +18,6 @@ export default class GameClient extends GameCommon {
   }
 
   load(ctx: CanvasRenderingContext2D, userId: string, gameId: string) {
-    this.unload();
     this.ctx = ctx;
     this.userId = userId;
     this.create(GameClient.W, GameClient.H);
@@ -47,9 +46,11 @@ export default class GameClient extends GameCommon {
       }
     }).bind(this);
 
-    socket.connect();
+    this.onAny = (e, v) => {
+      console.log('emitting to server: ', e, v);
+      socket.emit.bind(socket)(e, v);
+    };
 
-    this.onAny = socket.emit.bind(socket);
     socket.onAny((e, v) => {
       if (e != 'frame') console.log('Received: ', e, v);
       this.emit(e, v, false);
@@ -84,8 +85,6 @@ export default class GameClient extends GameCommon {
     window.removeEventListener('keydown', this.evdown);
     window.removeEventListener('keyup', this.evup);
     cancelAnimationFrame(this.frameid);
-    console.log('Disconnected GameClient');
-    socket.disconnect();
   }
 
   start() {

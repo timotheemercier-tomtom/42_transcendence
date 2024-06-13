@@ -59,10 +59,14 @@ export class GameService extends Eventer {
 
   joinGameRoom(gameId: string, user: string) {
     const game = this.guardGame(gameId);
-    if (this.userToGame.get(user))
-      throw new WsException('user already in a game');
-    this.userToGame.set(user, gameId);
-    game.joinGameRoom(user);
+    const currentGameRoom: string | undefined = this.userToGame.get(user);
+    if (currentGameRoom == undefined) {
+      this.userToGame.set(user, gameId);
+      game.joinGameRoom(user);
+    }
+    else if (currentGameRoom != gameId) {
+      throw new WsException(`user already in a game`);
+    }
     // console.log("games: ", this.games);
     // console.log("userToGame: ", this.userToGame);
   }
