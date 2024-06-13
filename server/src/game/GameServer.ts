@@ -45,7 +45,7 @@ export default class GameServer extends GameCommon {
     console.log(`'${userId}' left game room: '${this.gameId}'`);
     this.spectators.delete(userId);
     if (this.playerA == userId || this.playerB == userId) this.leave(userId);
-    this.emitGameState();
+    else this.emitGameState();
   }
 
   join(userId: string) {
@@ -81,7 +81,11 @@ export default class GameServer extends GameCommon {
     else if (this.gameState == GameState.Running) {
       this.gameState = GameState.Finished;
       clearInterval(this.frameInterval);
-      if (winner) this.userService.updateWinLossScore(winner, userId);
+      if (winner) {
+        this.userService.updateWinLossScore(winner, userId);
+        this.emitGameState(`Player '${winner}' won, because '${userId}' left!!`);
+        return;
+      }
     }
     this.emitGameState();
   }
@@ -121,22 +125,24 @@ export default class GameServer extends GameCommon {
       console.log(`game '${this.gameId}' finished!'`);
       clearInterval(this.frameInterval);
       this.gameState = GameState.Finished;
-      this.emitGameState();
       if (this.scoreA > this.scoreB) {
+        this.emitGameState(`Player '${this.playerA}' Won!'`);
         this.userService.updateWinLossScore(this.playerA!, this.playerB!);
       } else {
         this.userService.updateWinLossScore(this.playerB!, this.playerA!);
+        this.emitGameState(`Player '${this.playerB}' Won!'`);
       }
     }
     this.emit('frame', this.createFrame());
   };
 
-  emitGameState(): void {
+  emitGameState(textMsg: string | undefined = undefined): void {
     this.emit('game_state', {
       gameState: this.gameState,
       playerA: this.playerA,
       playerB: this.playerB,
       spectators: Array.from(this.spectators),
+      textMsg: textMsg
     });
   }
 

@@ -153,7 +153,8 @@ export class GameGateway extends Eventer {
         gameState: game.gameState,
         playerA: game.playerA,
         playerB: game.playerB,
-        spectators: Array.from(game.spectators)
+        spectators: Array.from(game.spectators),
+        textMsg: undefined
       });
   }
 }

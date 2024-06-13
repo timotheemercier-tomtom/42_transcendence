@@ -12,6 +12,7 @@ export default class GameClient extends GameCommon {
   userId!: string;
   frameid!: number;
   iv!: unknown;
+  textMsg: string | undefined = undefined;
 
   get ug() {
     return { userId: this.userId, gameId: this.gameId };
@@ -70,6 +71,7 @@ export default class GameClient extends GameCommon {
       this.playerA = v.playerA;
       this.playerB = v.playerB;
       this.spectators = new Set([...v.spectators]);
+      this.textMsg = v.textMsg;
     });
 
     // this.on('opt', (v) => this.addOpt(v));
@@ -139,6 +141,11 @@ export default class GameClient extends GameCommon {
     this.ctx.fillStyle = 'green';
     this.ctx.font = 'bold italic 40px Arial';
     this.ctx.fillText('Score: ' + this.scoreA + ' - ' + this.scoreB, 10, 50);
+
+    // extra msg
+    this.ctx.fillStyle = 'blue';
+    this.ctx.font = 'bold 25px Arial';
+    if (this.textMsg) this.ctx.fillText(this.textMsg, 50, 250);
 
     this.frameid = requestAnimationFrame(this._draw);
   }

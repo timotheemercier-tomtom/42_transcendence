@@ -58,6 +58,7 @@ export type GameEventData = {
     playerA: string | undefined;
     playerB: string | undefined;
     spectators: Array<string>;
+    textMsg: string | undefined;
   };
   request_game_state: string;
   key_change: { userId: string; key: string; keyState: KeyState };

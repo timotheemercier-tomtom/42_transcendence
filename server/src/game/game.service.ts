@@ -28,7 +28,7 @@ export class GameService extends Eventer {
   guardUserInGameRoom(user: string): GameServer {
     const gameid = this.userToGame.get(user);
     if (gameid) return this.guardGame(gameid);
-    throw new WsException('user not in game');
+    throw new WsException('user not in any game room');
   }
 
   createAndJoin(createMsg: GameEventData['create']) {
