@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { socket } from '../status.socket';
 import Row from './Row';
-import { StatusType, StatusList, StatusState } from 'common';
+import { StatusType, StatusList, StatusState } from '../../../common';
+
 import { Link } from 'react-router-dom';
 import { getLogin } from '../util';
 

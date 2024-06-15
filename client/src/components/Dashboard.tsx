@@ -1,9 +1,9 @@
 // src/components/Dashboard.tsx
 import React from 'react';
 import { Button, Menu, MenuItem } from '@mui/material';
-// import { useAuth } from './AuthContext.tsx';
+import { useAuth } from './Login.tsx';
 
-export default function BasicMenu() {
+export default function Dashboard() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { isLoggedIn, logout } = useAuth();
   const open = Boolean(anchorEl);

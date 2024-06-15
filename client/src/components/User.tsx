@@ -7,9 +7,10 @@ import React, {
 } from 'react';
 import { Avatar, Card, CircularProgress } from '@mui/material';
 import { Link, useParams } from 'react-router-dom';
-import Typography from './Typography';
 import Picture from './Picture';
 import FormWithValidation from './Form';
+import Typography from '@material-ui/core/Typography';
+import SignUp from './SignUp';
 
 type UserContextType = {
   user: any;
@@ -118,6 +119,7 @@ function User() {
           }
         }}
       />
+      <SignUp />
       <Typography variant="h5">Account Details</Typography>
       <Typography variant="h5">Intra Login: {userData.username}</Typography>
       <Link to={'/u/asaijers'}>Alfa Profile</Link>
@@ -128,13 +130,6 @@ function User() {
         initialFormData={userData}
         onImageUpdate={updateUserData} // Ajout de la prop onImageUpdate
       />
-
-      {/* <img
-        src={userData.picture}
-        alt={userData.username}
-      /> */}
-
-      {/* Add more user details as needed */}
     </Card>
   );
 }
