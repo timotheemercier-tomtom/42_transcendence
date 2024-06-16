@@ -7,6 +7,7 @@ export default function Home() {
     <Col>
       <h1>Welcome!</h1>
           <GameMaker /> 
+          <Dashboard />
     </Col>
   );
 }

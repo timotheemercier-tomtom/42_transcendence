@@ -10,6 +10,7 @@ import Profile from './pages/Profile.tsx';
 import Room from './pages/Room.tsx';
 import Home from './pages/Home.tsx';
 import User from './components/User.tsx';
+import Dashboard from './components/Dashboard.tsx';
 
 const router = createBrowserRouter([
   {
@@ -36,6 +37,14 @@ const router = createBrowserRouter([
       {
         path: 'profile',
         element: <User />,
+      },
+      {
+        path: 'dashboard',
+        element: <Dashboard />,
+      },
+      {
+        path: 'play',
+        element: <div>Play Pong - Component Placeholder</div>, // Replace with actual component
       },
     ],
   },

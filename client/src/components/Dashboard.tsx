@@ -1,12 +1,14 @@
 // src/components/Dashboard.tsx
 import React from 'react';
 import { Button, Menu, MenuItem } from '@mui/material';
-import { useAuth } from './Login.tsx';
+import { useAuth } from '../components/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { isLoggedIn, logout } = useAuth();
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -14,6 +16,11 @@ export default function Dashboard() {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (path: string) => {
+    navigate(path);
+    handleClose();
   };
 
   return (
@@ -36,13 +43,28 @@ export default function Dashboard() {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={handleClose}>Play Pong</MenuItem>
+        <MenuItem onClick={() => handleMenuItemClick('/play')}>
+          Play Pong
+        </MenuItem>
         {isLoggedIn ? (
-          <MenuItem onClick={handleClose}>My Account</MenuItem>
+          <MenuItem onClick={() => handleMenuItemClick('/profile')}>
+            My Account
+          </MenuItem>
         ) : (
-          <MenuItem onClick={handleClose}>Login</MenuItem>
+          <MenuItem onClick={() => handleMenuItemClick('/login')}>
+            Login
+          </MenuItem>
         )}
-        {isLoggedIn && <MenuItem onClick={() => { logout(); handleClose(); }}>Logout</MenuItem>}
+        {isLoggedIn && (
+          <MenuItem
+            onClick={() => {
+              logout();
+              handleClose();
+            }}
+          >
+            Logout
+          </MenuItem>
+        )}
       </Menu>
     </div>
   );
