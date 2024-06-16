@@ -1,14 +1,16 @@
+// Status.tsx
+
 import { useEffect, useState } from 'react';
 import { socket } from '../status.socket';
 import Row from './Row';
 import { StatusType, StatusList, StatusState } from '../../../common';
-
 import { Link } from 'react-router-dom';
-import { getLogin } from '../util';
+import { useAuth } from './AuthContext';
 
 const Status = () => {
+  const { user } = useAuth();
   const [status, setStatus] = useState(new Map<string, StatusType>());
-  const user = getLogin();
+
   useEffect(() => {
     socket.connect();
 
@@ -34,7 +36,7 @@ const Status = () => {
 
   return (
     <Row gap={'.5rem'}>
-      <span>you: {user}</span>
+      <span>you: {user ? user.login : 'Guest'}</span>
       {Array.from(status.entries()).map((v, i) => (
         <span key={i}>
           <Link to={'/u/' + v[0]}>{v[0]}</Link> : {v[1]}

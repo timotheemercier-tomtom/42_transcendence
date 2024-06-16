@@ -34,7 +34,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import FortyTwoStrategy from 'passport-42';
 import { UserService } from 'src/user/user.service';
-
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
@@ -70,4 +70,3 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
     return { user, accessToken: localAccessToken };
   }
 }
-

@@ -41,23 +41,20 @@ export class AuthController {
   constructor(
     private authService: FourTwoStrategy,
     private jwt: JwtService,
-    private user: UserService,
-    private config: ConfigService,
     private userService: UserService,
+    private config: ConfigService,
   ) {}
 
   @Get('42')
   @UseGuards(AuthGuard('42'))
   async signInWith42() {}
 
-  redir(host: string, token: string, login: string) {
-    return `http://${this.config.get(
-      'HOST',
-    )}:5173/login?token=${token}&u=${login}`;
+  private redir(host: string, token: string, login: string) {
+    return `http://${host}:5173/login?token=${token}&u=${login}`;
   }
 
   @Get('check')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   async checkAuth(@Req() req: any): Promise<User> {
     const user = await this.userService.findOne(req.user.login);
     if (!user) {
@@ -68,23 +65,28 @@ export class AuthController {
 
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
-  async fortyTwoAuthRedirect(@Req() req: Request | any, @Res() res: Response) {
+  async fortyTwoAuthRedirect(@Req() req: Request & any, @Res() res: Response) {
     const { accessToken, user }: { accessToken: string; user: User } = req.user;
-    // accessToken est directement extraits de req.user.
-    const host = new URL(req.headers.referer).hostname;
+
+    const referer =
+      req.headers.referer || `http://${this.config.get('HOST')}:5173`;
+    const host = new URL(referer).hostname;
+
     res.redirect(this.redir(host, accessToken, user.login));
   }
 
-  anonc = 0;
+  private anonc = 0;
 
   @Get('anon')
-  async anonSignIn(@Req() req: Request | any, @Res() res: Response) {
-    const host = new URL(req.headers.referer).hostname;
+  async anonSignIn(@Req() req: Request & any, @Res() res: Response) {
+    const referer =
+      req.headers.referer || `http://${this.config.get('HOST')}:5173`;
+    const host = new URL(referer).hostname;
     const name = '$anon' + this.anonc++;
     let user: User | null;
-    if (!(user = await this.user.findOne(name)))
-      user = await this.user.create({ login: name, displayName: name });
-    const accessToken = this.jwt.sign({...user});
+    if (!(user = await this.userService.findOne(name)))
+      user = await this.userService.create({ login: name, displayName: name });
+    const accessToken = this.jwt.sign({ ...user });
     res.redirect(this.redir(host, accessToken, name));
   }
 }
