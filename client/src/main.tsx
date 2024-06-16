@@ -9,6 +9,7 @@ import LoginResult from './pages/LoginResult.tsx';
 import Profile from './pages/Profile.tsx';
 import Room from './pages/Room.tsx';
 import Home from './pages/Home.tsx';
+import User from './components/User.tsx';
 
 const router = createBrowserRouter([
   {
@@ -25,12 +26,16 @@ const router = createBrowserRouter([
         element: <Room />,
       },
       {
-        element: <LoginResult />,
         path: 'login',
+        element: <LoginResult />,
       },
       {
-        element: <Profile />,
         path: 'u/:login',
+        element: <Profile />,
+      },
+      {
+        path: 'profile',
+        element: <User />,
       },
     ],
   },
@@ -38,7 +43,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-      <CssBaseline />
-        <RouterProvider router={router} />
+    <CssBaseline />
+    <RouterProvider router={router} />
   </React.StrictMode>,
 );

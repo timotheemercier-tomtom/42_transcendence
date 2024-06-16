@@ -9,6 +9,7 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   imports: [AuthModule, UserModule],
   providers: [GameService, GameGateway, UserService],
-  controllers: [GameController],
+    controllers: [GameController],
+  
 })
 export class GameModule {}

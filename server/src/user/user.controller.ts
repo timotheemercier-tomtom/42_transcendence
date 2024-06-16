@@ -1,30 +1,30 @@
+// user.controller.ts
+
 import {
   Body,
   Controller,
   Get,
-  HttpException,
   NotFoundException,
   Param,
   Patch,
   Post,
   Req,
   UnauthorizedException,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserDto } from './user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 import { FriendService } from './friend.service';
-import { Friend } from './friend.entity';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('user')
 export class UserController {
   constructor(
     private userService: UserService,
     private friendService: FriendService,
+    private authService: AuthService,
   ) {}
 
   @Get()
@@ -85,5 +85,34 @@ export class UserController {
     @Body() body: { picture: string },
   ): Promise<User> {
     return this.userService.updateImage(login, body.picture);
+  }
+
+  @Post(':login/2fa/enable')
+  @UseGuards(JwtAuthGuard)
+  async enableTwoFA(
+    @Param('login') login: string,
+    @Req() req: Request & any,
+  ): Promise<{ secret: string; otpauthUrl?: string }> {
+    if (req.user.login !== login) {
+      throw new UnauthorizedException();
+    }
+
+    const { otpauthUrl, base32 } = this.authService.generateTwoFASecret(login);
+    await this.userService.enableTwoFA(login, base32);
+
+    return { secret: base32, otpauthUrl };
+  }
+
+  @Post(':login/2fa/disable')
+  @UseGuards(JwtAuthGuard)
+  async disableTwoFA(
+    @Param('login') login: string,
+    @Req() req: Request & any,
+  ): Promise<User> {
+    if (req.user.login !== login) {
+      throw new UnauthorizedException();
+    }
+
+    return this.userService.disableTwoFA(login);
   }
 }

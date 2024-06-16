@@ -1,65 +1,42 @@
-// src/contexts/AuthContext.tsx
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  ReactNode,
-} from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, Card, Typography, CircularProgress } from '@mui/material';
+import { useAuth } from './AuthContext';
 
-interface AuthContextType {
-  isLoggedIn: boolean;
-  user: any;
-  login: () => void;
-  logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+const Login: React.FC = () => {
+  const { login, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('/auth/status')
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.isLoggedIn) {
-          setIsLoggedIn(true);
-          setUser(data.user);
-        }
-      });
-  }, []);
-
-  const login = async () => {
-    const response = await fetch('/auth/42');
-    const data = await response.json();
-    if (data.isLoggedIn) {
-      setIsLoggedIn(true);
-      setUser(data.user);
+    if (isLoggedIn) {
+      navigate('/profile'); // Redirect to the profile page after successful login
     }
-  };
+  }, [isLoggedIn, navigate]);
 
-  const logout = () => {
-    fetch('/auth/logout', { method: 'POST' }).then(() => {
-      setIsLoggedIn(false);
-      setUser(null);
-    });
-  };
+  if (isLoggedIn) {
+    return <Typography variant="h6">You are already logged in.</Typography>;
+  }
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
+    <Card style={{ padding: '2rem', maxWidth: '400px', margin: '2rem auto' }}>
+      <Typography variant="h4" gutterBottom>
+        Login
+      </Typography>
+      <Button
+        variant="contained"
+        color="primary"
+        fullWidth
+        onClick={() => {
+          setLoading(true);
+          login();
+        }}
+        disabled={loading}
+      >
+        {loading ? <CircularProgress size={24} /> : 'Login with 42 Intra'}
+      </Button>
+    </Card>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export default Login;
