@@ -13,6 +13,7 @@ export default class GameClient extends GameCommon {
   frameid!: number;
   iv!: unknown;
   textMsg: string | undefined = undefined;
+  scaleFactor: number = 1;
 
   get ug() {
     return { userId: this.userId, gameId: this.gameId };
@@ -103,34 +104,43 @@ export default class GameClient extends GameCommon {
 
   _draw = this.draw.bind(this);
 
+  calcScaleFactor(screenWidth: number, screenHeight: number): number {
+    const fWidth: number = screenWidth / 2 / GameCommon.W;
+    const fHeight: number = screenHeight / 2 / GameCommon.H;
+    this.scaleFactor = Math.min(fWidth, fHeight);
+    return this.scaleFactor;
+  }
+
   draw() {
+    const fact = this.scaleFactor;
+
     // field
     this.ctx.fillStyle = 'black';
-    this.ctx.fillRect(0, 0, this.w, this.h);
+    this.ctx.fillRect(0, 0, this.w * fact, this.h * fact);
     this.ctx.strokeStyle = 'white';
 
     // paddle A
     let c = this.opt.user[this.playerA!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
-    this.ctx.fillRect(GameCommon.PPAD, this.pa, GameCommon.PW, GameCommon.PH);
+    this.ctx.fillRect(GameCommon.PPAD * fact, this.pa * fact, GameCommon.PW * fact, GameCommon.PH * fact);
 
     // paddle B
     c = this.opt.user[this.playerB!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
     this.ctx.fillRect(
-      GameCommon.W - (GameCommon.PPAD + GameCommon.PW),
-      this.pb,
-      GameCommon.PW,
-      GameCommon.PH,
+      GameCommon.W * fact - (GameCommon.PPAD * fact + GameCommon.PW * fact),
+      this.pb * fact,
+      GameCommon.PW * fact,
+      GameCommon.PH * fact,
     );
 
     // ball
     this.ctx.fillStyle = 'white';
     this.ctx.beginPath();
     this.ctx.arc(
-      this.ballXpos,
-      this.ballYpos,
-      GameCommon.BRAD,
+      this.ballXpos * fact,
+      this.ballYpos * fact,
+      GameCommon.BRAD * fact,
       0,
       2 * Math.PI,
       false,
@@ -140,12 +150,12 @@ export default class GameClient extends GameCommon {
     // score
     this.ctx.fillStyle = 'green';
     this.ctx.font = 'bold italic 40px Arial';
-    this.ctx.fillText('Score: ' + this.scoreA + ' - ' + this.scoreB, 10, 50);
+    this.ctx.fillText('Score: ' + this.scoreA + ' - ' + this.scoreB, 10 * fact, 50 * fact);
 
     // extra msg
     this.ctx.fillStyle = 'blue';
     this.ctx.font = 'bold 25px Arial';
-    if (this.textMsg) this.ctx.fillText(this.textMsg, 50, 250);
+    if (this.textMsg) this.ctx.fillText(this.textMsg, 50 * fact, 250 * fact);
 
     this.frameid = requestAnimationFrame(this._draw);
   }

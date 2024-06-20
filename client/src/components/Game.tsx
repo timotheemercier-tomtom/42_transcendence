@@ -20,13 +20,16 @@ const Game = () => {
   const [playerB, setPlayerB] = useState<string | undefined>(undefined);
   const [spectators, setSpectators] = useState<string | undefined>(undefined);
   const [textMsg, setTextMsg] = useState<string | undefined>(undefined);
+  const [scaleFactor, setScaleFactor] = useState<number>(0.8);
 
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
     if (!ctx) return;
     socket.connect();
     GC.load(ctx, getLogin(), id!);
+    window.addEventListener('resize', handleResize);
     return () => {
+      window.removeEventListener('resize', handleResize);
       GC.unload();
       socket.disconnect();
     };
@@ -39,6 +42,7 @@ const Game = () => {
       setPlayerB(e.playerB);
       setSpectators([...e.spectators].join(', '));
       setTextMsg(e.textMsg);
+      setScaleFactor(GC.calcScaleFactor(window.innerWidth, window.innerHeight));
       if (e.gameState == GameState.WaitingForPlayers)
         setGameStateStr('waiting for players');
       if (e.gameState == GameState.ReadyToStart)
@@ -52,6 +56,10 @@ const Game = () => {
       socket.off('game_state', onStateChange);
     };
   }, [id]);
+
+  function handleResize() {
+    setScaleFactor(GC.calcScaleFactor(window.innerWidth, window.innerHeight));
+  }
 
   return (
     <Col>
@@ -87,7 +95,12 @@ const Game = () => {
       <span>player B: {playerB}</span>
       <span>People in the room: {spectators}</span>
       <span>Extra message: {textMsg}</span>
-      <canvas ref={cr} width={GameClient.W} height={GameClient.H}></canvas>
+      <span>scaleFactor: {scaleFactor}</span>
+      <canvas
+        ref={cr}
+        width={GameClient.W * scaleFactor}
+        height={GameClient.H * scaleFactor}
+      ></canvas>
     </Col>
   );
 };
