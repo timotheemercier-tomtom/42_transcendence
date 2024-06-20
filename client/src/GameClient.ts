@@ -122,7 +122,12 @@ export default class GameClient extends GameCommon {
     // paddle A
     let c = this.opt.user[this.playerA!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
-    this.ctx.fillRect(GameCommon.PPAD * fact, this.pa * fact, GameCommon.PW * fact, GameCommon.PH * fact);
+    this.ctx.fillRect(
+      GameCommon.PPAD * fact,
+      this.pa * fact,
+      GameCommon.PW * fact,
+      GameCommon.PH * fact,
+    );
 
     // paddle B
     c = this.opt.user[this.playerB!]?.paddle ?? 'white';
@@ -149,12 +154,16 @@ export default class GameClient extends GameCommon {
 
     // score
     this.ctx.fillStyle = 'green';
-    this.ctx.font = 'bold italic 40px Arial';
-    this.ctx.fillText('Score: ' + this.scoreA + ' - ' + this.scoreB, 10 * fact, 50 * fact);
+    this.ctx.font = `bold italic ${40 * fact}px Arial`;
+    this.ctx.fillText(
+      'Score: ' + this.scoreA + ' - ' + this.scoreB,
+      10 * fact,
+      50 * fact,
+    );
 
     // extra msg
-    this.ctx.fillStyle = 'blue';
-    this.ctx.font = 'bold 25px Arial';
+    this.ctx.fillStyle = 'cyan';
+    this.ctx.font = `bold ${25 * fact}px Arial`;
     if (this.textMsg) this.ctx.fillText(this.textMsg, 50 * fact, 250 * fact);
 
     this.frameid = requestAnimationFrame(this._draw);
