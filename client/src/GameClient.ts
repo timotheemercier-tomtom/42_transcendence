@@ -112,59 +112,57 @@ export default class GameClient extends GameCommon {
   }
 
   draw() {
-    const fact = this.scaleFactor;
+    // set dimensions
+    const canvasWidth: number = this.w * this.scaleFactor;
+    const canvasHeight: number = this.h * this.scaleFactor;
+    const paddleWidth: number = GameCommon.PW * this.scaleFactor;
+    const paddleHeight: number = GameCommon.PH * this.scaleFactor;
+    const padding: number = GameCommon.PPAD * this.scaleFactor;
+    const leftPaddleA: number = padding;
+    const leftPaddleB: number = canvasWidth - (padding + paddleWidth);
+    const topPaddleA: number = this.pa * this.scaleFactor;
+    const topPaddleB: number = this.pb * this.scaleFactor;
+    const ballXpos: number = this.ballXpos * this.scaleFactor;
+    const ballYpos: number = this.ballYpos * this.scaleFactor;
+    const ballRadius: number = GameCommon.BRAD * this.scaleFactor;
+    const scoreFontSize: number = 40 * this.scaleFactor;
+    const scoreXpos: number = 10 * this.scaleFactor;
+    const scoreYpos: number = 50 * this.scaleFactor;
+    const msgFontSize: number = 25 * this.scaleFactor;
+    const msgXpos: number = 50 * this.scaleFactor;
+    const msgYpos: number = 250 * this.scaleFactor;
 
     // field
     this.ctx.fillStyle = 'black';
-    this.ctx.fillRect(0, 0, this.w * fact, this.h * fact);
+    this.ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     this.ctx.strokeStyle = 'white';
 
     // paddle A
     let c = this.opt.user[this.playerA!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
-    this.ctx.fillRect(
-      GameCommon.PPAD * fact,
-      this.pa * fact,
-      GameCommon.PW * fact,
-      GameCommon.PH * fact,
-    );
+    this.ctx.fillRect(leftPaddleA, topPaddleA, paddleWidth, paddleHeight);
 
     // paddle B
     c = this.opt.user[this.playerB!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
-    this.ctx.fillRect(
-      GameCommon.W * fact - (GameCommon.PPAD * fact + GameCommon.PW * fact),
-      this.pb * fact,
-      GameCommon.PW * fact,
-      GameCommon.PH * fact,
-    );
+    this.ctx.fillRect(leftPaddleB, topPaddleB, paddleWidth, paddleHeight);
 
     // ball
     this.ctx.fillStyle = 'white';
     this.ctx.beginPath();
-    this.ctx.arc(
-      this.ballXpos * fact,
-      this.ballYpos * fact,
-      GameCommon.BRAD * fact,
-      0,
-      2 * Math.PI,
-      false,
-    );
+    this.ctx.arc(ballXpos, ballYpos, ballRadius, 0, 2 * Math.PI, false);
     this.ctx.fill();
 
     // score
+    const scoreStr: string = `Score: ${this.scoreA} - ${this.scoreB}`;
     this.ctx.fillStyle = 'green';
-    this.ctx.font = `bold italic ${40 * fact}px Arial`;
-    this.ctx.fillText(
-      'Score: ' + this.scoreA + ' - ' + this.scoreB,
-      10 * fact,
-      50 * fact,
-    );
+    this.ctx.font = `bold italic ${scoreFontSize}px Arial`;
+    this.ctx.fillText(scoreStr, scoreXpos, scoreYpos);
 
     // extra msg
     this.ctx.fillStyle = 'cyan';
-    this.ctx.font = `bold ${25 * fact}px Arial`;
-    if (this.textMsg) this.ctx.fillText(this.textMsg, 50 * fact, 250 * fact);
+    this.ctx.font = `bold ${msgFontSize}px Arial`;
+    if (this.textMsg) this.ctx.fillText(this.textMsg, msgXpos, msgYpos);
 
     this.frameid = requestAnimationFrame(this._draw);
   }
