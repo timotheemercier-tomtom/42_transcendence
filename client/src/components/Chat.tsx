@@ -5,11 +5,12 @@ import {
   ChatEventType,
   ChatServerEventData,
   ChatServerMessage,
+  User,
 } from 'common';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { socket } from '../chat.socket';
-import { getLogin } from '../util';
+import { API, getLogin } from '../util';
 import Col from './Col';
 import Row from './Row';
 
@@ -24,14 +25,13 @@ export default function Chat({ id }: { id: string }) {
   const [dms, setDms] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [block, setBlock] = useState(new Set<string>());
+  const [showHelp, setShowHelp] = useState(false);
+  const [friends, setFriends] = useState<User[]>([]);
+
   const user = getLogin();
 
   useEffect(() => {
     socket.connect();
-
-    return () => {
-      socket.disconnect();
-    };
   }, []);
 
   useEffect(() => {
@@ -50,6 +50,7 @@ export default function Chat({ id }: { id: string }) {
 
     const onconnect = () => {
       send('join', { room, pass: '' });
+      send('rooms', user);
     };
 
     const onjoin = (e: ChatServerEventData['join']) => {
@@ -65,13 +66,23 @@ export default function Chat({ id }: { id: string }) {
       });
     };
 
+    const getFriends = async () => {
+      const res = await fetch(API + `/user/${user}/friends`, {
+        credentials: 'include',
+      });
+      const data = await res.json();
+      setFriends(data);
+    };
+
     socket.on('connect', onconnect);
     socket.on('message', onmessage);
     socket.on('list', setPublic);
+    socket.on('rooms', setRooms);
     socket.on('dms', setDms);
     socket.on('join', onjoin);
     socket.on('error', setError);
     socket.on('leave', onleave);
+    getFriends();
 
     return () => {
       console.log('removing listeneres');
@@ -81,10 +92,11 @@ export default function Chat({ id }: { id: string }) {
       socket.off('list', setPublic);
       socket.off('dms', setDms);
       socket.off('join', onjoin);
+      socket.off('rooms', setRooms);
       socket.off('error', setError);
       socket.off('leave', onleave);
     };
-  }, [room]);
+  }, [room, user]);
 
   const send = <EventType extends ChatEventType>(
     ev: EventType,
@@ -106,7 +118,22 @@ export default function Chat({ id }: { id: string }) {
   });
 
   const cmdre =
-    /^\/(owner|admin|pass|ban|kick|mute|join|leave|public|dm|block)(.*)/;
+    /^\/(help|owner|admin|pass|ban|kick|mute|join|leave|public|dm|block)(.*)/;
+
+  const cmdinfo = {
+    help: 'toggle this help message',
+    owner: 'set the owner to user arg1',
+    admin: 'toggle admin on user arg1',
+    pass: 'set the password of this room to arg1',
+    kick: 'kick user arg1 from this room',
+    ban: 'ban user arg1 from this room',
+    mute: 'mute user arg1 in this room for arg2 seconds',
+    join: 'join room arg1 with optional password arg2',
+    public: 'toggle public flag of this room',
+    leave: 'leave this room',
+    dm: 'open a direct message to user arg1',
+    block: 'block a user arg1',
+  };
 
   const handleCommand = (input: string) => {
     const m = input.match(cmdre);
@@ -114,6 +141,9 @@ export default function Chat({ id }: { id: string }) {
     const args = m[2].trim().split(' ');
     const arg1 = args.length > 0 ? args[0] : '';
     switch (m[1]) {
+      case 'help':
+        setShowHelp(!showHelp);
+        break;
       case 'owner':
       case 'admin':
       case 'kick':
@@ -166,13 +196,18 @@ export default function Chat({ id }: { id: string }) {
   };
 
   const getcolor = (v: ChatServerMessage): string => {
-    return { admin: 'red', owner: 'purple', server: 'grey', user: 'white' }[
+    return { admin: 'red', owner: 'purple', server: 'orange', user: 'black' }[
       v.role
     ];
   };
 
   const joinRoom = (e: string) => {
     send('join', { room: e, pass });
+  };
+
+  const invite = (u: User) => {
+    send('dm', u.login);
+    send('message', { msg: 'invite ' + room, room: '+' + u.login });
   };
 
   const Message = ({ v }: { v: ChatServerMessage }) => {
@@ -216,6 +251,17 @@ export default function Chat({ id }: { id: string }) {
             <Button onClick={handleInput}>Send</Button>
           </Row>
         </Col>
+        {showHelp && (
+          <Col>
+            <span>Help:</span>
+            <span>format: /command arg1 arg2</span>
+            {Object.entries(cmdinfo).map(([k, v]) => (
+              <span>
+                /{k}: {v}
+              </span>
+            ))}
+          </Col>
+        )}
       </Col>
       <Col borderLeft={1}>
         {!badd ? (
@@ -251,6 +297,12 @@ export default function Chat({ id }: { id: string }) {
             </Button>
           ))
         )}
+      </Col>
+      <Col borderLeft={1}>
+        <span>Invite</span>
+        {friends.map((v) => (
+          <Button onClick={() => invite(v)}>{v.login}</Button>
+        ))}
       </Col>
     </Row>
   );

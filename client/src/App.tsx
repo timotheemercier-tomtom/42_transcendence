@@ -6,6 +6,7 @@ import Col from './components/Col';
 import Row from './components/Row';
 import Status from './components/Status';
 import { API } from './util';
+import InviteReceiver from './components/InviteReceiver';
 
 const App: React.FC = () => {
   const handle42Login = () => {
@@ -17,7 +18,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <Container className="root">
+    <Container className="root" maxWidth="xl">
+      <InviteReceiver />
       <Col className="app">
         <header>
           <Row>

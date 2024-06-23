@@ -245,4 +245,14 @@ export class ChatGateway
     };
     this.server.to(msg.room).emit('message', msg);
   }
+
+  @SubscribeMessage('rooms')
+  rooms(client: Socket, e: string): void {
+    const user = this.idmap.get(client.id)!;
+    const rooms: string[] = [];
+    this.service.rooms.forEach((users, room) => {
+      if (users.has(user)) rooms.push(room);
+    });
+    client.emit('rooms', rooms);
+  }
 }

@@ -12,7 +12,8 @@ export type ChatEventType =
   | 'list'
   | 'dm'
   | 'dms'
-  | 'error';
+  | 'error'
+  | 'rooms';
 
 type ChatEventData = {
   pass: ChatPass;
@@ -32,11 +33,13 @@ type ChatEventData = {
 export type ChatServerEventData = {
   message: ChatServerMessage;
   join: string;
+  rooms: string[];
 } & ChatEventData;
 
 export type ChatClientEventData = {
   message: ChatClientMessage;
   join: ChatJoin;
+  rooms: string;
 } & ChatEventData;
 
 export type ChatRole = 'user' | 'admin' | 'owner' | 'server';
