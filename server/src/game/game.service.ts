@@ -37,6 +37,7 @@ export class GameService extends Eventer {
     const game = new GameServer(
       createMsg.gameId,
       createMsg.isPublic,
+      createMsg.isSelfBalancing,
       this.userService,
     );
     game.create(GameServer.W, GameServer.H);
@@ -63,8 +64,7 @@ export class GameService extends Eventer {
     if (currentGameRoom == undefined) {
       this.userToGame.set(user, gameId);
       game.joinGameRoom(user);
-    }
-    else if (currentGameRoom != gameId) {
+    } else if (currentGameRoom != gameId) {
       throw new WsException(`user already in a game`);
     }
     // console.log("games: ", this.games);
@@ -109,13 +109,14 @@ export class GameService extends Eventer {
     game.emit(e, v);
   }
 
-  enque(user: string) {
+  enque(user: string, isSelfBalancing: boolean = false) {
     if (this.userToGame.has(user))
       throw new WsException('user already in a game');
     // join existing public game
     for (const [gameId, game] of this.games.entries()) {
       if (
         game.isPublic &&
+        game.isSelfBalancing == isSelfBalancing &&
         game.gameState == GameState.WaitingForPlayers &&
         (!game.playerA || !game.playerB)
       ) {
@@ -126,7 +127,12 @@ export class GameService extends Eventer {
     }
     // create new public game
     const id = 'game-' + randomUUID();
-    this.createAndJoin({ gameId: id, userId: user, isPublic: true });
+    this.createAndJoin({
+      gameId: id,
+      userId: user,
+      isPublic: true,
+      isSelfBalancing: isSelfBalancing,
+    });
   }
 
   opt(opt: GameOpt) {

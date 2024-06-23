@@ -13,6 +13,7 @@ export enum GameState {
 export type GameEventType =
   | 'create'
   | 'enque'
+  | 'enque_self_balancing'
   | 'join'
   | 'join_game_room'
   | 'leave'
@@ -38,8 +39,10 @@ export type GameEventData = {
     userId: string;
     gameId: string;
     isPublic: boolean;
+    isSelfBalancing: boolean;
   };
   enque: string;
+  enque_self_balancing: string;
   join: GameUserGame;
   join_game_room: GameUserGame;
   leave: GameUserGame;
@@ -52,6 +55,7 @@ export type GameEventData = {
     ballAngle: number;
     scoreA: number;
     scoreB: number;
+    selfBalancingFactor: number;
   };
   game_state: {
     gameState: GameState;
@@ -112,6 +116,8 @@ export class GameCommon extends Eventer {
   scoreA: number = 0;
   scoreB: number = 0;
   isPublic: boolean = true;
+  isSelfBalancing: boolean = false;
+  selfBalancingFactor: number = 1;
 
   get pa() {
     return this.p[0];

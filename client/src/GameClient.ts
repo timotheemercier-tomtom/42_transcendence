@@ -65,6 +65,7 @@ export default class GameClient extends GameCommon {
       this.pb = e.playerB;
       this.scoreA = e.scoreA;
       this.scoreB = e.scoreB;
+      this.selfBalancingFactor = e.selfBalancingFactor;
     });
 
     this.on('game_state', (v) => {
@@ -116,7 +117,14 @@ export default class GameClient extends GameCommon {
     const canvasWidth: number = this.w * this.scaleFactor;
     const canvasHeight: number = this.h * this.scaleFactor;
     const paddleWidth: number = GameCommon.PW * this.scaleFactor;
-    const paddleHeight: number = GameCommon.PH * this.scaleFactor;
+    const paddleHeightA: number =
+      GameCommon.PH *
+      this.scaleFactor *
+      (this.scoreA < this.scoreB ? this.selfBalancingFactor : 1);
+    const paddleHeightB: number =
+      GameCommon.PH *
+      this.scaleFactor *
+      (this.scoreB < this.scoreA ? this.selfBalancingFactor : 1);
     const padding: number = GameCommon.PPAD * this.scaleFactor;
     const leftPaddleA: number = padding;
     const leftPaddleB: number = canvasWidth - (padding + paddleWidth);
@@ -140,12 +148,12 @@ export default class GameClient extends GameCommon {
     // paddle A
     let c = this.opt.user[this.playerA!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
-    this.ctx.fillRect(leftPaddleA, topPaddleA, paddleWidth, paddleHeight);
+    this.ctx.fillRect(leftPaddleA, topPaddleA, paddleWidth, paddleHeightA);
 
     // paddle B
     c = this.opt.user[this.playerB!]?.paddle ?? 'white';
     this.ctx.fillStyle = c;
-    this.ctx.fillRect(leftPaddleB, topPaddleB, paddleWidth, paddleHeight);
+    this.ctx.fillRect(leftPaddleB, topPaddleB, paddleWidth, paddleHeightB);
 
     // ball
     this.ctx.fillStyle = 'white';

@@ -47,6 +47,13 @@ const GameMaker = () => {
           </Button>
         </Col>
       </Row>
+      <Row alignItems={'center'} gap={'1rem'}>
+        <Col>
+          <Button onClick={() => socket.emit('enque_self_balancing', userId)}>
+            Play self-balancing PONG with a random opponent!
+          </Button>
+        </Col>
+      </Row>
     </>
   );
 };

@@ -12,6 +12,7 @@ type paddle = {
   front: number;
   top: number;
   bottom: number;
+  height: number;
   maxBallAngleUp: number;
   maxBallAngleDown: number;
 };
@@ -24,10 +25,9 @@ export function runPhysics(): void {
   }
 
   // update ball (except when game is paused)
-  let newX: number =
-    this.ballXpos + Math.sin(this.ballAngle) * GameCommon.BSPEED;
-  let newY: number =
-    this.ballYpos + Math.cos(this.ballAngle) * GameCommon.BSPEED;
+  const ballSpeed: number = calcBallSpeed.bind(this)();
+  let newX: number = this.ballXpos + Math.sin(this.ballAngle) * ballSpeed;
+  let newY: number = this.ballYpos + Math.cos(this.ballAngle) * ballSpeed;
   if (
     this.pausingAfterGoal ||
     handleGoal.bind(this)(newX) ||
@@ -46,8 +46,12 @@ export function runPhysics(): void {
   }
   if (this.keysA.down == true) {
     this.pa += GameCommon.PSPEED;
-    if (this.pa > GameCommon.H - GameCommon.PH - GameCommon.PPAD) {
-      this.pa = GameCommon.H - GameCommon.PH - GameCommon.PPAD;
+    const paddleHeightA: number =
+      this.isSelfBalancing && this.scoreA < this.scoreB
+        ? GameCommon.PH * this.selfBalancingFactor
+        : GameCommon.PH;
+    if (this.pa > GameCommon.H - paddleHeightA - GameCommon.PPAD) {
+      this.pa = GameCommon.H - paddleHeightA - GameCommon.PPAD;
     }
   }
   if (this.keysB.up == true) {
@@ -56,8 +60,12 @@ export function runPhysics(): void {
   }
   if (this.keysB.down == true) {
     this.pb += GameCommon.PSPEED;
-    if (this.pb > GameCommon.H - GameCommon.PH - GameCommon.PPAD) {
-      this.pb = GameCommon.H - GameCommon.PH - GameCommon.PPAD;
+    const paddleHeightB: number =
+      this.isSelfBalancing && this.scoreB < this.scoreA
+        ? GameCommon.PH * this.selfBalancingFactor
+        : GameCommon.PH;
+    if (this.pb > GameCommon.H - paddleHeightB - GameCommon.PPAD) {
+      this.pb = GameCommon.H - paddleHeightB - GameCommon.PPAD;
     }
   }
 }
@@ -79,6 +87,7 @@ function handleGoal(newX: number): boolean {
     this.ballYpos = GameCommon.H / 2;
     this.pausingAfterGoal = true;
     this.goalTimeStamp = Date.now();
+    this.selfBalancingFactor = calcSelfBalancingFactor.bind(this)();
     return true;
   } else {
     return false;
@@ -104,11 +113,27 @@ function handleCeilingOrFloorBounce(newY: number): boolean {
   }
 }
 
-function getPaddle(newX: number, newY: number): paddle | undefined {
+/*
+returns properties of the paddle that is hit
+returns 'undefined' if no paddle is hit
+*/
+function getHitPaddle(newX: number, newY: number): paddle | undefined {
+  if (
+    newX > GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD &&
+    newX < GameCommon.W - GameCommon.PPAD - GameCommon.PW - GameCommon.BRAD
+  ) {
+    return undefined; // quick return: x-coordinate of ball rules out a hit
+  }
+
   let paddle: paddle | undefined = undefined;
+  const paddleHeight: number =
+    this.isSelfBalancing && ballGoesToPlayerBehindInScore.bind(this)()
+      ? GameCommon.PH * this.selfBalancingFactor
+      : GameCommon.PH;
+
   if (
     newX <= GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD &&
-    newY <= this.pa + GameCommon.PH + GameCommon.BRAD &&
+    newY <= this.pa + paddleHeight + GameCommon.BRAD &&
     newY >= this.pa - GameCommon.BRAD &&
     this.ballAngle > Math.PI
   ) {
@@ -116,13 +141,14 @@ function getPaddle(newX: number, newY: number): paddle | undefined {
     paddle = {
       front: GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD,
       top: this.pa,
-      bottom: this.pa + GameCommon.PH,
+      bottom: this.pa + paddleHeight,
+      height: paddleHeight,
       maxBallAngleUp: 0.9 * Math.PI,
       maxBallAngleDown: 0.1 * Math.PI,
     };
   } else if (
     newX >= GameCommon.W - GameCommon.PPAD - GameCommon.PW - GameCommon.BRAD &&
-    newY <= this.pb + GameCommon.PH + GameCommon.BRAD &&
+    newY <= this.pb + paddleHeight + GameCommon.BRAD &&
     newY >= this.pb - GameCommon.BRAD &&
     this.ballAngle < Math.PI
   ) {
@@ -130,7 +156,8 @@ function getPaddle(newX: number, newY: number): paddle | undefined {
     paddle = {
       front: GameCommon.W - (GameCommon.PPAD + GameCommon.PW + GameCommon.BRAD),
       top: this.pb,
-      bottom: this.pb + GameCommon.PH,
+      bottom: this.pb + paddleHeight,
+      height: paddleHeight,
       maxBallAngleUp: 1.1 * Math.PI,
       maxBallAngleDown: 1.9 * Math.PI,
     };
@@ -139,7 +166,7 @@ function getPaddle(newX: number, newY: number): paddle | undefined {
 }
 
 function handlePaddleBounce(newX: number, newY: number): boolean {
-  const paddle: paddle | undefined = getPaddle.bind(this)(newX, newY);
+  const paddle: paddle | undefined = getHitPaddle.bind(this)(newX, newY);
   if (paddle) {
     if (newY <= paddle.top) {
       // bounce on top of paddle
@@ -160,13 +187,13 @@ function handlePaddleBounce(newX: number, newY: number): boolean {
 
       // calc angle; extremes are capped to prevent (nearly) pure vertical angles
       const bounce_extreme: number =
-        newY > paddle.top + GameCommon.PH / 2
+        newY > paddle.top + paddle.height / 2
           ? paddle.maxBallAngleDown
           : paddle.maxBallAngleUp;
       const bounce_symetric: number = Math.PI * 2 - this.ballAngle;
       const rel_dist_from_center: number =
-        Math.abs(newY - (paddle.top + GameCommon.PH / 2)) /
-        (GameCommon.BRAD + GameCommon.PH / 2);
+        Math.abs(newY - (paddle.top + paddle.height / 2)) /
+        (GameCommon.BRAD + paddle.height / 2);
       this.ballAngle =
         rel_dist_from_center * bounce_extreme +
         (1 - rel_dist_from_center) * bounce_symetric;
@@ -174,6 +201,23 @@ function handlePaddleBounce(newX: number, newY: number): boolean {
     return true;
   }
   return false;
+}
+
+function calcBallSpeed() {
+  return this.isSelfBalancing && ballGoesToPlayerBehindInScore.bind(this)()
+    ? GameCommon.BSPEED / this.selfBalancingFactor
+    : GameCommon.BSPEED;
+}
+
+function calcSelfBalancingFactor() {
+  return this.isSelfBalancing ? 1 + Math.abs(this.scoreA - this.scoreB) / 5 : 1;
+}
+
+function ballGoesToPlayerBehindInScore(): boolean {
+  return (
+    (this.ballAngle < Math.PI && this.scoreB < this.scoreA) ||
+    (this.ballAngle > Math.PI && this.scoreA < this.scoreB)
+  );
 }
 
 // symetrice bounce on floor or ceiling

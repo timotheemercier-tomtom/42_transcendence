@@ -21,11 +21,13 @@ export default class GameServer extends GameCommon {
   constructor(
     gameId: string,
     isPublic: boolean,
+    isSelfBalancing: boolean,
     private readonly userService: UserService,
   ) {
     super();
     this.gameId = gameId;
     this.isPublic = isPublic;
+    this.isSelfBalancing = isSelfBalancing;
     console.log(`game created: '${gameId}'`);
   }
 
@@ -159,6 +161,7 @@ export default class GameServer extends GameCommon {
       ballAngle: this.ballAngle,
       scoreA: this.scoreA,
       scoreB: this.scoreB,
+      selfBalancingFactor: this.selfBalancingFactor,
     };
     return frame;
   }

@@ -58,8 +58,8 @@ export class GameGateway extends Eventer {
       // send outgoing messages to all users in the game room
       game.onAny = (e, v) => {
         // if (e != 'frame') {
-          // console.log('emtting: ', e, v);
-          // console.log('to spectators: ', game.spectators);
+        // console.log('emtting: ', e, v);
+        // console.log('to spectators: ', game.spectators);
         // }
         for (const spectator of game.spectators) {
           const client: Socket | undefined = this.userToClient.get(spectator);
@@ -90,6 +90,7 @@ export class GameGateway extends Eventer {
       userId: userId,
       gameId: createMsg.gameId,
       isPublic: createMsg.isPublic,
+      isSelfBalancing: createMsg.isSelfBalancing,
     });
   }
 
@@ -103,9 +104,13 @@ export class GameGateway extends Eventer {
   _joinGameRoom(client: Socket, ug: GameEventData['join_game_room']) {
     const user = this.idmap.get(client.id)!;
     if (!this.service.games.has(ug.gameId)) {
-      this.service.createAndJoin({ userId: ug.userId, gameId: ug.gameId, isPublic: true })
-    }
-    else {
+      this.service.createAndJoin({
+        userId: ug.userId,
+        gameId: ug.gameId,
+        isPublic: true,
+        isSelfBalancing: false,
+      });
+    } else {
       this.service.joinGameRoom(ug.gameId, user);
     }
   }
@@ -135,6 +140,12 @@ export class GameGateway extends Eventer {
     this.service.enque(user);
   }
 
+  @SubscribeMessage('enque_self_balancing')
+  _enque_self_balancing(client: Socket) {
+    const user = this.idmap.get(client.id)!;
+    this.service.enque(user, true);
+  }
+
   @SubscribeMessage('opt')
   _opt(client: Socket, opt: GameEventData['opt']) {
     this.service.opt(opt);
@@ -154,7 +165,7 @@ export class GameGateway extends Eventer {
         playerA: game.playerA,
         playerB: game.playerB,
         spectators: Array.from(game.spectators),
-        textMsg: undefined
+        textMsg: undefined,
       });
   }
 }
