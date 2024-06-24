@@ -160,6 +160,8 @@ export class GameGateway extends Eventer {
         playerB: game.playerB,
         spectators: Array.from(game.spectators),
         textMsg: undefined,
+        gameType: (game.isSelfBalancing) ? GameType.SelfBalancing : GameType.Classic,
+        isPublic: game.isPublic
       });
   }
 }

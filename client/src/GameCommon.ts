@@ -66,6 +66,8 @@ export type GameEventData = {
     playerB: string | undefined;
     spectators: Array<string>;
     textMsg: string | undefined;
+    gameType: GameType;
+    isPublic: boolean;
   };
   request_game_state: string;
   key_change: { userId: string; key: string; keyState: KeyState };

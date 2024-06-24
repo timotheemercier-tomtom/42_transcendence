@@ -4,7 +4,7 @@ import Col from './Col';
 import { getLogin } from '../util';
 import { useParams } from 'react-router-dom';
 import { Button } from '@mui/material';
-import { GameEventData, GameState } from '../GameCommon';
+import { GameEventData, GameState, GameType } from '../GameCommon';
 import { socket } from '../game.socket';
 
 const GC = new GameClient();
@@ -20,7 +20,10 @@ const Game = () => {
   const [playerB, setPlayerB] = useState<string | undefined>(undefined);
   const [spectators, setSpectators] = useState<string | undefined>(undefined);
   const [textMsg, setTextMsg] = useState<string | undefined>(undefined);
-  const [scaleFactor, setScaleFactor] = useState<number>(0.8);
+  const [scaleFactor, setScaleFactor] = useState<number>(1.0);
+  const [gameTypeStr, setGameTypeStr] = useState<string>('Classic');
+  const [publicOrPrivateStr, setPublicOrPrivateStr] =
+    useState<string>('Public');
 
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
@@ -49,6 +52,23 @@ const Game = () => {
         setGameStateStr('ready to start');
       if (e.gameState == GameState.Running) setGameStateStr('running');
       if (e.gameState == GameState.Finished) setGameStateStr('finished');
+
+      switch (e.gameType) {
+        case GameType.Classic: {
+          setGameTypeStr('Classic');
+          break;
+        }
+        case GameType.SelfBalancing: {
+          setGameTypeStr('Self-balaning');
+          break;
+        }
+      }
+      if (e.isPublic == true) {
+        setPublicOrPrivateStr('Public');
+      }
+      else {
+        setPublicOrPrivateStr('Private');
+      }
     };
 
     socket.on('game_state', onStateChange);
@@ -96,6 +116,7 @@ const Game = () => {
       <span>People in the room: {spectators}</span>
       <span>Extra message: {textMsg}</span>
       <span>scaleFactor: {scaleFactor}</span>
+      <span>game type: {gameTypeStr} - {publicOrPrivateStr}</span>
       <canvas
         ref={cr}
         width={GameClient.W * scaleFactor}

@@ -5,6 +5,7 @@ import {
   GameEventData,
   KeyState,
   GameState,
+  GameType,
 } from './GameCommon';
 import { runPhysics } from './physics';
 import { UserService } from 'src/user/user.service';
@@ -85,7 +86,9 @@ export default class GameServer extends GameCommon {
       clearInterval(this.frameInterval);
       if (winner) {
         this.userService.updateWinLossScore(winner, userId);
-        this.emitGameState(`Player '${winner}' won, because '${userId}' left!!`);
+        this.emitGameState(
+          `Player '${winner}' won, because '${userId}' left!!`,
+        );
         setTimeout(this.resetGame.bind(this), 5000);
         return;
       }
@@ -140,7 +143,7 @@ export default class GameServer extends GameCommon {
       setTimeout(this.resetGame.bind(this), 5000);
     }
     this.emit('frame', this.createFrame());
-  };
+  }
 
   emitGameState(textMsg: string | undefined = undefined): void {
     this.emit('game_state', {
@@ -148,7 +151,11 @@ export default class GameServer extends GameCommon {
       playerA: this.playerA,
       playerB: this.playerB,
       spectators: Array.from(this.spectators),
-      textMsg: textMsg
+      textMsg: textMsg,
+      gameType: this.isSelfBalancing
+        ? GameType.SelfBalancing
+        : GameType.Classic,
+      isPublic: this.isPublic,
     });
   }
 
@@ -171,7 +178,6 @@ export default class GameServer extends GameCommon {
   }
 
   resetGame() {
-    console.log("Getting ready for new game...")
     this.playerA = undefined;
     this.playerB = undefined;
     this.pausingAfterGoal = false;
@@ -180,8 +186,8 @@ export default class GameServer extends GameCommon {
     this.pa = this.h / 2 - GameCommon.PH / 2;
     this.pb = this.h / 2 - GameCommon.PH / 2;
     this.ballAngle = 1.5 * Math.PI;
-    this.ballXpos
-    this.ballYpos
+    this.ballXpos;
+    this.ballYpos;
     this.gameState = GameState.WaitingForPlayers;
     this.emit('frame', this.createFrame());
     this.emitGameState();
