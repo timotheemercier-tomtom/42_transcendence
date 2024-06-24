@@ -6,6 +6,7 @@ import {
   GameEventType,
   GameOpt,
   GameState,
+  GameType,
 } from './GameCommon';
 import { randomUUID } from 'crypto';
 import { WsException } from '@nestjs/websockets';
@@ -34,10 +35,12 @@ export class GameService extends Eventer {
   createAndJoin(createMsg: GameEventData['create']) {
     if (this.games.has(createMsg.gameId))
       throw new WsException('game already exists');
+    const isSelfBalancing: boolean =
+      createMsg.gameType == GameType.SelfBalancing ? true : false;
     const game = new GameServer(
       createMsg.gameId,
       createMsg.isPublic,
-      createMsg.isSelfBalancing,
+      isSelfBalancing,
       this.userService,
     );
     game.create(GameServer.W, GameServer.H);
@@ -109,10 +112,12 @@ export class GameService extends Eventer {
     game.emit(e, v);
   }
 
-  enque(user: string, isSelfBalancing: boolean = false) {
+  enque(user: string, gameType: GameType) {
     if (this.userToGame.has(user))
       throw new WsException('user already in a game');
     // join existing public game
+    const isSelfBalancing: boolean =
+      gameType == GameType.SelfBalancing ? true : false;
     for (const [gameId, game] of this.games.entries()) {
       if (
         game.isPublic &&
@@ -131,7 +136,7 @@ export class GameService extends Eventer {
       gameId: id,
       userId: user,
       isPublic: true,
-      isSelfBalancing: isSelfBalancing,
+      gameType: gameType,
     });
   }
 

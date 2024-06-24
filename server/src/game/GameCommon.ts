@@ -10,10 +10,14 @@ export enum GameState {
   Finished,
 }
 
+export enum GameType {
+  Classic,
+  SelfBalancing,
+}
+
 export type GameEventType =
   | 'create'
   | 'enque'
-  | 'enque_self_balancing'
   | 'join'
   | 'join_game_room'
   | 'leave'
@@ -39,10 +43,9 @@ export type GameEventData = {
     userId: string;
     gameId: string;
     isPublic: boolean;
-    isSelfBalancing: boolean;
+    gameType: GameType;
   };
-  enque: string;
-  enque_self_balancing: string;
+  enque: { userId: string; gameType: GameType };
   join: GameUserGame;
   join_game_room: GameUserGame;
   leave: GameUserGame;

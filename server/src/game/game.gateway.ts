@@ -5,7 +5,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
-import { Eventer, GameEventData } from './GameCommon';
+import { Eventer, GameEventData, GameType } from './GameCommon';
 import { GameService } from './game.service';
 import { WsException } from '@nestjs/websockets';
 
@@ -90,7 +90,7 @@ export class GameGateway extends Eventer {
       userId: userId,
       gameId: createMsg.gameId,
       isPublic: createMsg.isPublic,
-      isSelfBalancing: createMsg.isSelfBalancing,
+      gameType: createMsg.gameType,
     });
   }
 
@@ -108,7 +108,7 @@ export class GameGateway extends Eventer {
         userId: ug.userId,
         gameId: ug.gameId,
         isPublic: true,
-        isSelfBalancing: false,
+        gameType: GameType.Classic,
       });
     } else {
       this.service.joinGameRoom(ug.gameId, user);
@@ -135,15 +135,9 @@ export class GameGateway extends Eventer {
   }
 
   @SubscribeMessage('enque')
-  _enque(client: Socket) {
+  _enque(client: Socket, queItem: GameEventData['enque']) {
     const user = this.idmap.get(client.id)!;
-    this.service.enque(user);
-  }
-
-  @SubscribeMessage('enque_self_balancing')
-  _enque_self_balancing(client: Socket) {
-    const user = this.idmap.get(client.id)!;
-    this.service.enque(user, true);
+    this.service.enque(queItem.userId, queItem.gameType);
   }
 
   @SubscribeMessage('opt')
