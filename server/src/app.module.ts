@@ -40,6 +40,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { Friend } from './user/friend.entity';
 import { StatusModule } from './status/status.module';
 import { GameModule } from './game/game.module';
+import { MatchHistory } from './game/matchhistory.entity';
 
 const typeOrmModule = TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
@@ -51,7 +52,7 @@ const typeOrmModule = TypeOrmModule.forRootAsync({
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    entities: [User, Friend],
+    entities: [User, Friend, MatchHistory],
     synchronize: configService.get<boolean>('TYPEORM_SYNC', false),
     logging: false,
     migrations: [],

@@ -9,6 +9,7 @@ import {
 } from './GameCommon';
 import { runPhysics } from './physics';
 import { UserService } from 'src/user/user.service';
+import { GameService } from './game.service';
 
 type keyStatus = { up: boolean; down: boolean };
 
@@ -24,12 +25,13 @@ export default class GameServer extends GameCommon {
     isPublic: boolean,
     isSelfBalancing: boolean,
     private readonly userService: UserService,
+    private readonly gameService: GameService,
   ) {
     super();
     this.gameId = gameId;
     this.isPublic = isPublic;
     this.isSelfBalancing = isSelfBalancing;
-    console.log(`game created: '${gameId}'`);
+    console.log(`game room created: '${gameId}'`);
   }
 
   addOpt(opt: GameOpt): void {
@@ -69,31 +71,43 @@ export default class GameServer extends GameCommon {
   }
 
   leave(userId: string) {
-    let winner: string | undefined;
-    if (this.playerA == userId) {
-      this.playerA = undefined;
-      winner = this.playerB;
-    } else if (this.playerB == userId) {
-      this.playerB = undefined;
-      winner = this.playerA;
-    } else {
+    if (userId != this.playerA && userId != this.playerB) {
       throw new WsException('user not in this game');
     }
-    if (this.gameState == GameState.ReadyToStart)
-      this.gameState = GameState.WaitingForPlayers;
-    else if (this.gameState == GameState.Running) {
-      this.gameState = GameState.Finished;
-      clearInterval(this.frameInterval);
-      if (winner) {
-        this.userService.updateWinLossScore(winner, userId);
-        this.emitGameState(
-          `Player '${winner}' won, because '${userId}' left!!`,
+    if (this.gameState == GameState.Running) {
+      if (!this.playerA || !this.playerB) {
+        throw new WsException(
+          'invalid combination: game is running without 2 players',
         );
-        setTimeout(this.resetGame.bind(this), 5000);
-        return;
+      }
+      this.gameState = GameState.Finished;
+      const winner: string =
+        userId == this.playerA ? this.playerB : this.playerA;
+      clearInterval(this.frameInterval);
+      setTimeout(this.resetGame.bind(this), 5000);
+      this.userService.updateWinLossScore(winner, userId);
+      this.gameService.storeMatchHistory(this, winner);
+      this.removePlayerFromGame(userId);
+      this.emitGameState(`Player '${winner}' won, because '${userId}' left!!`);
+    } else {
+      if (this.gameState == GameState.ReadyToStart)
+        this.gameState = GameState.WaitingForPlayers;
+      this.removePlayerFromGame(userId);
+      this.emitGameState();
+    }
+  }
+
+  removePlayerFromGame(userId: string) {
+    switch (userId) {
+      case this.playerA: {
+        this.playerA = undefined;
+        break;
+      }
+      case this.playerB: {
+        this.playerB = undefined;
+        break;
       }
     }
-    this.emitGameState();
   }
 
   start() {
@@ -133,14 +147,12 @@ export default class GameServer extends GameCommon {
       console.log(`game '${this.gameId}' finished!'`);
       clearInterval(this.frameInterval);
       this.gameState = GameState.Finished;
-      if (this.scoreA > this.scoreB) {
-        this.emitGameState(`Player '${this.playerA}' Won!'`);
-        this.userService.updateWinLossScore(this.playerA!, this.playerB!);
-      } else {
-        this.userService.updateWinLossScore(this.playerB!, this.playerA!);
-        this.emitGameState(`Player '${this.playerB}' Won!'`);
-      }
+      const winner: string = this.scoreA == 10 ? this.playerA! : this.playerB!;
+      const loser: string = this.scoreA < 10 ? this.playerA! : this.playerB!;
+      this.emitGameState(`Player '${winner}' Won!'`);
       setTimeout(this.resetGame.bind(this), 5000);
+      this.userService.updateWinLossScore(winner, loser);
+      this.gameService.storeMatchHistory(this, winner);
     }
     this.emit('frame', this.createFrame());
   }
@@ -174,6 +186,7 @@ export default class GameServer extends GameCommon {
   }
 
   destroy(): void {
+    console.log(`game room deleted: ${this.gameId}`);
     super.destroy();
   }
 

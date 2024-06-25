@@ -11,10 +11,17 @@ import {
 import { randomUUID } from 'crypto';
 import { WsException } from '@nestjs/websockets';
 import { UserService } from 'src/user/user.service';
+import { MatchHistory } from './matchhistory.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class GameService extends Eventer {
-  constructor(private readonly userService: UserService) {
+  constructor(
+    @InjectRepository(MatchHistory)
+    private matchHistoryRepository: Repository<MatchHistory>,
+    private readonly userService: UserService,
+  ) {
     super();
   }
 
@@ -42,6 +49,7 @@ export class GameService extends Eventer {
       createMsg.isPublic,
       isSelfBalancing,
       this.userService,
+      this,
     );
     game.create(GameServer.W, GameServer.H);
     this.games.set(createMsg.gameId, game);
@@ -143,5 +151,30 @@ export class GameService extends Eventer {
   opt(opt: GameOpt) {
     const game = this.guardGame(opt.gameId);
     game.addOpt(opt);
+  }
+
+  findAllMatchHistory(): Promise<MatchHistory[]> {
+    return this.matchHistoryRepository.find();
+  }
+
+  async printAllMatchHistory() {
+    let allMatches: MatchHistory[] = await this.findAllMatchHistory();
+    console.log('allMatches: ', allMatches);
+  }
+
+  async storeMatchHistory(
+    game: GameServer,
+    winner: string,
+  ): Promise<MatchHistory> {
+    const rec: MatchHistory = this.matchHistoryRepository.create({
+      winner: winner,
+      playerA: game.playerA,
+      playerB: game.playerB,
+      scoreA: game.scoreA,
+      scoreB: game.scoreB,
+    });
+    console.log('created match history record: ', rec);
+    this.printAllMatchHistory(); // debug
+    return this.matchHistoryRepository.save(rec);
   }
 }
