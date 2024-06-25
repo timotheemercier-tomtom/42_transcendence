@@ -4,6 +4,15 @@ import { GameEventData, GameType } from '../GameCommon';
 import { getLogin } from '../util';
 import { useNavigate } from 'react-router-dom';
 import { randomUUID } from '../util';
+import {
+  Box,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  Radio,
+  Button,
+} from '@mui/material';
 
 const GameMaker = () => {
   const userId = getLogin();
@@ -24,16 +33,19 @@ const GameMaker = () => {
   }, []);
 
   function submitHandler(event: SyntheticEvent) {
+    console.log(`submit handler: -${publicOrPrivateStr}-, ${gameTypeStr}`);
     event.preventDefault();
     const gameType: GameType =
       gameTypeStr == 'Classic' ? GameType.Classic : GameType.SelfBalancing;
 
     switch (publicOrPrivateStr) {
       case 'Public': {
+        console.log('emitting Public..');
         socket.emit('enque', { userId: userId, gameType: gameType });
         break;
       }
       case 'Private': {
+        console.log('emitting Private..');
         socket.emit('create', {
           userId: userId,
           gameId: 'game-' + randomUUID(),
@@ -44,61 +56,57 @@ const GameMaker = () => {
       }
     }
   }
-
   return (
     <form onSubmit={submitHandler}>
-      <fieldset>
+      <Box component="fieldset">
         <legend>Create a game room to play PONG!</legend>
-        <span>Which version of PONG! do you want to play? </span>
-        <br />
-        <input
-          type="radio"
-          id="classic"
-          name="gameType"
-          value="Classic"
-          onChange={(e) => setGameTypeStr(e.target.value)}
-          defaultChecked
-        />
-        <label htmlFor="classic">PONG Classic!</label>
-        <br />
-        <input
-          type="radio"
-          id="self-balancing"
-          name="gameType"
-          value="SelfBalancing"
-          onChange={(e) => setGameTypeStr(e.target.value)}
-        />
-        <label htmlFor="self-balancing">Self-balancing PONG!</label>
-        <br />
-        <br />
+        <FormControl onSubmit={submitHandler}>
+          <FormLabel id="game-type" sx={{ color: 'primary.main' }}>
+            Which version of PONG! do you want to play?
+          </FormLabel>
+          <RadioGroup
+            aria-labelledby="game-type"
+            defaultValue="Classic"
+            name="gameType"
+            onChange={(e) => setGameTypeStr(e.target.value)}
+          >
+            <FormControlLabel
+              value="Classic"
+              control={<Radio />}
+              label="PONG Classic!"
+            />
+            <FormControlLabel
+              value="Self-balancing"
+              control={<Radio />}
+              label="Self-balancing PONG!"
+            />
+          </RadioGroup>
 
-        <span>Public or Private? </span>
-        <br />
-        <input
-          type="radio"
-          id="public"
-          name="publicPrivate"
-          value="Public"
-          onChange={(e) => setPublicOrPrivateStr(e.target.value)}
-          defaultChecked
-        />
-        <label htmlFor="public">Public - play with strangers!</label>
-        <br />
-        <input
-          type="radio"
-          id="private"
-          name="publicPrivate"
-          value="Private"
-          onChange={(e) => setPublicOrPrivateStr(e.target.value)}
-        />
-        <label htmlFor="private">
-          Private - invite people to your game room!
-        </label>
-        <br />
-        <br />
-
-        <input type="submit" value="Create Game!" />
-      </fieldset>
+          <FormLabel id="public-private" sx={{ color: 'primary.main' }}>
+            Public or Private?
+          </FormLabel>
+          <RadioGroup
+            aria-labelledby="public-private"
+            defaultValue="Public"
+            name="publicPrivate"
+            onChange={(e) => setPublicOrPrivateStr(e.target.value)}
+          >
+            <FormControlLabel
+              value="Public"
+              control={<Radio />}
+              label="Public - play PONG with strangers!"
+            />
+            <FormControlLabel
+              value="Private"
+              control={<Radio />}
+              label="Private - invite people to your game room!"
+            />
+          </RadioGroup>
+          <Button type="submit" value="Create Game!">
+            Submit
+          </Button>
+        </FormControl>
+      </Box>
     </form>
   );
 };
