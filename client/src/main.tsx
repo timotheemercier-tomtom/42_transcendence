@@ -11,6 +11,7 @@ import Profile from './pages/Profile.tsx';
 import Room from './pages/Room.tsx';
 import theme from './theme.ts';
 import Home from './pages/Home.tsx';
+import MatchHistory from './pages/MatchHistory.tsx';
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         element: <Profile />,
         path: 'u/:login',
+      },
+      {
+        path: 'matchhistory',
+        element: <MatchHistory />,
       },
     ],
   },
