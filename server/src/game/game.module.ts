@@ -11,7 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 @Module({
   imports: [AuthModule, UserModule, TypeOrmModule.forFeature([MatchHistory])],
   providers: [GameService, GameGateway, UserService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, GameService],
   controllers: [GameController],
 })
 export class GameModule {}
