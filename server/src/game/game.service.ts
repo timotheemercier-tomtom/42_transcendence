@@ -172,6 +172,9 @@ export class GameService extends Eventer {
       playerB: game.playerB,
       scoreA: game.scoreA,
       scoreB: game.scoreB,
+      gameType: game.isSelfBalancing
+        ? GameType.SelfBalancing
+        : GameType.Classic,
     });
     console.log('created match history record: ', rec);
     this.printAllMatchHistory(); // debug

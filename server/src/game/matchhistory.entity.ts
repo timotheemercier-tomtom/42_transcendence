@@ -1,4 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  CreateDateColumn,
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { GameType } from './GameCommon';
 
 @Entity()
@@ -6,8 +11,8 @@ export class MatchHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // @Column('timestamp')
-  // timestamp: Date;
+  @CreateDateColumn({ type: 'timestamp' })
+  timestamp: Date;
 
   @Column()
   winner: string;
@@ -24,6 +29,6 @@ export class MatchHistory {
   @Column()
   scoreB: number;
 
-  // @Column()
-  // gameType: GameType;
+  @Column()
+  gameType: GameType;
 }
