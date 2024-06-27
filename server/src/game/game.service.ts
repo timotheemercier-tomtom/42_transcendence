@@ -157,11 +157,6 @@ export class GameService extends Eventer {
     return this.matchHistoryRepository.find();
   }
 
-  async printAllMatchHistory() {
-    let allMatches: MatchHistory[] = await this.findAllMatchHistory();
-    console.log('allMatches: ', allMatches);
-  }
-
   async storeMatchHistory(
     game: GameServer,
     winner: string,
@@ -176,8 +171,6 @@ export class GameService extends Eventer {
         ? GameType.SelfBalancing
         : GameType.Classic,
     });
-    console.log('created match history record: ', rec);
-    this.printAllMatchHistory(); // debug
     return this.matchHistoryRepository.save(rec);
   }
 }
