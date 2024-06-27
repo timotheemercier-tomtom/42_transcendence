@@ -90,7 +90,7 @@ export class GameService extends Eventer {
     this.userToGame.delete(userId);
     if (game.spectators.size == 0) {
       this.games.delete(leftGameId);
-      console.log(`game '${leftGameId}' removed from server'`);
+      console.log(`game room '${leftGameId}' removed from server'`);
     }
   }
 
