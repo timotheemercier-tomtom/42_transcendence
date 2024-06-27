@@ -1,8 +1,9 @@
 import Col from '../components/Col';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import { GameType } from '../GameCommon';
 
-type MatchHistoryType = {
+interface MatchHistoryDTO {
   id: number;
   timestamp: Date;
   winner: string;
@@ -11,50 +12,39 @@ type MatchHistoryType = {
   scoreA: number;
   scoreB: number;
   gameType: GameType;
-};
-
-type MatchHistoryProps = {
-  matchhistory: MatchHistoryType[];
-};
-
-function TableHeader() {
-  return (
-    <thead>
-      <tr>
-        <th>Id</th>
-        <th>Time Stamp</th>
-        <th>Winner</th>
-        <th>Player A</th>
-        <th>Player B</th>
-        <th>Score</th>
-        <th>gameType</th>
-      </tr>
-    </thead>
-  );
+}
+interface TableRowData {
+  id: number;
+  timestamp: Date;
+  winner: string;
+  playerA: string;
+  playerB: string;
+  score: string;
+  gameType: string;
 }
 
-function TableBody({ matchhistory }: MatchHistoryProps) {
-  const arrayDataItems = matchhistory.map((rec) => (
-    <tr>
-      <td>{rec.id}</td>
-      <td>
-        {new Date(rec.timestamp).toLocaleDateString()}{' '}
-        {new Date(rec.timestamp).toLocaleTimeString()}
-      </td>
-      <td>{rec.winner}</td>
-      <td>{rec.playerA}</td>
-      <td>{rec.playerB}</td>
-      <td>
-        {rec.scoreA} - {rec.scoreB}
-      </td>
-      <td>{rec.gameType == GameType.Classic ? 'Classic' : 'Self-balancing'}</td>
-    </tr>
-  ));
-  return <tbody>{arrayDataItems}</tbody>;
+function createRowData(rec: MatchHistoryDTO): TableRowData {
+  const id: number = rec.id;
+  const timestamp: Date = new Date(rec.timestamp);
+  const winner: string = rec.winner;
+  const playerA: string = rec.playerA;
+  const playerB: string = rec.playerB;
+  const score: string = `${rec.scoreA} - ${rec.scoreB}`;
+  const gameType: string =
+    rec.gameType === GameType.Classic ? 'Classic' : 'Self-balancing';
+  return { id, timestamp, winner, playerA, playerB, score, gameType };
+}
+
+function createTableRows(recs: MatchHistoryDTO[]): TableRowData[] {
+  let rows: TableRowData[] = [];
+  recs.forEach((rec) => {
+    rows.push(createRowData(rec));
+  });
+  return rows;
 }
 
 export default function MatchHistory() {
-  const [matchHistory, setMatchHistory] = useState<MatchHistoryType[]>([]);
+  const [matchHistory, setMatchHistory] = useState<MatchHistoryDTO[]>([]);
 
   const fetchMatchHistory = async () => {
     try {
@@ -76,6 +66,28 @@ export default function MatchHistory() {
     fetchMatchHistory();
   }, []);
 
+  const rows = createTableRows(matchHistory);
+  const columns: GridColDef[] = [
+    { field: 'id', headerName: 'ID', width: 70 },
+    {
+      field: 'timestamp',
+      headerName: 'Timestamp',
+      type: 'dateTime',
+      width: 230,
+    },
+    { field: 'winner', headerName: 'Winner', width: 130 },
+    { field: 'playerA', headerName: 'Player A', width: 130 },
+    { field: 'playerB', headerName: 'Player B', width: 130 },
+    { field: 'score', headerName: 'Score', width: 130 },
+    {
+      field: 'gameType',
+      headerName: 'Game type',
+      type: 'singleSelect',
+      valueOptions: ['Classic', 'Self-balancing'],
+      width: 130,
+    },
+  ];
+
   if (matchHistory.length < 1) {
     return (
       <Col>
@@ -87,10 +99,16 @@ export default function MatchHistory() {
     return (
       <Col>
         <h1>Match History</h1>
-        <table>
-          <TableHeader />
-          <TableBody matchhistory={matchHistory} />
-        </table>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: { page: 0, pageSize: 5 },
+            },
+          }}
+          pageSizeOptions={[5, 10]}
+        />
       </Col>
     );
   }
