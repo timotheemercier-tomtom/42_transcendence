@@ -2,6 +2,7 @@ import Col from '../components/Col';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import { GameType } from '../GameCommon';
+import { Link } from 'react-router-dom';
 
 interface MatchHistoryDTO {
   id: number;
@@ -91,6 +92,9 @@ export default function MatchHistory() {
   if (matchHistory.length < 1) {
     return (
       <Col>
+        <Link to={'/'}>
+          <p>Back to homepage</p>
+        </Link>
         <h1>Match History</h1>
         <p>no matches found</p>
       </Col>
@@ -98,6 +102,9 @@ export default function MatchHistory() {
   } else {
     return (
       <Col>
+        <Link to={'/'}>
+          <p>Back to homepage</p>
+        </Link>
         <h1>Match History</h1>
         <DataGrid
           rows={rows}
