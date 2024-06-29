@@ -28,12 +28,13 @@
   the refresh token has a higher lifespan from 20 minutes to 7 days.
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import FortyTwoStrategy from 'passport-42';
 import { UserService } from 'src/user/user.service';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
@@ -63,10 +64,8 @@ export class FourTwoStrategy extends PassportStrategy(FortyTwoStrategy, '42') {
         picture: profile._json.image.link,
       });
     }
-    console.log(user);
 
-    const payload = { ...user };
-
+    const payload = { login: user.login, displayName: user.displayName };
     const localAccessToken = this.jwtService.sign(payload);
     return { user, accessToken: localAccessToken };
   }

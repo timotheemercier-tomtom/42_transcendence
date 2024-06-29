@@ -1,19 +1,43 @@
+// LoginResult.tsx
+
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../components/AuthContext';
 
 function LoginResult() {
   const navigate = useNavigate();
   const [query] = useSearchParams();
-  useEffect(() => {
-    // Place the navigation logic inside useEffect
-    // to ensure it runs after the component mounts
-    // sessionStorage.setItem('user', query.get('u') ?? '');
-    document.cookie = 'accessToken=' + query.get('token');
-    navigate('/');
-  }, [navigate, query]); // Add navigate to the dependency array
+  const { setUser } = useAuth();
 
-  // Return null or a loader as the user won't see this component
-  // because of the immediate redirect
+  useEffect(() => {
+    const token = query.get('token');
+    if (token) {
+      document.cookie = 'accessToken=' + token;
+      
+      // Fetch user info and update context
+      const fetchUser = async () => {
+        try {
+          const response = await fetch(`http://${location.hostname}:3000/auth/check`, {
+            method: 'GET',
+            credentials: 'include',
+          });
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          }
+        } catch (error) {
+          console.error('Error fetching user info:', error);
+        }
+      };
+      
+      fetchUser().then(() => {
+        navigate('/');
+      });
+    } else {
+      navigate('/login');
+    }
+  }, [navigate, query, setUser]);
+
   return null;
 }
 

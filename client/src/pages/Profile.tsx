@@ -11,7 +11,6 @@ const Profile = () => {
       <User />
       <AddFriend />
       <Friends />
-      {/* Other profile-related components */}
     </div>
   );
 };

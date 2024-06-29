@@ -19,7 +19,14 @@ user data after successful authentication and setting an HTTP-only cookie with
     protect the routes and manage the authentication flow.
  */
 
-import { Get, Req, Res, UseGuards, Controller } from '@nestjs/common';
+import {
+  Get,
+  Req,
+  Res,
+  UseGuards,
+  Controller,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FourTwoStrategy } from './fourtwo.strategy';
 import { Response } from 'express';
@@ -27,15 +34,17 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { User } from 'src/user/user.entity';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: FourTwoStrategy,
     private jwt: JwtService,
-    private user: UserService,
+    private userService: UserService,
     private config: ConfigService,
   ) {}
+
 
   @Get('42')
   @UseGuards(AuthGuard('42'))
@@ -47,25 +56,41 @@ export class AuthController {
     )}:5173/login?token=${token}&u=${login}`;
   }
 
+
+  @Get('check')
+  @UseGuards(AuthGuard('jwt'))
+  async checkAuth(@Req() req: any): Promise<User> {
+    const user = await this.userService.findOne(req.user.login);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return user;
+  }
+
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
-  async fortyTwoAuthRedirect(@Req() req: Request | any, @Res() res: Response) {
+  async fortyTwoAuthRedirect(@Req() req: Request & any, @Res() res: Response) {
     const { accessToken, user }: { accessToken: string; user: User } = req.user;
-    // accessToken est directement extraits de req.user.
-    const host = new URL(req.headers.referer).hostname;
+
+    const referer =
+      req.headers.referer || `http://${this.config.get('HOST')}:5173`;
+    const host = new URL(referer).hostname;
+
     res.redirect(this.redir(host, accessToken, user.login));
   }
 
-  anonc = 0;
+  private anonc = 0;
 
   @Get('anon')
-  async anonSignIn(@Req() req: Request | any, @Res() res: Response) {
-    const host = new URL(req.headers.referer).hostname;
+  async anonSignIn(@Req() req: Request & any, @Res() res: Response) {
+    const referer =
+      req.headers.referer || `http://${this.config.get('HOST')}:5173`;
+    const host = new URL(referer).hostname;
     const name = '$anon' + this.anonc++;
     let user: User | null;
-    if (!(user = await this.user.findOne(name)))
-      user = await this.user.create({ login: name, displayName: name });
-    const accessToken = this.jwt.sign({...user});
+    if (!(user = await this.userService.findOne(name)))
+      user = await this.userService.create({ login: name, displayName: name });
+    const accessToken = this.jwt.sign({ ...user });
     res.redirect(this.redir(host, accessToken, name));
   }
 }

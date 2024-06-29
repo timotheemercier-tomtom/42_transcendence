@@ -37,6 +37,7 @@ import { FourTwoStrategy } from 'src/auth/fourtwo.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { Friend } from './friend.entity';
 import { FriendService } from './friend.service';
+import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Friend]), JwtModule],
@@ -47,6 +48,7 @@ import { FriendService } from './friend.service';
     ConfigService,
     FourTwoStrategy,
     FriendService,
+    AuthService,
   ],
   exports: [UserService, TypeOrmModule, FriendService],
   controllers: [UserController],

@@ -1,30 +1,9 @@
-/**
- * ? `UserService`
- * Provides business logic for user operations in the Transcendance project.
- *
- * ? `findUserByUsername`
- * Retrieves a user from the database by their username using TypeORM's findOne method.
- * @param {string} username - The username of the user to retrieve.
- * @return {Promise<User | null>} - The user object or null if not found.
- *
- * ? `createUser`
- * Creates a new user in the database using the provided user data.
- * @param {Partial<User>} userData - Partial user data for creating a new user.
- * @return {Promise<User>} - The newly created user object.
- *
- * ? `updateUser`
- * Updates an existing user's details in the database. It first finds the user by username,
- * then updates their details with the provided UpdateUserDto, and finally saves the updated user.
- * @param {string} username - The username of the user to update.
- * @param {UserDto} updateUserDto - The DTO containing the updated user data.
- * @return {Promise<User>} - The updated user object.
- */
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserDto } from './user.dto';
 import { User } from './user.entity';
+// user.service.ts
 
 @Injectable()
 export class UserService {
@@ -93,5 +72,49 @@ export class UserService {
 
   async removeOne(id: number): Promise<void> {
     await this.usersRepository.delete(id);
+  }
+
+  async enableTwoFA(login: string, secret: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ login });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    user.twoFASecret = secret;
+    user.isTwoFAEnabled = true;
+    return this.usersRepository.save(user);
+  }
+
+  async disableTwoFA(login: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ login });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    user.twoFASecret = '';
+    user.isTwoFAEnabled = false;
+    return this.usersRepository.save(user);
+  }
+
+  async updateWinLossScore(
+    loginWon: string,
+    loginLost: string,
+  ): Promise<boolean> {
+    const userWon = await this.userRepository.findOneBy({
+      login: loginWon,
+    });
+    if (!userWon) {
+      throw new NotFoundException('User not found');
+    }
+    userWon.won += 1;
+    this.usersRepository.save(userWon);
+
+    const userLost = await this.userRepository.findOneBy({
+      login: loginLost,
+    });
+    if (!userLost) {
+      throw new NotFoundException('User not found');
+    }
+    userLost.lost += 1;
+    this.usersRepository.save(userLost);
+    return true;
   }
 }

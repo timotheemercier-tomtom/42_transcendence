@@ -1,110 +1,42 @@
-// import React, { useState } from 'react';
-// import {
-//   Button,
-//   Dialog,
-//   DialogActions,
-//   DialogContent,
-//   DialogTitle,
-// } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, Card, Typography, CircularProgress } from '@mui/material';
+import { useAuth } from './AuthContext';
 
-// interface LoginProps {
-//   open: boolean;
-//   handleClose: () => void;
-// }
+const Login: React.FC = () => {
+  const { login, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-// import ButtonLogin from './ButtonLogin';
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/profile'); // Redirect to the profile page after successful login
+    }
+  }, [isLoggedIn, navigate]);
 
-// const LoginModule: React.FC<LoginProps> = ({ open, handleClose }) => {
-//   const [loggedInWith42, setLoggedInWith42] = useState(false);
+  if (isLoggedIn) {
+    return <Typography variant="h6">You are already logged in.</Typography>;
+  }
 
-//   const handle42Login = () => {
-//     window.location.href = 'http://localhost:3000/auth/42';
-//   };
-//   return <ButtonLogin onClick={handle42Login} text="Log In" />;
-// };
-// export default LoginModule;
+  return (
+    <Card style={{ padding: '2rem', maxWidth: '400px', margin: '2rem auto' }}>
+      <Typography variant="h4" gutterBottom>
+        Login
+      </Typography>
+      <Button
+        variant="contained"
+        color="primary"
+        fullWidth
+        onClick={() => {
+          setLoading(true);
+          login();
+        }}
+        disabled={loading}
+      >
+        {loading ? <CircularProgress size={24} /> : 'Login with 42 Intra'}
+      </Button>
+    </Card>
+  );
+};
 
-// //   const handleLoginWith42 = async () => {
-// //     try {
-// //       const response = await fetch('http://localhost:3000/auth/42');
-// //       if (response.ok) {
-// //         setLoggedInWith42(true);
-// //         console.log('Connected to Intra 42');
-// //         // navigate('./Room');
-// //       } else {
-// //         // Gérer les erreurs
-// //         console.error('Échec de la connexion avec Intra 42');
-// //       }
-// //     } catch (error) {
-// //       console.error('Erreur lors de la connexion', error);
-// //     }
-// //   };
-
-// // const LoginDialog: React.FC<LoginDialogProps> = ({ open, handleClose }) => {
-// //   // État pour suivre si l'utilisateur est déjà connecté avec 42
-// //   const [loggedInWith42, setLoggedInWith42] = useState(false);
-
-// //   // Fonction pour gérer la connexion avec 42
-// //   const handleLoginWith42 = async () => {
-// //     try {
-// //       const response = await fetch('http://localhost:3000/auth/42');
-// //       if (response.ok) {
-// //         setLoggedInWith42(true);
-// //         console.log('Connected to Intra 42');
-
-// //         // navigate('./Room');
-// //       } else {
-// //         // Gérer les erreurs
-// //         console.error('Échec de la connexion avec Intra 42');
-// //       }
-// //     } catch (error) {
-// //       console.error('Erreur lors de la connexion', error);
-// //     }
-// //   };
-
-// //   return (
-// //     <Dialog open={open} onClose={handleClose}>
-// //       <DialogTitle>Choose an Option</DialogTitle>
-// //       <DialogContent>
-// //         {loggedInWith42 ? (
-// //           // Si l'utilisateur est connecté avec 42, affichez un message ou un bouton de déconnexion
-// //           <p>You are logged in with Intra 42.</p>
-// //         ) : (
-// //           // Si l'utilisateur n'est pas connecté avec 42, affichez les options de connexion
-// //           <>
-// //             <Button
-// //               variant="contained"
-// //               color="primary"
-// //               onClick={() =>
-// //                 (window.location.href =
-// //                   'https://api.intra.42.fr/oauth/authorize?response_type=code&redirect_uri=...&client_id=...')
-// //               }
-// //             >
-// //               Log In with 42
-// //             </Button>
-// //             <Button
-// //               variant="contained"
-// //               color="primary"
-// //               onClick={handleLoginWith42}
-// //             >
-// //               Login with Intra 42
-// //             </Button>
-// //             <Button variant="contained" color="primary">
-// //               Login
-// //             </Button>
-// //             <Button variant="contained" color="primary">
-// //               Sign Up
-// //             </Button>
-// //           </>
-// //         )}
-// //       </DialogContent>
-// //       <DialogActions>
-// //         <Button onClick={handleClose} color="primary">
-// //           Close
-// //         </Button>
-// //       </DialogActions>
-// //     </Dialog>
-// //   );
-// // };
-
-// // export default LoginDialog;
+export default Login;
