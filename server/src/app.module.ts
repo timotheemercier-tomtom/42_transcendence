@@ -14,8 +14,6 @@ import { HealthController } from './health/health.controller';
 import { UserController } from './user/user.controller';
 import { User } from './user/user.entity';
 import { Friend } from './user/friend.entity';
-import { StatusModule } from './status/status.module';
-import { GameModule } from './game/game.module';
 import { MatchHistory } from './game/matchhistory.entity';
 
 const typeOrmModule = TypeOrmModule.forRootAsync({

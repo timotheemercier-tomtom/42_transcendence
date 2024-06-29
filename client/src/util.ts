@@ -37,7 +37,6 @@ export const getJWTPayload = () => {
 };
 
 // export const getLogin = () => getJWTPayload()?.login;
-// // util.js (or wherever getLogin is defined)
 
 export const getLogin = () => {
     const cookies = document.cookie.split('; ');
@@ -45,8 +44,6 @@ export const getLogin = () => {
     return accessToken ? accessToken.split('=')[1] : null;
   };
   
-// export const getLogin = () => getJWTPayload()?.login;
-
 export const randomUUID = () => {
   return uuidv4();
 }

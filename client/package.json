@@ -17,6 +17,7 @@
     "@mui/icons-material": "^5.14.18",
     "@mui/material": "^5.15.4",
     "@mui/styled-engine": "^5.15.6",
+    "@mui/x-data-grid": "^7.8.0",
     "common": "0.2.5",
     "framer-motion": "^11.0.3",
     "material-ui": "^0.20.2",
