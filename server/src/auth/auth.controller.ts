@@ -45,13 +45,17 @@ export class AuthController {
     private config: ConfigService,
   ) {}
 
+
   @Get('42')
   @UseGuards(AuthGuard('42'))
   async signInWith42() {}
 
-  private redir(host: string, token: string, login: string) {
-    return `http://${host}:5173/login?token=${token}&u=${login}`;
+  redir(host: string, token: string, login: string) {
+    return `http://${this.config.get(
+      'HOST',
+    )}:5173/login?token=${token}&u=${login}`;
   }
+
 
   @Get('check')
   @UseGuards(AuthGuard('jwt'))
