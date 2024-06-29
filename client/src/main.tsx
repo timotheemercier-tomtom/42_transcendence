@@ -10,7 +10,7 @@ import Room from './pages/Room.tsx';
 import Home from './pages/Home.tsx';
 import User from './components/User.tsx';
 import Dashboard from './components/Dashboard.tsx';
-import MatchHistory from './pages/MatchHistory.tsx';
+import MatchHistoryPage from './pages/MatchHistoryPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -48,7 +48,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'matchhistory',
-        element: <MatchHistory />,
+        element: <MatchHistoryPage />,
       },
     ],
   },

@@ -1,8 +1,7 @@
-import Col from '../components/Col';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import { GameType } from '../GameCommon';
-import { Link } from 'react-router-dom';
+import { getLogin } from '../util';
 
 interface MatchHistoryDTO {
   id: number;
@@ -36,15 +35,23 @@ function createRowData(rec: MatchHistoryDTO): TableRowData {
   return { id, timestamp, winner, playerA, playerB, score, gameType };
 }
 
-function createTableRows(recs: MatchHistoryDTO[]): TableRowData[] {
+function createTableRows(
+  recs: MatchHistoryDTO[],
+  filterUser: string = '',
+): TableRowData[] {
   let rows: TableRowData[] = [];
   recs.forEach((rec) => {
-    rows.push(createRowData(rec));
+    if (
+      filterUser == '' ||
+      rec.playerA == filterUser ||
+      rec.playerB == filterUser
+    )
+      rows.push(createRowData(rec));
   });
   return rows;
 }
 
-export default function MatchHistory() {
+const MatchHistory = (props: { filterUser: boolean }) => {
   const [matchHistory, setMatchHistory] = useState<MatchHistoryDTO[]>([]);
 
   const fetchMatchHistory = async () => {
@@ -67,7 +74,10 @@ export default function MatchHistory() {
     fetchMatchHistory();
   }, []);
 
-  const rows = createTableRows(matchHistory);
+  const rows = props.filterUser
+    ? createTableRows(matchHistory, getLogin())
+    : createTableRows(matchHistory);
+
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     {
@@ -90,22 +100,10 @@ export default function MatchHistory() {
   ];
 
   if (matchHistory.length < 1) {
-    return (
-      <Col>
-        <Link to={'/'}>
-          <p>Back to homepage</p>
-        </Link>
-        <h1>Match History</h1>
-        <p>no matches found</p>
-      </Col>
-    );
+    return <p>no matches found</p>;
   } else {
     return (
-      <Col>
-        <Link to={'/'}>
-          <p>Back to homepage</p>
-        </Link>
-        <h1>Match History</h1>
+      <>
         <DataGrid
           rows={rows}
           columns={columns}
@@ -116,7 +114,9 @@ export default function MatchHistory() {
           }}
           pageSizeOptions={[5, 10]}
         />
-      </Col>
+      </>
     );
   }
-}
+};
+
+export default MatchHistory;
