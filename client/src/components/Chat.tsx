@@ -8,7 +8,7 @@ import {
   User,
 } from 'common';
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { socket } from '../chat.socket';
 import { API, getLogin } from '../util';
 import Col from './Col';
@@ -27,12 +27,25 @@ export default function Chat({ id }: { id: string }) {
   const [block, setBlock] = useState(new Set<string>());
   const [showHelp, setShowHelp] = useState(false);
   const [friends, setFriends] = useState<User[]>([]);
-
+  const nav = useNavigate();
   const user = getLogin();
 
   useEffect(() => {
     socket.connect();
-  }, []);
+    const getFriends = async () => {
+      const res = await fetch(API + `/user/${user}/friends`, {
+        credentials: 'include',
+      });
+      const data = await res.json();
+      setFriends(data);
+    };
+    getFriends();
+
+    if (socket.connected) {
+      send('join', { room: id, pass: '' });
+      send('rooms', user);
+    }
+  }, [id, user]);
 
   useEffect(() => {
     console.log('adding listeneres');
@@ -66,14 +79,6 @@ export default function Chat({ id }: { id: string }) {
       });
     };
 
-    const getFriends = async () => {
-      const res = await fetch(API + `/user/${user}/friends`, {
-        credentials: 'include',
-      });
-      const data = await res.json();
-      setFriends(data);
-    };
-
     socket.on('connect', onconnect);
     socket.on('message', onmessage);
     socket.on('list', setPublic);
@@ -82,7 +87,6 @@ export default function Chat({ id }: { id: string }) {
     socket.on('join', onjoin);
     socket.on('error', setError);
     socket.on('leave', onleave);
-    getFriends();
 
     return () => {
       console.log('removing listeneres');
@@ -118,10 +122,11 @@ export default function Chat({ id }: { id: string }) {
   });
 
   const cmdre =
-    /^\/(help|owner|admin|pass|ban|kick|mute|join|leave|public|dm|block)(.*)/;
+    /^\/(help|joingame|owner|admin|pass|ban|kick|mute|join|leave|public|dm|block)(.*)/;
 
   const cmdinfo = {
     help: 'toggle this help message',
+    joingame: 'join the game with the same name as this chat channel',
     owner: 'set the owner to user arg1',
     admin: 'toggle admin on user arg1',
     pass: 'set the password of this room to arg1',
@@ -174,8 +179,12 @@ export default function Chat({ id }: { id: string }) {
       case 'block':
         if (arg1) setBlock((v) => new Set(v).add(arg1));
         break;
+      case 'joingame':
+        nav('/r/' + room);
+        break;
     }
     setInput('');
+    setError('');
     return true;
   };
 
@@ -185,6 +194,7 @@ export default function Chat({ id }: { id: string }) {
       const msg: ChatClientMessage = { msg: input, room };
       send('message', msg);
       setInput('');
+      setError('');
     }
   };
 
@@ -207,7 +217,7 @@ export default function Chat({ id }: { id: string }) {
 
   const invite = (u: User) => {
     send('dm', u.login);
-    send('message', { msg: 'invite ' + room, room: '+' + u.login });
+    send('message', { msg: 'invite ' + id, room: '+' + u.login });
   };
 
   const Message = ({ v }: { v: ChatServerMessage }) => {

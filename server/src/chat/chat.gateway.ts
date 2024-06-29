@@ -71,6 +71,8 @@ export class ChatGateway
     console.log(`chat connected: ${client.id} ${this.idmap.get(client.id)}`);
     this.list(client);
     this.sdms(client);
+    const user = this.idmap.get(client.id)!;
+    this.service.rooms.forEach((v, k) => v.has(user) && client.join(k));
   }
 
   handleDisconnect(client: Socket) {
@@ -170,6 +172,8 @@ export class ChatGateway
   @SubscribeMessage('ban')
   ban(client: Socket, e: ChatRoomUser) {
     const user = this.idmap.get(client.id)!;
+    const uclient = this.userToClient.get(e.user);
+    if (!uclient) return;
     this.service.guardExists(e.room);
     this.service.guardAdmin(e.room, user);
     this.service.toggleBanned(e.room, e.user);
@@ -179,6 +183,7 @@ export class ChatGateway
         e.user
       }`,
     );
+    if (this.service.isBanned(e.room, e.user)) this.leave(uclient, e.room);
   }
 
   @SubscribeMessage('kick')
