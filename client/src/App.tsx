@@ -7,7 +7,6 @@ import Row from './components/Row';
 import Status from './components/Status';
 import { API } from './util';
 import InviteReceiver from './components/InviteReceiver';
-import Dashboard from './components/Dashboard';
 import { AuthProvider } from './components/AuthContext';
 
 const App: React.FC = () => {
@@ -22,7 +21,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Container className="root">
-      <InviteReceiver />
+        <InviteReceiver />
         <Col className="app">
           <header>
             <Row>

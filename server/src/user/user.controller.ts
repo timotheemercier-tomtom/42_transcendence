@@ -1,5 +1,3 @@
-// user.controller.ts
-
 import {
   Body,
   Controller,
@@ -12,7 +10,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UserDto } from './user.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
@@ -35,27 +33,19 @@ export class UserController {
 
   @Get(':login')
   @UseGuards(JwtAuthGuard)
-  async findUser(
-    @Req() req: Request & any,
-    @Param('login') login: string,
-  ): Promise<User | null> {
+  async findUser(@Param('login') login: string): Promise<User | null> {
     const user = await this.userService.findOne(login);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
     return user;
   }
 
   @Patch(':login')
+  @UseGuards(JwtAuthGuard)
   async updateUser(
     @Param('login') login: string,
     @Body() updateUserDto: UserDto,
     @Req() req: Request & any,
   ): Promise<User> {
-    const user = req.user;
-    if (user.login !== login) {
-      throw new UnauthorizedException();
-    }
+    // const user = req.user;
     return await this.userService.update(login, updateUserDto);
   }
 
@@ -105,14 +95,7 @@ export class UserController {
 
   @Post(':login/2fa/disable')
   @UseGuards(JwtAuthGuard)
-  async disableTwoFA(
-    @Param('login') login: string,
-    @Req() req: Request & any,
-  ): Promise<User> {
-    if (req.user.login !== login) {
-      throw new UnauthorizedException();
-    }
-
+  async disableTwoFA(@Param('login') login: string): Promise<User> {
     return this.userService.disableTwoFA(login);
   }
 }

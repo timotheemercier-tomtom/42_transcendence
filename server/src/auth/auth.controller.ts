@@ -45,7 +45,6 @@ export class AuthController {
     private config: ConfigService,
   ) {}
 
-
   @Get('42')
   @UseGuards(AuthGuard('42'))
   async signInWith42() {}
@@ -56,15 +55,10 @@ export class AuthController {
     )}:5173/login?token=${token}&u=${login}`;
   }
 
-
   @Get('check')
   @UseGuards(AuthGuard('jwt'))
   async checkAuth(@Req() req: any): Promise<User> {
-    const user = await this.userService.findOne(req.user.login);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-    return user;
+    return req.user;
   }
 
   @Get('42/callback')

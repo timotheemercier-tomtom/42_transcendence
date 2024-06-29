@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useAuth } from './AuthContext';
 import qrcode from 'qrcode';
+import { API } from '../util';
 
 const User: React.FC = () => {
   const { login } = useParams<{ login: string }>();
@@ -28,32 +29,29 @@ const User: React.FC = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch(
-          `http://${location.hostname}:3000/user/${login}`,
-          {
-            method: 'GET',
-            credentials: 'include',
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-
-        const data = await response.json();
-        setUserData(data);
-        setTwoFAEnabled(data.isTwoFAEnabled);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserData();
   }, [login]);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(`${API}/user/${login}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const data = await response.json();
+      setUserData(data);
+      setTwoFAEnabled(data.isTwoFAEnabled);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleImageChange = async () => {
     if (!newPicture) return;
@@ -87,14 +85,28 @@ const User: React.FC = () => {
   ) => {
     setTwoFAEnabled(event.target.checked);
     if (event.target.checked) {
-      // Enable 2FA
+      enableTwoFAForUser();
+    } else {
+      disableTwoFAForUser();
+    }
+  };
+
+  const enableTwoFAForUser = async () => {
+    try {
       const response = await enableTwoFA(userData.login);
       const qrCodeUrl = await qrcode.toDataURL(response.otpauthUrl);
       setQrCode(qrCodeUrl);
-    } else {
-      // Disable 2FA
+    } catch (error) {
+      setError('Failed to enable 2FA');
+    }
+  };
+
+  const disableTwoFAForUser = async () => {
+    try {
       await disableTwoFA(userData.login);
       setQrCode(null);
+    } catch (error) {
+      setError('Failed to disable 2FA');
     }
   };
 

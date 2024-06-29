@@ -16,6 +16,11 @@ export class UserDto {
   @MinLength(3, { message: 'Username must have atleast 3 characters.' })
   readonly username?: string;
 
+
+  @IsOptional()
+  @MinLength(3, { message: 'Username must have atleast 3 characters.' })
+  readonly displayName?: string;
+    
   @IsOptional()
   @IsString()
   picture?: string;

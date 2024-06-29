@@ -1,5 +1,4 @@
 import Col from '../components/Col';
-import Dashboard from '../components/Dashboard';
 import GameMaker from '../components/GameMaker';
 import { Link } from 'react-router-dom';
 import { getLogin } from '../util';
@@ -13,7 +12,6 @@ export default function Home() {
       <Col>
         <h1>Welcome!</h1>
         <GameMaker />
-		<Dashboard />
         <Link to={'/matchhistory'}>
           <p>View match history</p>
         </Link>
