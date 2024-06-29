@@ -1,4 +1,3 @@
-import { ThemeProvider } from '@emotion/react';
 import { CssBaseline } from '@mui/material';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -7,7 +6,6 @@ import App from './App.tsx';
 import './css/index.css';
 import Error404 from './pages/Error404.tsx';
 import LoginResult from './pages/LoginResult.tsx';
-import Profile from './pages/Profile.tsx';
 import Room from './pages/Room.tsx';
 import Home from './pages/Home.tsx';
 import User from './components/User.tsx';
