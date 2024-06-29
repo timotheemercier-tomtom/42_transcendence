@@ -45,7 +45,7 @@ export const getLogin = () => {
     return accessToken ? accessToken.split('=')[1] : null;
   };
   
-export const getLogin = () => getJWTPayload()?.login;
+// export const getLogin = () => getJWTPayload()?.login;
 
 export const randomUUID = () => {
   return uuidv4();

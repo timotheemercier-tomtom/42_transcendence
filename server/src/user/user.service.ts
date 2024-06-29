@@ -93,28 +93,4 @@ export class UserService {
     user.isTwoFAEnabled = false;
     return this.usersRepository.save(user);
   }
-
-  async updateWinLossScore(
-    loginWon: string,
-    loginLost: string,
-  ): Promise<boolean> {
-    const userWon = await this.userRepository.findOneBy({
-      login: loginWon,
-    });
-    if (!userWon) {
-      throw new NotFoundException('User not found');
-    }
-    userWon.won += 1;
-    this.usersRepository.save(userWon);
-
-    const userLost = await this.userRepository.findOneBy({
-      login: loginLost,
-    });
-    if (!userLost) {
-      throw new NotFoundException('User not found');
-    }
-    userLost.lost += 1;
-    this.usersRepository.save(userLost);
-    return true;
-  }
 }

@@ -8,7 +8,7 @@ import { User } from './user.entity';
 export class FriendService {
   constructor(
     @InjectRepository(Friend) private friendRepository: Repository<Friend>,
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
 
   async addFriend(userId: string, friendId: string): Promise<Friend> {
@@ -44,7 +44,7 @@ export class FriendService {
 
     const userIds = friendRelationships.map((friendship) => friendship.userId);
 
-    const friends = await this.userRepository.findBy({ login: In(userIds) });
+    const friends = await this.usersRepository.findBy({ login: In(userIds) });
     return friends;
   }
 }
