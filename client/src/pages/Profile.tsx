@@ -1,6 +1,8 @@
 import AddFriend from '../components/AddFriend';
 import Friends from '../components/Friends';
 import User from '../components/User';
+import MatchHistory from '../components/MatchHistory';
+// import User from '../components/User';
 
 const Profile = () => {
   return (
@@ -9,6 +11,8 @@ const Profile = () => {
       <User />
       <AddFriend />
       <Friends />
+      <h2>Match history</h2>
+      <MatchHistory filterUser={true} />
     </div>
   );
 };
