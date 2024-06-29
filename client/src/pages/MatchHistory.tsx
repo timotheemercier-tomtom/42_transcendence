@@ -3,6 +3,8 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import { GameType } from '../GameCommon';
 import { Link } from 'react-router-dom';
+import { getLogin } from '../util';
+import { useNavigate } from 'react-router-dom';
 
 interface MatchHistoryDTO {
   id: number;
@@ -45,6 +47,7 @@ function createTableRows(recs: MatchHistoryDTO[]): TableRowData[] {
 }
 
 export default function MatchHistory() {
+  const nav = useNavigate();
   const [matchHistory, setMatchHistory] = useState<MatchHistoryDTO[]>([]);
 
   const fetchMatchHistory = async () => {
@@ -64,7 +67,9 @@ export default function MatchHistory() {
   };
 
   useEffect(() => {
-    fetchMatchHistory();
+    const userId: string = getLogin();
+    if (!userId) nav('/');
+    else fetchMatchHistory();
   }, []);
 
   const rows = createTableRows(matchHistory);
