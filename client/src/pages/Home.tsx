@@ -15,6 +15,9 @@ export default function Home() {
         <Link to={'/matchhistory'}>
           <p>View match history</p>
         </Link>
+        <Link to={'/ranking'}>
+          <p>View ranking</p>
+        </Link>
         <Link to={'/u/' + userId}>
           <p>View my profile</p>
         </Link>

@@ -31,6 +31,12 @@ export class UserController {
     return await this.userService.findOne(req.user.login);
   }
 
+  @Get('all-users')
+  @UseGuards(JwtAuthGuard)
+  async getAllUsers(): Promise<User[]> {
+    return await this.userService.findAll();
+  }
+
   @Get(':login')
   @UseGuards(JwtAuthGuard)
   async findUser(@Param('login') login: string): Promise<User | null> {

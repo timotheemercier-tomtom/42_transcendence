@@ -47,7 +47,7 @@ export class UserService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    return await this.usersRepository.find();
   }
 
   async removeOne(id: number): Promise<void> {
