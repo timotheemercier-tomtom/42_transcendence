@@ -21,9 +21,6 @@ export class User {
   @Column({ default: 0 })
   lost: number;
 
-  @Column({ default: 0 })
-  rank: number;
-
   @Column({ nullable: true })
   twoFASecret?: string;
 
