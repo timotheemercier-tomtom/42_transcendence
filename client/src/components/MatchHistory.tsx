@@ -60,6 +60,7 @@ const MatchHistory = (props: { filterUser: boolean }) => {
         `http://${location.hostname}:3000/game/matchhistory`,
         {
           method: 'GET',
+          credentials: 'include',
         },
       );
       if (!response.ok) throw new Error('Network response error');
