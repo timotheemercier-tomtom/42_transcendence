@@ -140,11 +140,6 @@ export class GameGateway extends Eventer {
     this.service.enque(queItem.userId, queItem.gameType);
   }
 
-  @SubscribeMessage('opt')
-  _opt(client: Socket, opt: GameEventData['opt']) {
-    this.service.opt(opt);
-  }
-
   @SubscribeMessage('request_game_state')
   _request_game_state(
     client: Socket,
@@ -160,8 +155,10 @@ export class GameGateway extends Eventer {
         playerB: game.playerB,
         spectators: Array.from(game.spectators),
         textMsg: undefined,
-        gameType: (game.isSelfBalancing) ? GameType.SelfBalancing : GameType.Classic,
-        isPublic: game.isPublic
+        gameType: game.isSelfBalancing
+          ? GameType.SelfBalancing
+          : GameType.Classic,
+        isPublic: game.isPublic,
       });
   }
 }

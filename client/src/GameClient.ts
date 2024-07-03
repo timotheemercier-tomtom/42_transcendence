@@ -76,8 +76,6 @@ export default class GameClient extends GameCommon {
       this.textMsg = v.textMsg;
     });
 
-    // this.on('opt', (v) => this.addOpt(v));
-    // socket.emit('opt', { gameId: this.gameId, user: {} });
     socket.emit('join_game_room', this.ug);
     socket.emit('request_game_state', gameId);
     window.addEventListener('keydown', this.evdown);
@@ -146,13 +144,11 @@ export default class GameClient extends GameCommon {
     this.ctx.strokeStyle = 'white';
 
     // paddle A
-    let c = this.opt.user[this.playerA!]?.paddle ?? 'white';
-    this.ctx.fillStyle = c;
+    this.ctx.fillStyle = 'white';
     this.ctx.fillRect(leftPaddleA, topPaddleA, paddleWidth, paddleHeightA);
 
     // paddle B
-    c = this.opt.user[this.playerB!]?.paddle ?? 'white';
-    this.ctx.fillStyle = c;
+    this.ctx.fillStyle = 'white';
     this.ctx.fillRect(leftPaddleB, topPaddleB, paddleWidth, paddleHeightB);
 
     // ball

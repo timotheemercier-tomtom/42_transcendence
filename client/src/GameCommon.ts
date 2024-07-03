@@ -25,16 +25,10 @@ export type GameEventType =
   | 'frame'
   | 'game_state'
   | 'request_game_state'
-  | 'key_change'
-  | 'opt';
+  | 'key_change';
 
 export type GameUserGame = {
   userId: string;
-  gameId: string;
-};
-
-export type GameOpt = {
-  user: { [K in string]: { i: number; ball: string; paddle: string } };
   gameId: string;
 };
 
@@ -71,7 +65,6 @@ export type GameEventData = {
   };
   request_game_state: string;
   key_change: { userId: string; key: string; keyState: KeyState };
-  opt: GameOpt;
 };
 
 type EvCb<T> = (e: T) => void;
@@ -139,15 +132,6 @@ export class GameCommon extends Eventer {
   w!: number;
   h!: number;
   gameId!: string;
-  opt: GameOpt = {
-    user: {},
-    gameId: '',
-  };
-
-  addOpt(opt: GameOpt) {
-    Object.assign(this.opt.user, opt.user);
-    this.opt.gameId = opt.gameId;
-  }
 
   create(w: number, h: number) {
     this.w = w;

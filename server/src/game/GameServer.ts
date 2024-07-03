@@ -1,7 +1,6 @@
 import { WsException } from '@nestjs/websockets';
 import {
   GameCommon,
-  GameOpt,
   GameEventData,
   KeyState,
   GameState,
@@ -32,11 +31,6 @@ export default class GameServer extends GameCommon {
     this.isPublic = isPublic;
     this.isSelfBalancing = isSelfBalancing;
     console.log(`game room created: '${gameId}'`);
-  }
-
-  addOpt(opt: GameOpt): void {
-    super.addOpt(opt);
-    // this.emit('opt', this.opt);
   }
 
   joinGameRoom(userId: string) {

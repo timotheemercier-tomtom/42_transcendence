@@ -4,7 +4,6 @@ import {
   Eventer,
   GameEventData,
   GameEventType,
-  GameOpt,
   GameState,
   GameType,
 } from './GameCommon';
@@ -146,11 +145,6 @@ export class GameService extends Eventer {
       isPublic: true,
       gameType: gameType,
     });
-  }
-
-  opt(opt: GameOpt) {
-    const game = this.guardGame(opt.gameId);
-    game.addOpt(opt);
   }
 
   findAllMatchHistory(): Promise<MatchHistory[]> {
