@@ -75,8 +75,14 @@ export class GameGateway extends Eventer {
     });
   }
 
+  handleConnection(client: Socket) {
+    const user = this.idmap.get(client.id)!;
+    console.log(`game client connected: ${client.id} ${user}`);
+  }
+
   handleDisconnect(client: Socket) {
     const user = this.idmap.get(client.id)!;
+    console.log(`game disconnected: ${client.id} ${user}`);
     const leftGameId = this.service.userToGame.get(user);
     if (user && leftGameId) {
       this.service.leaveGameRoom(leftGameId, user);
