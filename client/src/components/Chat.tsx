@@ -143,6 +143,13 @@ export default function Chat({ id }: { id: string }) {
     block: 'block a user arg1',
   };
 
+  const send = <EventType extends ChatEventType>(
+    ev: EventType,
+    data: ChatClientEventData[EventType],
+  ) => {
+    socket.emit(ev, data);
+  };
+
   const handleCommand = (input: string) => {
     const m = input.match(cmdre);
     if (!m) return false;
