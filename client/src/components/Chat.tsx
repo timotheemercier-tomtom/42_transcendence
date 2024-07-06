@@ -9,10 +9,10 @@ import {
 } from 'common';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { socket } from '../chat.socket';
 import { API, getLogin } from '../util';
 import Col from './Col';
 import Row from './Row';
+import { socket } from '../chat.socket';
 
 export default function Chat({ id }: { id: string }) {
   const [msgs, setMsgs] = useState(new Map<string, ChatServerMessage[]>());
@@ -40,7 +40,12 @@ export default function Chat({ id }: { id: string }) {
       setFriends(data);
     };
     getFriends();
-
+    const send = <EventType extends ChatEventType>(
+      ev: EventType,
+      data: ChatClientEventData[EventType],
+    ) => {
+      socket.emit(ev, data);
+    };
     if (socket.connected) {
       send('join', { room: id, pass: '' });
       send('rooms', user);
@@ -60,7 +65,12 @@ export default function Chat({ id }: { id: string }) {
         return n;
       });
     };
-
+    const send = <EventType extends ChatEventType>(
+      ev: EventType,
+      data: ChatClientEventData[EventType],
+    ) => {
+      socket.emit(ev, data);
+    };
     const onconnect = () => {
       send('join', { room, pass: '' });
       send('rooms', user);
@@ -101,13 +111,6 @@ export default function Chat({ id }: { id: string }) {
       socket.off('leave', onleave);
     };
   }, [room, user]);
-
-  const send = <EventType extends ChatEventType>(
-    ev: EventType,
-    data: ChatClientEventData[EventType],
-  ) => {
-    socket.emit(ev, data);
-  };
 
   useEffect(() => {
     setRoom(id);

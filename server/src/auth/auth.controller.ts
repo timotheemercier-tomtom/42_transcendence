@@ -50,9 +50,7 @@ export class AuthController {
   async signInWith42() {}
 
   redir(host: string, token: string, login: string) {
-    return `http://${this.config.get(
-      'HOST',
-    )}:5173/login?token=${token}&u=${login}`;
+    return `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`;
   }
 
   @Get('check')

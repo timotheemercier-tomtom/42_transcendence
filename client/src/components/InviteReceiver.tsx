@@ -10,7 +10,6 @@ const InviteReceiver = () => {
   const nav = useNavigate();
   const [invite, setInvite] = useState<null | [string, string]>();
   const user = getLogin();
-
   useEffect(() => {
     socket.connect();
   }, []);

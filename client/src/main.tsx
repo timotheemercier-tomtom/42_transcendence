@@ -5,14 +5,12 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App.tsx';
 import './css/index.css';
 import Error404 from './pages/Error404.tsx';
-import LoginResult from './pages/LoginResult.tsx';
 import Room from './pages/Room.tsx';
 import Home from './pages/Home.tsx';
-import User from './components/User.tsx';
-import Dashboard from './components/Dashboard.tsx';
 import MatchHistoryPage from './pages/MatchHistoryPage.tsx';
 import RankingPage from './pages/RankingPage.tsx';
 import Profile from './pages/Profile.tsx';
+import { AuthProvider } from './components/AuthContext.tsx';
 
 const router = createBrowserRouter([
   {
@@ -27,10 +25,6 @@ const router = createBrowserRouter([
       {
         path: 'r/:id',
         element: <Room />,
-      },
-      {
-        path: 'login',
-        element: <LoginResult />,
       },
       {
         path: 'u/:login',
@@ -59,6 +53,8 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <CssBaseline />
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>,
 );
