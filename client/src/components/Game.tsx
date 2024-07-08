@@ -1,13 +1,31 @@
 import { useRef, useEffect, useState } from 'react';
 import GameClient from '../GameClient';
 import Col from './Col';
+import Row from './Row';
 import { getLogin } from '../util';
 import { useParams } from 'react-router-dom';
-import { Button } from '@mui/material';
+import { Avatar, Button } from '@mui/material';
 import { GameEventData, GameState, GameType } from '../GameCommon';
 import { socket } from '../game.socket';
+import { API } from '../util';
+
+type SetterFunction = React.Dispatch<any>;
 
 const GC = new GameClient();
+
+const GameAvatar = (props: any) => {
+  const picture: any =
+    props.userData && props.userData.picture
+      ? props.userData.picture
+      : undefined;
+  return (
+    <Avatar
+      src={picture}
+      alt="Profile"
+      style={{ width: '100px', height: '100px' }}
+    />
+  );
+};
 
 const Game = () => {
   const { id } = useParams(); // this is the room ID!
@@ -24,6 +42,8 @@ const Game = () => {
   const [gameTypeStr, setGameTypeStr] = useState<string>('Classic');
   const [publicOrPrivateStr, setPublicOrPrivateStr] =
     useState<string>('Public');
+  const [userDataA, setUserDataA] = useState<any>(null);
+  const [userDataB, setUserDataB] = useState<any>(null);
 
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
@@ -42,7 +62,9 @@ const Game = () => {
     const onStateChange = (e: GameEventData['game_state']) => {
       setGameState(e.gameState);
       setPlayerA(e.playerA);
+      fetchUserData(e.playerA, setUserDataA);
       setPlayerB(e.playerB);
+      fetchUserData(e.playerB, setUserDataB);
       setSpectators([...e.spectators].join(', '));
       setTextMsg(e.textMsg);
       setScaleFactor(GC.calcScaleFactor(window.innerWidth, window.innerHeight));
@@ -65,8 +87,7 @@ const Game = () => {
       }
       if (e.isPublic == true) {
         setPublicOrPrivateStr('Public');
-      }
-      else {
+      } else {
         setPublicOrPrivateStr('Private');
       }
     };
@@ -81,6 +102,29 @@ const Game = () => {
     setScaleFactor(GC.calcScaleFactor(window.innerWidth, window.innerHeight));
   }
 
+  const fetchUserData = async (
+    newPlayer: string | undefined,
+    setUserData: SetterFunction,
+  ) => {
+    if (newPlayer == undefined) {
+      setUserData(undefined);
+    } else {
+      try {
+        const response = await fetch(`${API}/user/${newPlayer}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        setUserData(await response.json());
+      } catch (err: any) {
+        console.log('error retrieving user: ', userId);
+      }
+    }
+  };
+
+  // if (userData) {
   return (
     <Col>
       <Button
@@ -116,7 +160,14 @@ const Game = () => {
       <span>People in the room: {spectators}</span>
       <span>Extra message: {textMsg}</span>
       <span>scaleFactor: {scaleFactor}</span>
-      <span>game type: {gameTypeStr} - {publicOrPrivateStr}</span>
+      <span>
+        game type: {gameTypeStr} - {publicOrPrivateStr}
+      </span>
+      <Row>
+        <GameAvatar userData={userDataA} />
+        <GameAvatar userData={userDataB} />
+      </Row>
+
       <canvas
         ref={cr}
         width={GameClient.W * scaleFactor}
@@ -125,5 +176,6 @@ const Game = () => {
     </Col>
   );
 };
+// };
 
 export default Game;
