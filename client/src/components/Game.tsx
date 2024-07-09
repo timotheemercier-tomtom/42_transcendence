@@ -4,10 +4,19 @@ import Col from './Col';
 import Row from './Row';
 import { getLogin } from '../util';
 import { useParams } from 'react-router-dom';
-import { Avatar, Button } from '@mui/material';
+import { Avatar, Button, Typography } from '@mui/material';
 import { GameEventData, GameState, GameType } from '../GameCommon';
 import { socket } from '../game.socket';
 import { API } from '../util';
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import TableHead from '@mui/material/TableHead';
+import Collapse from '@mui/material';
 
 type SetterFunction = React.Dispatch<any>;
 
@@ -124,46 +133,90 @@ const Game = () => {
     }
   };
 
-  // if (userData) {
   return (
-    <Col>
-      <Button
-        disabled={
-          gameState != GameState.WaitingForPlayers ||
-          playerA == userId ||
-          playerB == userId
-        }
-        onClick={() => GC.join()}
+    <Col align-items="flex-start">
+      <Typography
+        color="inherit"
+        variant="h2"
+        component="div"
+        sx={{ margin: '10px' }}
       >
-        Join Game!
-      </Button>
-      <Button
-        disabled={playerA != userId && playerB != userId}
-        onClick={() => GC.leave()}
-      >
-        Leave Game!
-      </Button>
-      <Button
-        disabled={
-          gameState != GameState.ReadyToStart ||
-          (playerA != userId && playerB != userId)
-        }
-        onClick={() => GC.start()}
-      >
-        Start Game!
-      </Button>
-      <span>userId: {userId}</span>
-      <span>gameId: {gameId}</span>
-      <span>gameState: {gameStateString}</span>
-      <span>player A: {playerA}</span>
-      <span>player B: {playerB}</span>
-      <span>People in the room: {spectators}</span>
-      <span>Extra message: {textMsg}</span>
-      <span>scaleFactor: {scaleFactor}</span>
-      <span>
-        game type: {gameTypeStr} - {publicOrPrivateStr}
-      </span>
+        Pong !
+      </Typography>
       <Row>
+        <Col sx={{ width: '100%' }}>
+          <TableContainer component={Paper}>
+            <Table aria-label="simple table" size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="left" colSpan={2}>
+                    <b>Game properties</b>
+                  </TableCell>
+                  <TableCell
+                    align="left"
+                    colSpan={1}
+                    sx={{ padding: '6px 24px' }}
+                  >
+                    <b>Actions</b>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    <b>Game type:</b>
+                  </TableCell>
+                  <TableCell>{gameTypeStr}</TableCell>
+                  <TableCell>
+                    <Button
+                      disabled={
+                        gameState != GameState.WaitingForPlayers ||
+                        playerA == userId ||
+                        playerB == userId
+                      }
+                      onClick={() => GC.join()}
+                    >
+                      Join Game!
+                    </Button>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <b>Availability</b>
+                  </TableCell>
+                  <TableCell>{publicOrPrivateStr}</TableCell>
+                  <TableCell>
+                    <Button
+                      disabled={playerA != userId && playerB != userId}
+                      onClick={() => GC.leave()}
+                    >
+                      Leave Game!
+                    </Button>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <b>Game state</b>
+                  </TableCell>
+                  <TableCell>{gameStateString}</TableCell>
+                  <TableCell>
+                    <Button
+                      disabled={
+                        gameState != GameState.ReadyToStart ||
+                        (playerA != userId && playerB != userId)
+                      }
+                      onClick={() => GC.start()}
+                    >
+                      Start Game!
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Col>
+      </Row>
+      <Row sx={{ justifyContent: 'space-between', padding: '30px' }}>
         <GameAvatar userData={userDataA} />
         <GameAvatar userData={userDataB} />
       </Row>
