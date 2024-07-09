@@ -36,6 +36,50 @@ const GameAvatar = (props: any) => {
   );
 };
 
+const JoinButton = (props: any) => {
+  return (
+    <Button
+      disabled={
+        props.obj.gameState != GameState.WaitingForPlayers ||
+        props.obj.playerA == props.obj.userId ||
+        props.obj.playerB == props.obj.userId
+      }
+      onClick={() => GC.join()}
+    >
+      Join Game!
+    </Button>
+  );
+};
+
+const LeaveButton = (props: any) => {
+  return (
+    <Button
+      disabled={
+        props.obj.playerA != props.obj.userId &&
+        props.obj.playerB != props.obj.userId
+      }
+      onClick={() => GC.leave()}
+    >
+      Leave Game!
+    </Button>
+  );
+};
+
+const StartButton = (props: any) => {
+  return (
+    <Button
+      disabled={
+        props.obj.gameState != GameState.ReadyToStart ||
+        (props.obj.playerA != props.obj.userId &&
+          props.obj.playerB != props.obj.userId)
+      }
+      onClick={() => GC.start()}
+    >
+      Start Game!
+    </Button>
+  );
+};
+
 const Game = () => {
   const { id } = useParams(); // this is the room ID!
   const cr = useRef<HTMLCanvasElement>(null);
@@ -133,6 +177,16 @@ const Game = () => {
     }
   };
 
+  function buttonProps(): any {
+    const obj: any = {
+      gameState: gameState,
+      userId: userId,
+      playerA: playerA,
+      playerB: playerB,
+    };
+    return obj;
+  }
+
   return (
     <Col align-items="flex-start">
       <Typography
@@ -144,78 +198,33 @@ const Game = () => {
         Pong !
       </Typography>
       <Row>
-        <Col sx={{ width: '100%' }}>
-          <TableContainer component={Paper}>
-            <Table aria-label="simple table" size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell align="left" colSpan={2}>
-                    <b>Game properties</b>
-                  </TableCell>
-                  <TableCell
-                    align="left"
-                    colSpan={1}
-                    sx={{ padding: '6px 24px' }}
-                  >
-                    <b>Actions</b>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    <b>Game type:</b>
-                  </TableCell>
-                  <TableCell>{gameTypeStr}</TableCell>
-                  <TableCell>
-                    <Button
-                      disabled={
-                        gameState != GameState.WaitingForPlayers ||
-                        playerA == userId ||
-                        playerB == userId
-                      }
-                      onClick={() => GC.join()}
-                    >
-                      Join Game!
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <b>Availability</b>
-                  </TableCell>
-                  <TableCell>{publicOrPrivateStr}</TableCell>
-                  <TableCell>
-                    <Button
-                      disabled={playerA != userId && playerB != userId}
-                      onClick={() => GC.leave()}
-                    >
-                      Leave Game!
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <b>Game state</b>
-                  </TableCell>
-                  <TableCell>{gameStateString}</TableCell>
-                  <TableCell>
-                    <Button
-                      disabled={
-                        gameState != GameState.ReadyToStart ||
-                        (playerA != userId && playerB != userId)
-                      }
-                      onClick={() => GC.start()}
-                    >
-                      Start Game!
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Col>
+        <TableContainer component={Paper}>
+          <Table aria-label="simple table" size="small">
+            <TableBody>
+              <TableRow>
+                <TableCell>Actions:</TableCell>
+                <TableCell>
+                  <JoinButton obj={buttonProps()} />
+                  <LeaveButton obj={buttonProps()} />
+                  <StartButton obj={buttonProps()} />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  {/* <TableCell align="left" colSpan={2}> */}
+                  Game:
+                </TableCell>
+                <TableCell sx={{ display: 'flex', justifyContent: 'left'}}>
+                  <Col sx={{ margin: '0 30px 0 8px' }}>{gameTypeStr}</Col>
+                  <Col sx={{ margin: '0 30px 0 0' }}>{publicOrPrivateStr}</Col>
+                  <Col sx={{ margin: '0 30px 0 0' }}>{gameStateString}</Col>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Row>
+
       <Row sx={{ justifyContent: 'space-between', padding: '30px' }}>
         <GameAvatar userData={userDataA} />
         <GameAvatar userData={userDataB} />
