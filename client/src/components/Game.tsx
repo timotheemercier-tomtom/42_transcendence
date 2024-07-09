@@ -97,6 +97,8 @@ const Game = () => {
     useState<string>('Public');
   const [userDataA, setUserDataA] = useState<any>(null);
   const [userDataB, setUserDataB] = useState<any>(null);
+  const [scoreAstate, setScoreAstate] = useState<number>(0);
+  const [scoreBstate, setScoreBstate] = useState<number>(0);
 
   useEffect(() => {
     const ctx = cr.current?.getContext('2d');
@@ -115,8 +117,10 @@ const Game = () => {
     const onStateChange = (e: GameEventData['game_state']) => {
       setGameState(e.gameState);
       setPlayerA(e.playerA);
+      setScoreAstate(e.scoreA);
       fetchUserData(e.playerA, setUserDataA);
       setPlayerB(e.playerB);
+      setScoreBstate(e.scoreB);
       fetchUserData(e.playerB, setUserDataB);
       setSpectators([...e.spectators].join(', '));
       setTextMsg(e.textMsg);
@@ -189,14 +193,14 @@ const Game = () => {
 
   return (
     <Col align-items="flex-start">
-      <Typography
+      {/* <Typography
         color="inherit"
         variant="h2"
         component="div"
         sx={{ margin: '10px' }}
       >
         Pong !
-      </Typography>
+      </Typography> */}
       <Row>
         <TableContainer component={Paper}>
           <Table aria-label="simple table" size="small">
@@ -210,11 +214,8 @@ const Game = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>
-                  {/* <TableCell align="left" colSpan={2}> */}
-                  Game:
-                </TableCell>
-                <TableCell sx={{ display: 'flex', justifyContent: 'left'}}>
+                <TableCell>Game:</TableCell>
+                <TableCell sx={{ display: 'flex', justifyContent: 'left' }}>
                   <Col sx={{ margin: '0 30px 0 8px' }}>{gameTypeStr}</Col>
                   <Col sx={{ margin: '0 30px 0 0' }}>{publicOrPrivateStr}</Col>
                   <Col sx={{ margin: '0 30px 0 0' }}>{gameStateString}</Col>
@@ -225,8 +226,17 @@ const Game = () => {
         </TableContainer>
       </Row>
 
-      <Row sx={{ justifyContent: 'space-between', padding: '30px' }}>
+      <Row sx={{ display: 'flex', justifyContent: 'space-between', padding: '30px', alignItems: 'center'}}>
         <GameAvatar userData={userDataA} />
+        <Typography
+          color="inherit"
+          variant="h2"
+          component="div"
+          sx={{ margin: '10px' }}
+        >
+          {scoreAstate ? scoreAstate.toString() : '0'} -{' '}
+          {scoreBstate ? scoreBstate.toString() : '0'}
+        </Typography>
         <GameAvatar userData={userDataB} />
       </Row>
 
@@ -238,6 +248,5 @@ const Game = () => {
     </Col>
   );
 };
-// };
 
 export default Game;
