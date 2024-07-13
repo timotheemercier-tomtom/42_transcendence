@@ -36,7 +36,7 @@ export class StatusGateway {
   async state(user: string, state: StatusType) {
     this.status.set(user, state);
     const friends = await this.friends.getUsersWhoAddedAsFriend(user);
-    console.log(friends);
+    // console.log(friends);
 
     friends.forEach((v) =>
       this.userToClient.get(v.login)?.emit('state', [user, state]),
