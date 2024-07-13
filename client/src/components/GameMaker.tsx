@@ -37,7 +37,6 @@ const GameMaker = () => {
     event.preventDefault();
     const gameType: GameType =
       gameTypeStr == 'Classic' ? GameType.Classic : GameType.SelfBalancing;
-
     switch (publicOrPrivateStr) {
       case 'Public': {
         console.log('emitting Public..');

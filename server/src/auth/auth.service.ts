@@ -17,7 +17,7 @@ export class AuthService {
 
   generateTwoFASecret(login: string): { otpauthUrl?: string; base32: string } {
     const secret = speakeasy.generateSecret({
-      name: `MyApp (${login})`,
+      name: `Pong (${login})`,
     });
 
     const otpauthUrl = secret.otpauth_url;
@@ -42,35 +42,3 @@ export class AuthService {
     }
   }
 }
-// @Injectable()
-// export class AuthService {
-//   constructor(
-//     private configService: ConfigService,
-//     private jwtService: JwtService,
-//     private userService: UserService,
-//   ) {}
-
-//   generateTwoFASecret(login: string): { otpauthUrl?: string; base32: string } {
-//     const secret = speakeasy.generateSecret({
-//       name: `MyApp (${login})`,
-//     });
-
-//     return { otpauthUrl: secret.otpauth_url, base32: secret.base32 };
-//   }
-
-//   async validateUser(token: string): Promise<User | null> {
-//     try {
-//       const decoded = this.jwtService.verify(token, {
-//         secret: this.configService.get('JWT_SECRET'),
-//       });
-
-//       const user = await this.userService.findOne(decoded.login);
-//       if (!user) {
-//         return null;
-//       }
-//       return user;
-//     } catch (error) {
-//       return null;
-//     }
-//   }
-// }
