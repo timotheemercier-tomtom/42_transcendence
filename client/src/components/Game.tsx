@@ -15,8 +15,6 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import TableHead from '@mui/material/TableHead';
-import Collapse from '@mui/material';
 
 type SetterFunction = React.Dispatch<any>;
 
@@ -193,14 +191,6 @@ const Game = () => {
 
   return (
     <Col align-items="flex-start">
-      {/* <Typography
-        color="inherit"
-        variant="h2"
-        component="div"
-        sx={{ margin: '10px' }}
-      >
-        Pong !
-      </Typography> */}
       <Row>
         <TableContainer component={Paper}>
           <Table aria-label="simple table" size="small">
@@ -226,7 +216,14 @@ const Game = () => {
         </TableContainer>
       </Row>
 
-      <Row sx={{ display: 'flex', justifyContent: 'space-between', padding: '30px', alignItems: 'center'}}>
+      <Row
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          padding: '30px',
+          alignItems: 'center',
+        }}
+      >
         <GameAvatar userData={userDataA} />
         <Typography
           color="inherit"
@@ -234,8 +231,7 @@ const Game = () => {
           component="div"
           sx={{ margin: '10px' }}
         >
-          {scoreAstate ? scoreAstate.toString() : '0'} -{' '}
-          {scoreBstate ? scoreBstate.toString() : '0'}
+          {scoreAstate.toString()} - {scoreBstate.toString()}
         </Typography>
         <GameAvatar userData={userDataB} />
       </Row>

@@ -74,6 +74,8 @@ export default class GameClient extends GameCommon {
       this.playerB = v.playerB;
       this.spectators = new Set([...v.spectators]);
       this.textMsg = v.textMsg;
+      this.scoreA = v.scoreA;
+      this.scoreB = v.scoreB;
     });
 
     socket.emit('join_game_room', this.ug);
@@ -158,10 +160,10 @@ export default class GameClient extends GameCommon {
     this.ctx.fill();
 
     // score
-    const scoreStr: string = `Score: ${this.scoreA} - ${this.scoreB}`;
-    this.ctx.fillStyle = 'green';
-    this.ctx.font = `bold italic ${scoreFontSize}px Arial`;
-    this.ctx.fillText(scoreStr, scoreXpos, scoreYpos);
+    // const scoreStr: string = `Score: ${this.scoreA} - ${this.scoreB}`;
+    // this.ctx.fillStyle = 'green';
+    // this.ctx.font = `bold italic ${scoreFontSize}px Arial`;
+    // this.ctx.fillText(scoreStr, scoreXpos, scoreYpos);
 
     // extra msg
     this.ctx.fillStyle = 'cyan';
