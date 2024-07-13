@@ -58,10 +58,12 @@ export class UserController {
 
 
   @Post(':login/friend/:friend')
+  @UseGuards(JwtAuthGuard)
   async toggleFriend(
     @Param('login') login: string,
     @Param('friend') friendId: string,
   ): Promise<any> {
+    if (login == friendId) return { message: 'CANT ADD  YOUR SELF' };
     if (await this.friendService.isFriend(login, friendId)) {
       this.friendService.removeFriend(login, friendId);
       return { message: 'Friend removed successfully' };
@@ -78,6 +80,7 @@ export class UserController {
   }
 
   @Patch(':login/image')
+  @UseGuards(JwtAuthGuard)
   async updateImage(
     @Param('login') login: string,
     @Body() body: { picture: string },

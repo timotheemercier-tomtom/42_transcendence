@@ -162,6 +162,8 @@ export default class GameServer extends GameCommon {
         ? GameType.SelfBalancing
         : GameType.Classic,
       isPublic: this.isPublic,
+      scoreA: this.scoreA,
+      scoreB: this.scoreB,
     });
   }
 

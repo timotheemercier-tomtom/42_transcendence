@@ -38,7 +38,7 @@ const App: React.FC = () => {
   }, [navigate, query, setUser]);
 
   return (
-    <Container className="root">
+    <Container className="root" sx={{maxWidth: '1600px!important'}}>
       <InviteReceiver />
       <Col className="app">
         <header>
