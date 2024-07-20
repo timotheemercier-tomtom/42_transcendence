@@ -20,20 +20,25 @@ export class TwoFAService {
     });
 
     try {
-      const response: AxiosResponse = await firstValueFrom(this.httpService.post(url, data.toString(), {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-CSRF-Token': userToken,
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        withCredentials: true,
-      }));
+      const response: AxiosResponse = await firstValueFrom(
+        this.httpService.post(url, data.toString(), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRF-Token': userToken,
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          withCredentials: true,
+        }),
+      );
 
       if (response.status !== 200) {
         throw new HttpException('Failed to enable 2FA', response.status);
       }
     } catch (error) {
-      throw new HttpException('Failed to enable 2FA', error.response?.status || 500);
+      throw new HttpException(
+        'Failed to enable 2FA',
+        error.response?.status || 500,
+      );
     }
   }
 
@@ -44,20 +49,25 @@ export class TwoFAService {
     });
 
     try {
-      const response: AxiosResponse = await firstValueFrom(this.httpService.post(url, data.toString(), {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-CSRF-Token': userToken,
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        withCredentials: true,
-      }));
+      const response: AxiosResponse = await firstValueFrom(
+        this.httpService.post(url, data.toString(), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRF-Token': userToken,
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          withCredentials: true,
+        }),
+      );
 
       if (response.status !== 200) {
         throw new HttpException('Failed to disable 2FA', response.status);
       }
     } catch (error) {
-      throw new HttpException('Failed to disable 2FA', error.response?.status || 500);
+      throw new HttpException(
+        'Failed to disable 2FA',
+        error.response?.status || 500,
+      );
     }
   }
 
@@ -65,16 +75,22 @@ export class TwoFAService {
     const url = `${this.apiUrl}/v2/users/${userId}/otp_settings`;
 
     try {
-      const response: AxiosResponse<TwoFactorStatusResponse> = await firstValueFrom(this.httpService.get(url, {
-        headers: {
-          'X-CSRF-Token': userToken,
-        },
-        withCredentials: true,
-      }));
+      const response: AxiosResponse<TwoFactorStatusResponse> =
+        await firstValueFrom(
+          this.httpService.get(url, {
+            headers: {
+              'X-CSRF-Token': userToken,
+            },
+            withCredentials: true,
+          }),
+        );
 
       return response.data.enabled;
     } catch (error) {
-      throw new HttpException('Failed to fetch 2FA status', error.response?.status || 500);
+      throw new HttpException(
+        'Failed to fetch 2FA status',
+        error.response?.status || 500,
+      );
     }
   }
 }

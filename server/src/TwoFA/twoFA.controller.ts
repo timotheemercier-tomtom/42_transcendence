@@ -1,10 +1,17 @@
-import { Controller, Post, Body, Get, Req, UseGuards, HttpException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Req,
+  UseGuards,
+  HttpException,
+} from '@nestjs/common';
 import { TwoFAService } from './twoFA.service';
 import { AuthService } from '../auth/auth.service';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../user/user.entity';
-
 
 @Controller('api/2fa')
 export class TwoFAController {
@@ -23,7 +30,10 @@ export class TwoFAController {
       throw new HttpException('User not found', 404);
     }
 
-    const isPasswordValid = await this.authService.validatePassword(user.login, password);
+    const isPasswordValid = await this.authService.validatePassword(
+      user.login,
+      password,
+    );
     if (!isPasswordValid) {
       throw new HttpException('Invalid password', 401);
     }
@@ -41,7 +51,10 @@ export class TwoFAController {
       throw new HttpException('User not found', 404);
     }
 
-    const isPasswordValid = await this.authService.validatePassword(user.login, password);
+    const isPasswordValid = await this.authService.validatePassword(
+      user.login,
+      password,
+    );
     if (!isPasswordValid) {
       throw new HttpException('Invalid password', 401);
     }
@@ -62,7 +75,6 @@ export class TwoFAController {
     return await this.twoFAAuthService.is2FAEnabled(user.login, userToken);
   }
 }
-
 
 // import { Controller, Get, Redirect } from '@nestjs/common';
 
