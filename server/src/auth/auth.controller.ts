@@ -28,7 +28,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { FourTwoStrategy } from './fourtwo.strategy';
+import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
@@ -39,7 +39,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authService: FourTwoStrategy,
+    private authService: AuthService,
     private jwt: JwtService,
     private userService: UserService,
     private config: ConfigService,

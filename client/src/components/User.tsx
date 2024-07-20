@@ -11,10 +11,16 @@ import {
   Avatar,
   Switch,
   FormControlLabel,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material';
 import { useAuth } from './AuthContext';
 import qrcode from 'qrcode';
 import { API } from '../util';
+import axios from 'axios';
 
 const User: React.FC = () => {
   const { login } = useParams<{ login: string }>();
@@ -25,8 +31,10 @@ const User: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [newPicture, setNewPicture] = useState<File | null>(null);
   const [newUsername, setNewUsername] = useState('');
-  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+  const [is2FAEnabled, setTwoFAEnabled] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     fetchUserData();
@@ -50,6 +58,31 @@ const User: React.FC = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleChange = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleRedirect = async () => {
+    try {
+      const url = is2FAEnabled ? '2fa/disable' : '2fa/enable';
+      await axios.post(url, { password });
+      setTwoFAEnabled(!is2FAEnabled);
+
+      const redirectUrl = is2FAEnabled
+        ? `${API}/otp_settings/deactivate`
+        : `${API}/otp_settings/new`;
+      window.location.href = redirectUrl;
+    } catch (error) {
+      console.error('Failed to update 2FA status', error);
+    } finally {
+      setOpen(false);
     }
   };
 
@@ -79,37 +112,6 @@ const User: React.FC = () => {
       setError('Failed to update username');
     }
   };
-
-  const handleTwoFAToggle = async (
-  ) => {
-      location.href = `https://profile.intra.42.fr/otp_settings/new`;
-    // setTwoFAEnabled(event.target.checked);
-    // if (event.target.checked) {
-    //   enableTwoFAForUser();
-    // } else {
-    //   disableTwoFAForUser();
-    // }
-  };
-
-  const enableTwoFAForUser = async () => {
-    try {
-      const response = await enableTwoFA(userData.login);
-      const qrCodeUrl = await qrcode.toDataURL(response.otpauthUrl);
-      setQrCode(qrCodeUrl);
-    } catch (error) {
-      setError('Failed to enable 2FA');
-    }
-  };
-
-  const disableTwoFAForUser = async () => {
-    try {
-      await disableTwoFA(userData.login);
-      setQrCode(null);
-    } catch (error) {
-      setError('Failed to disable 2FA');
-    }
-  };
-    
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -151,16 +153,45 @@ const User: React.FC = () => {
         style={{ marginTop: '1rem' }}
       >
         Update Username
-          </Button>
-          
-          <Button
-            onClick={handleTwoFAToggle}
-            // onChange={handleTwoFAToggle}
-            style={{ marginTop: '1rem' }}
-          >
-              2FA SETTING
-          </Button>
-      {qrCode && (
+      </Button>
+      <div>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={is2FAEnabled}
+              onChange={handleToggleChange}
+              color="primary"
+            />
+          }
+          label={is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+        />
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Two-Factor Authentication</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {is2FAEnabled
+                ? 'You are about to disable two-factor authentication. Please enter your password to continue.'
+                : 'You are about to enable two-factor authentication. Please enter your password to continue.'}
+            </DialogContentText>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleRedirect} color="primary" autoFocus>
+              Continue
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+
+      {/* {qrCode && (
         <div style={{ marginTop: '1rem' }}>
           <Typography variant="h6">
             Scan this QR code with your authenticator app:
@@ -171,7 +202,7 @@ const User: React.FC = () => {
             style={{ width: '200px', height: '200px' }}
           />
         </div>
-      )}
+      )} */}
     </Card>
   );
 };

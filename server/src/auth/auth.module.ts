@@ -19,7 +19,6 @@
  */
 
 import { PassportModule } from '@nestjs/passport';
-import { FourTwoStrategy } from './fourtwo.strategy';
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -42,7 +41,7 @@ import { AuthService } from './auth.service';
       }),
     }),
   ],
-  providers: [FourTwoStrategy, AuthService],
+  providers: [AuthService],
   controllers: [AuthController],
   exports: [AuthService],
 })
