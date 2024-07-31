@@ -49,8 +49,14 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async signInWith42() {}
 
-  redir(host: string, token: string, login: string) {
-    return `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`;
+  async redir(host: string, token: string, login: string) {
+    const user: User | null = await this.userService.findOne(login);
+    if (user?.isTwoFAEnabled) {
+      return `http://${this.config.get('HOST')}:5173/2fa-verify`;
+    }
+    else {
+      return `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`;
+    }
   }
 
   @Get('check')
@@ -68,7 +74,7 @@ export class AuthController {
       req.headers.referer || `http://${this.config.get('HOST')}:5173`;
     const host = new URL(referer).hostname;
 
-    res.redirect(this.redir(host, accessToken, user.login));
+    res.redirect(await this.redir(host, accessToken, user.login));
   }
 
   private anonc = 0;
@@ -83,6 +89,6 @@ export class AuthController {
     if (!(user = await this.userService.findOne(name)))
       user = await this.userService.create({ login: name, displayName: name });
     const accessToken = this.jwt.sign({ ...user });
-    res.redirect(this.redir(host, accessToken, name));
+    res.redirect(await this.redir(host, accessToken, name));
   }
 }
