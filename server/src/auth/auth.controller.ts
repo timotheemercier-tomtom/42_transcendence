@@ -5,8 +5,8 @@ import {
   UseGuards,
   Controller,
   UnauthorizedException,
-  Post,
   Param,
+  Post,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -32,12 +32,6 @@ export class AuthController {
 
   redir(host: string, token: string, login: string) {
     return `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`;
-  }
-
-  @Get('check')
-  @UseGuards(AuthGuard('jwt'))
-  async checkAuth(@Req() req: any): Promise<User> {
-    return req.user;
   }
 
   @Get('42/callback')
@@ -66,8 +60,6 @@ export class AuthController {
     const accessToken = this.jwt.sign({ ...user });
     res.redirect(this.redir(host, accessToken, name));
   }
-
-
   @Post(':login/:token/2fa/verify')
   async verifyTwoFA(
     @Req() req: Request & any,
@@ -78,12 +70,12 @@ export class AuthController {
     const user: User | null = await this.userService.findOne(login);
 
     if (user && user.twoFASecret) {
-      const two_fa_ok: boolean = this.authService.validateTwoFAToken(
+      const twoFAok: boolean = this.authService.validateTwoFAToken(
         user.twoFASecret,
         twofa_token,
       );
-      if (two_fa_ok) {
-        const token = this.jwt.sign({ ...user });
+      if (twoFAok) {
+        const token = this.jwt.sign({ login });
         req.headers.referer = `http://${this.config.get('HOST')}:5173`;
         res.send(
           `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`,

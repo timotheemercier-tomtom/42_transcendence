@@ -33,7 +33,6 @@ import { UserController } from './user.controller';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
-import { FourTwoStrategy } from 'src/auth/fourtwo.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { Friend } from './friend.entity';
 import { FriendService } from './friend.service';
@@ -46,7 +45,6 @@ import { AuthService } from 'src/auth/auth.service';
     JwtStrategy,
     JwtAuthGuard,
     ConfigService,
-    FourTwoStrategy,
     FriendService,
     AuthService,
   ],
