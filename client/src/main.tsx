@@ -48,7 +48,7 @@ const router = createBrowserRouter([
         element: <RankingPage />,
       },
       {
-        path: '2fa-verify',
+        path: '2fa-verify/:login',
         element: <TwoFAVerify />,
       },
     ],
