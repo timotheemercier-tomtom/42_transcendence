@@ -81,14 +81,14 @@ const User: React.FC = () => {
   };
 
   const handleTwoFAToggle = async (
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-      location.href = `https://profile.intra.42.fr/otp_settings/new`;
-    // setTwoFAEnabled(event.target.checked);
-    // if (event.target.checked) {
-    //   enableTwoFAForUser();
-    // } else {
-    //   disableTwoFAForUser();
-    // }
+    setTwoFAEnabled(event.target.checked);
+    if (event.target.checked) {
+      enableTwoFAForUser();
+    } else {
+      disableTwoFAForUser();
+    }
   };
 
   const enableTwoFAForUser = async () => {
@@ -109,7 +109,6 @@ const User: React.FC = () => {
       setError('Failed to disable 2FA');
     }
   };
-    
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -151,15 +150,18 @@ const User: React.FC = () => {
         style={{ marginTop: '1rem' }}
       >
         Update Username
-          </Button>
-          
-          <Button
-            onClick={handleTwoFAToggle}
-            // onChange={handleTwoFAToggle}
-            style={{ marginTop: '1rem' }}
-          >
-              2FA SETTING
-          </Button>
+      </Button>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={twoFAEnabled}
+            onChange={handleTwoFAToggle}
+            name="twoFAEnabled"
+            color="primary"
+          />
+        }
+        label="Enable 2FA"
+      />
       {qrCode && (
         <div style={{ marginTop: '1rem' }}>
           <Typography variant="h6">
