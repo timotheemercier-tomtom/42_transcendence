@@ -7,7 +7,7 @@ import React, {
   ReactNode,
   useEffect,
 } from 'react';
-import { API } from '../util';
+import { API, getLogin } from '../util';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -32,35 +32,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    setIsLoggedIn(!!getLogin());
+}, []);
 
-  const checkAuth = async () => {
-    try {
-      const response = await fetch(`${API}/auth/check`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
-    } catch (error) {
-      console.error('Error checking authentication:', error);
-    }
-  };
 
   const login = () => {
     window.location.href = `${API}/auth/42`;
   };
 
+  function deleteCookie(name: any) {
+    // Set the cookie with a past expiration date
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+  }
+    
   const logout = () => {
-    setUser(null);
-    setIsLoggedIn(false);
+      setUser(null);
+      deleteCookie('accessToken');
+      location.reload();
   };
 
   const updateUserImage = async (login: string, base64Image: string) => {

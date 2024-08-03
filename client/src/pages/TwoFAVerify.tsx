@@ -15,19 +15,15 @@ export default function TwoFAVerify() {
       credentials: 'include',
     });
     const redir_url = await res.text();
-    if (redir_url != '') {
+    if (redir_url !== '') {
       location.href = redir_url;
     } else {
-      alert('wrong code!');
+      alert('Wrong code!');
     }
   };
 
   const verifcationOnChangeHandler = (event: FormEvent<HTMLInputElement>) => {
-    if (event.currentTarget.value == '') {
-      setTwoFAToken('');
-    } else {
-      setTwoFAToken(event.currentTarget.value);
-    }
+    setTwoFAToken(event.currentTarget.value);
   };
 
   return (
@@ -37,7 +33,7 @@ export default function TwoFAVerify() {
         <label>
           Verification Code:
           <input
-            id="verifcation-code"
+            id="verification-code"
             type="number"
             value={twoFAToken}
             onChange={verifcationOnChangeHandler}

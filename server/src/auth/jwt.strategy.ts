@@ -4,18 +4,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserService } from 'src/user/user.service';
-import { FourTwoStrategy } from './fourtwo.strategy';
 import { User } from 'src/user/user.entity';
-
-// const extractJwtFromCookie = (req: Request): string | null => {
-//   return req.cookies?.['accessToken'] || null;
-// };
+import { Auth } from 'typeorm';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
       private configService: ConfigService,
-    private readonly authService: FourTwoStrategy,
+    private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {
     super({
@@ -36,6 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 const extractJwtFromCookie = (req: Request): string | null => {
   return req.cookies?.['accessToken'] || null;
 };
+
 
 
 // @Injectable()

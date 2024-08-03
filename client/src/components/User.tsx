@@ -82,14 +82,15 @@ const User: React.FC = () => {
     }
   };
 
-  const handleTwoFAToggle = async () => {
-    location.href = `https://profile.intra.42.fr/otp_settings/new`;
-    // setTwoFAEnabled(event.target.checked);
-    // if (event.target.checked) {
-    //   enableTwoFAForUser();
-    // } else {
-    //   disableTwoFAForUser();
-    // }
+  const handleTwoFAToggle = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setTwoFAEnabled(event.target.checked);
+    if (event.target.checked) {
+      enableTwoFAForUser();
+    } else {
+      disableTwoFAForUser();
+    }
   };
 
   const enableTwoFAForUser = async () => {
