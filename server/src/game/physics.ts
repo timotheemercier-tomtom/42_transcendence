@@ -78,10 +78,12 @@ function handleGoal(newX: number): boolean {
     if (newX < GameCommon.BRAD) {
       this.scoreB++;
       this.ballAngle = 1.5 * Math.PI;
+      this.emitGameState();
     }
     if (newX > GameCommon.W - GameCommon.BRAD) {
       this.ballAngle = 0.5 * Math.PI;
       this.scoreA++;
+      this.emitGameState();
     }
     this.ballXpos = GameCommon.W / 2;
     this.ballYpos = GameCommon.H / 2;

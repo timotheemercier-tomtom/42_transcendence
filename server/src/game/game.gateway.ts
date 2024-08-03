@@ -165,6 +165,8 @@ export class GameGateway extends Eventer {
           ? GameType.SelfBalancing
           : GameType.Classic,
         isPublic: game.isPublic,
+        scoreA: game.scoreA,
+        scoreB: game.scoreB,
       });
   }
 }

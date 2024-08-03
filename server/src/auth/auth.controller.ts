@@ -21,11 +21,13 @@ user data after successful authentication and setting an HTTP-only cookie with
 
 import {
   Get,
+  Post,
   Req,
   Res,
   UseGuards,
   Controller,
   UnauthorizedException,
+  Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FourTwoStrategy } from './fourtwo.strategy';
@@ -49,8 +51,14 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async signInWith42() {}
 
-  redir(host: string, token: string, login: string) {
-    return `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`;
+  async redir(host: string, token: string, login: string) {
+    const user: User | null = await this.userService.findOne(login);
+    if (user?.isTwoFAEnabled) {
+      return `http://${this.config.get('HOST')}:5173/2fa-verify/${login}`;
+    }
+    else {
+      return `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`;
+    }
   }
 
   @Get('check')
@@ -68,7 +76,7 @@ export class AuthController {
       req.headers.referer || `http://${this.config.get('HOST')}:5173`;
     const host = new URL(referer).hostname;
 
-    res.redirect(this.redir(host, accessToken, user.login));
+    res.redirect(await this.redir(host, accessToken, user.login));
   }
 
   private anonc = 0;
@@ -83,7 +91,27 @@ export class AuthController {
     if (!(user = await this.userService.findOne(name)))
       user = await this.userService.create({ login: name, displayName: name });
     const accessToken = this.jwt.sign({ ...user });
-    res.redirect(this.redir(host, accessToken, name));
+    res.redirect(await this.redir(host, accessToken, name));
+  }
+
+  @Post(':login/:token/2fa/verify')
+  async verifyTwoFA(
+    @Req() req: Request & any,
+    @Res() res: Response,
+    @Param('login') login: string,
+  ) {
+
+    // do actual verification
+
+
+    // if OK, return redirect string to client
+    const user: User | null = await this.userService.findOne(login);
+    const token = this.jwt.sign({ ...user });
+    req.headers.referer = `http://${this.config.get('HOST')}:5173`;
+    console.log('redirecting...');
+    res.send(
+      `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`
+    )
   }
     
   

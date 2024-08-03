@@ -11,6 +11,7 @@ const AddFriend = () => {
   const onclick = async () => {
     const res = await fetch(`${API}/user/${user}/friend/${friend}`, {
       method: 'POST',
+      credentials: 'include'
     });
     const data = await res.json();
     setMsg(data.message);

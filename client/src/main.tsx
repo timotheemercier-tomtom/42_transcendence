@@ -10,6 +10,7 @@ import Home from './pages/Home.tsx';
 import MatchHistoryPage from './pages/MatchHistoryPage.tsx';
 import RankingPage from './pages/RankingPage.tsx';
 import Profile from './pages/Profile.tsx';
+import TwoFAVerify from './pages/TwoFAVerify.tsx';
 import { AuthProvider } from './components/AuthContext.tsx';
 
 const router = createBrowserRouter([
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
       {
         path: 'ranking',
         element: <RankingPage />,
+      },
+      {
+        path: '2fa-verify/:login',
+        element: <TwoFAVerify />,
       },
     ],
   },

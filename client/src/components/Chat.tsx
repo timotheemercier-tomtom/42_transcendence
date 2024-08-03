@@ -318,12 +318,14 @@ export default function Chat({ id }: { id: string }) {
           ))
         )}
       </Col>
-      <Col borderLeft={1}>
-        <span>Invite</span>
-        {friends.map((v) => (
-          <Button onClick={() => invite(v)}>{v.login}</Button>
-        ))}
-      </Col>
+      {friends.length == 0 ? null : (
+        <Col borderLeft={1}>
+          <span>Invite</span>
+          {friends.map((v) => (
+            <Button onClick={() => invite(v)}>{v.login}</Button>
+          ))}
+        </Col>
+      )}
     </Row>
   );
 }

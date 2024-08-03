@@ -8,9 +8,9 @@ export default function Room() {
 
   return (
     <Row flexGrow={1} minHeight={0}>
-      <Link to={'/'}>
+      {/* <Link to={'/'}>
         <p>Back to homepage</p>
-      </Link>
+      </Link> */}
       <Game />
       <Chat id={id}></Chat>
     </Row>
