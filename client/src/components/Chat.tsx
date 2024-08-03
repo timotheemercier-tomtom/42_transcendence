@@ -167,6 +167,7 @@ export default function Chat({ id }: { id: string }) {
         break;
       case 'pass':
         if (arg1) send(m[1], { pass: arg1, room });
+        else send(m[1], { pass: '', room });
         break;
       case 'mute':
         if (args.length > 1)
