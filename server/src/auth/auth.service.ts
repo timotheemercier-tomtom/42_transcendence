@@ -5,7 +5,14 @@ import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 
 import * as speakeasy from 'speakeasy';
-import * as qrcode from 'qrcode';
+
+function toHex(str: string) {
+  let result = '';
+  for (let i = 0; i < str.length; i++) {
+    result += str.charCodeAt(i).toString(16);
+  }
+  return result;
+}
 
 @Injectable()
 export class AuthService {
@@ -24,6 +31,22 @@ export class AuthService {
     const base32 = secret.base32;
 
     return { otpauthUrl, base32 };
+  }
+
+  validateTwoFAToken(
+    twoFA_secret_base32: string,
+    verificationCode: string,
+  ): boolean {
+    const base32 = require('hi-base32');
+    const secretAscii = base32.decode(twoFA_secret_base32);
+    const secretHex = toHex(secretAscii);
+
+    return speakeasy.totp.verify({
+      secret: secretHex,
+      encoding: 'hex',
+      token: verificationCode,
+      window: 6,
+    });
   }
 
   async validateUser(token: string): Promise<User | null> {

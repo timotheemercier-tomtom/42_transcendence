@@ -35,13 +35,14 @@ import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { ConfigService } from '@nestjs/config';
+import { AuthService } from './auth.service';
 import { User } from 'src/user/user.entity';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authService: FourTwoStrategy,
+    private authService: AuthService,
     private jwt: JwtService,
     private userService: UserService,
     private config: ConfigService,
@@ -55,8 +56,7 @@ export class AuthController {
     const user: User | null = await this.userService.findOne(login);
     if (user?.isTwoFAEnabled) {
       return `http://${this.config.get('HOST')}:5173/2fa-verify/${login}`;
-    }
-    else {
+    } else {
       return `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`;
     }
   }
@@ -99,18 +99,28 @@ export class AuthController {
     @Req() req: Request & any,
     @Res() res: Response,
     @Param('login') login: string,
+    @Param('token') twofa_token: string,
   ) {
-
-    // do actual verification
-
-
-    // if OK, return redirect string to client
     const user: User | null = await this.userService.findOne(login);
-    const token = this.jwt.sign({ ...user });
-    req.headers.referer = `http://${this.config.get('HOST')}:5173`;
-    console.log('redirecting...');
-    res.send(
-      `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`
-    )
+
+    if (user && user.twoFASecret) {
+      const two_fa_ok: boolean = this.authService.validateTwoFAToken(
+        user.twoFASecret,
+        twofa_token,
+      );
+      if (two_fa_ok) {
+        const token = this.jwt.sign({ ...user });
+        req.headers.referer = `http://${this.config.get('HOST')}:5173`;
+        res.send(
+          `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`,
+        );
+      } else {
+        // wrong 2fa code:
+        console.error(`error: wrong two-fa token entered by user ${login}`);
+        res.send('');
+      }
+    } else {
+      console.error(`error: two-fa not enabled!`);
+    }
   }
 }

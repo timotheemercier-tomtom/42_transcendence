@@ -3,29 +3,30 @@ import { API } from '../util';
 import { useParams } from 'react-router-dom';
 
 export default function TwoFAVerify() {
-  const [twoFAToken, setTwoFAToken] = useState(0);
+  const [twoFAToken, setTwoFAToken] = useState('');
   const { login } = useParams<{ login: string }>();
+
   const handleVerificationSubmit = async (
     event: FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
-
-    const res = await fetch(
-      `${API}/auth/${login}/${twoFAToken}/2fa/verify`,
-      {
-        method: 'POST',
-        credentials: 'include',
-      },
-    );
+    const res = await fetch(`${API}/auth/${login}/${twoFAToken}/2fa/verify`, {
+      method: 'POST',
+      credentials: 'include',
+    });
     const redir_url = await res.text();
-    location.href = (redir_url);
+    if (redir_url != '') {
+      location.href = redir_url;
+    } else {
+      alert('wrong code!');
+    }
   };
 
   const verifcationOnChangeHandler = (event: FormEvent<HTMLInputElement>) => {
     if (event.currentTarget.value == '') {
-      setTwoFAToken(0);
+      setTwoFAToken('');
     } else {
-      setTwoFAToken(event.currentTarget.valueAsNumber);
+      setTwoFAToken(event.currentTarget.value);
     }
   };
 
