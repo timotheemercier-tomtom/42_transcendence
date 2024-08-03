@@ -2,6 +2,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import { GameType } from '../GameCommon';
 import { getLogin } from '../util';
+import { Typography } from '@mui/material';
 
 interface MatchHistoryDTO {
   id: number;
@@ -105,6 +106,7 @@ const MatchHistory = (props: { filterUser: boolean }) => {
   } else {
     return (
       <>
+        <Typography variant="h5">Match History</Typography>
         <DataGrid
           rows={rows}
           columns={columns}
