@@ -85,4 +85,6 @@ export class AuthController {
     const accessToken = this.jwt.sign({ ...user });
     res.redirect(this.redir(host, accessToken, name));
   }
+    
+  
 }

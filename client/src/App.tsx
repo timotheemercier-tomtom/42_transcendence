@@ -1,15 +1,20 @@
 import { Container } from '@mui/material';
-import React, { useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import ButtonLogin from './components/ButtonLogin';
 import Col from './components/Col';
 import Row from './components/Row';
 import Status from './components/Status';
-import { API } from './util';
+import { API, getLogin } from './util';
 import InviteReceiver from './components/InviteReceiver';
 import { useAuth } from './components/AuthContext';
 
 const App: React.FC = () => {
+    const navigate = useNavigate();
+    const [query] = useSearchParams();
+    const { setUser, user } = useAuth();
+  
+
   const handle42Login = () => {
     window.location.href = API + '/auth/42';
   };
@@ -18,9 +23,11 @@ const App: React.FC = () => {
     location.href = API + `/auth/anon`;
   };
 
-  const navigate = useNavigate();
-  const [query] = useSearchParams();
-  const { setUser } = useAuth();
+  const handleLogout = () => {
+    document.cookie = 'accessToken=; Max-Age=0';
+    setUser(null);
+    location.reload();
+  };
 
   useEffect(() => {
     const token = query.get('token');
@@ -35,9 +42,15 @@ const App: React.FC = () => {
       <InviteReceiver />
       <Col className="app">
         <header>
-          <Row>
-            <ButtonLogin onClick={handle42Login} text="Log In" />
-            <ButtonLogin onClick={anonlogin} text="anon Log In" />
+        <Row>
+            {getLogin() ? (
+              <ButtonLogin onClick={handleLogout} text="Log Out" />
+            ) : (
+              <>
+                <ButtonLogin onClick={handle42Login} text="Log In" />
+                <ButtonLogin onClick={anonlogin} text="anon Log In" />
+              </>
+            )}
             <Status />
           </Row>
         </header>

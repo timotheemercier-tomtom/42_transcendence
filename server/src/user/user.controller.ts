@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Req,
+  Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -54,6 +55,7 @@ export class UserController {
     // const user = req.user;
     return await this.userService.update(login, updateUserDto);
   }
+
 
   @Post(':login/friend/:friend')
   @UseGuards(JwtAuthGuard)

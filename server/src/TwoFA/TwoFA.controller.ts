@@ -1,13 +1,16 @@
-import { Controller, Get, Post, Req, Res, Body } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, Body, UnauthorizedException, Redirect } from '@nestjs/common';
 import { TwoFAService } from './TwoFA.service';
+import { AuthService } from '../auth/auth.service';
+import { UserService } from '../user/user.service';
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
 
 @Controller('2fa')
 export class TwoFAController {
   TwoFAService: any;
-  constructor(TwoFAService: any) {
-    this.TwoFAService = TwoFAService;
+  constructor(TwoFAService: any, private userService: UserService, private authService: AuthService) {
+      this.TwoFAService = TwoFAService;
+      
   }
 
   @Get('generate')
@@ -48,7 +51,7 @@ export class TwoFAController {
       return res.status(401).json({ message: 'User not authenticated' });
     }
 
-    if (user.isTwoFactorAuthenticationEnabled) {
+    if (user.isTwoFAEnabled) {
       return res.status(400).json({ message: '2FA already enabled!' });
     }
 
@@ -56,7 +59,7 @@ export class TwoFAController {
 
     const isValidToken = this.TwoFAService.validate2FaToken(
       token,
-      user.twoFactorAuthenticationSecret,
+      user.twoFASecret,
     );
 
     if (!isValidToken) {
@@ -65,4 +68,27 @@ export class TwoFAController {
 
     return res.status(200).json({ message: '2FA enabled successfully' });
   }
+    
+    
+  @Post('2fa/verify')
+  async verify2FA(@Body() body: any, @Res() res: any) {
+    const { user, token } = body;
+    await this.userService.findOne(user.login);
+    
+    if (!user) {
+      throw new UnauthorizedException('Invalid user');
+    }
+
+    const isValidToken = this.TwoFAService.validate2FaToken(
+      token,
+      user.twoFASecret,
+    );
+
+    if (!isValidToken) {
+      return res.status(401).json({ message: 'Invalid 2FA token' });
+    }
+
+      return Redirect('http://localhost:3000/auth/42');
+  }
+
 }
