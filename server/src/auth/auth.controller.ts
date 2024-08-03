@@ -109,7 +109,7 @@ export class AuthController {
         twofa_token,
       );
       if (two_fa_ok) {
-        const token = this.jwt.sign({ ...user });
+        const token = this.jwt.sign({ login });
         req.headers.referer = `http://${this.config.get('HOST')}:5173`;
         res.send(
           `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`,
