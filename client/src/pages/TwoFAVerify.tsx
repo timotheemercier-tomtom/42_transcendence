@@ -32,10 +32,10 @@ export default function TwoFAVerify() {
 
   return (
     <>
-      <h2>2FA Verification Code</h2>
+      <h2>2FA Verification Code for user {login}</h2>
       <form onSubmit={handleVerificationSubmit}>
         <label>
-          VerificationCode:
+          Verification Code:
           <input
             id="verifcation-code"
             type="number"
