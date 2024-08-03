@@ -47,7 +47,12 @@ export class ChatService {
 
   guardOwner(room: string, user: string) {
     if (this.owners.get(room) != user)
-      throw Error(`you are not the owner of room ${room}`);
+      throw Error(`user ${user} is not the owner of room ${room}`);
+  }
+
+  guardNotOwner(room: string, user: string) {
+    if (this.owners.get(room) == user)
+      throw Error(`user ${user} is the owner of room ${room}`);
   }
 
   guardBanned(room: string, user: string) {

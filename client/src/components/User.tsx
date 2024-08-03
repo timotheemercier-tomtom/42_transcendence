@@ -11,10 +11,12 @@ import {
   Avatar,
   Switch,
   FormControlLabel,
+  Box,
 } from '@mui/material';
 import { useAuth } from './AuthContext';
 import qrcode from 'qrcode';
-import { API } from '../util';
+import { API, getLogin } from '../util';
+import Col from './Col';
 
 const User: React.FC = () => {
   const { login } = useParams<{ login: string }>();
@@ -80,15 +82,14 @@ const User: React.FC = () => {
     }
   };
 
-  const handleTwoFAToggle = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setTwoFAEnabled(event.target.checked);
-    if (event.target.checked) {
-      enableTwoFAForUser();
-    } else {
-      disableTwoFAForUser();
-    }
+  const handleTwoFAToggle = async () => {
+    location.href = `https://profile.intra.42.fr/otp_settings/new`;
+    // setTwoFAEnabled(event.target.checked);
+    // if (event.target.checked) {
+    //   enableTwoFAForUser();
+    // } else {
+    //   disableTwoFAForUser();
+    // }
   };
 
   const enableTwoFAForUser = async () => {
@@ -114,67 +115,73 @@ const User: React.FC = () => {
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Card style={{ padding: '2rem', maxWidth: '400px', margin: '2rem auto' }}>
-      <Typography variant="h5">Profile</Typography>
-      <Typography variant="h6">Username: {userData.displayName}</Typography>
-      <Typography variant="h6">Login: {userData.login}</Typography>
+    <Col gap={'.2rem'} alignItems={'start'}>
       <Avatar
         src={userData.picture}
         alt="Profile"
         style={{ width: '100px', height: '100px' }}
       />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) =>
-          setNewPicture(e.target.files ? e.target.files[0] : null)
-        }
-        style={{ marginTop: '1rem' }}
-      />
-      <Button
-        onClick={handleImageChange}
-        disabled={!newPicture}
-        style={{ marginTop: '1rem' }}
-      >
-        Update Picture
-      </Button>
-      <TextField
-        label="New Username"
-        value={newUsername}
-        onChange={(e) => setNewUsername(e.target.value)}
-        style={{ marginTop: '1rem' }}
-      />
-      <Button
-        onClick={handleUsernameChange}
-        disabled={!newUsername}
-        style={{ marginTop: '1rem' }}
-      >
-        Update Username
-      </Button>
-      <FormControlLabel
-        control={
-          <Switch
-            checked={twoFAEnabled}
-            onChange={handleTwoFAToggle}
-            name="twoFAEnabled"
-            color="primary"
+      {getLogin() == login && (
+        <>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              setNewPicture(e.target.files ? e.target.files[0] : null)
+            }
+            style={{ marginTop: '1rem' }}
           />
-        }
-        label="Enable 2FA"
-      />
-      {qrCode && (
-        <div style={{ marginTop: '1rem' }}>
-          <Typography variant="h6">
-            Scan this QR code with your authenticator app:
-          </Typography>
-          <img
-            src={qrCode}
-            alt="2FA QR Code"
-            style={{ width: '200px', height: '200px' }}
-          />
-        </div>
+          <Button
+            onClick={handleImageChange}
+            disabled={!newPicture}
+            style={{ marginTop: '1rem' }}
+          >
+            Update Picture
+          </Button>
+        </>
       )}
-    </Card>
+
+      <Typography variant="h6">Username: {userData.displayName}</Typography>
+      <Typography variant="h6">Login: {userData.login}</Typography>
+      {getLogin() == login && (
+        <>
+          <TextField
+            label="New Username"
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+            style={{ marginTop: '1rem' }}
+          />
+          <Button
+            onClick={handleUsernameChange}
+            disabled={!newUsername}
+            style={{ marginTop: '1rem' }}
+          >
+            Update Username
+          </Button>
+
+          <Button
+            onClick={handleTwoFAToggle}
+            // onChange={handleTwoFAToggle}
+            style={{ marginTop: '1rem' }}
+          >
+            2FA SETTING
+          </Button>
+
+          {qrCode && (
+            <div style={{ marginTop: '1rem' }}>
+              <Typography variant="h6">
+                Scan this QR code with your authenticator app:
+              </Typography>
+              <img
+                src={qrCode}
+                alt="2FA QR Code"
+                style={{ width: '200px', height: '200px' }}
+              />
+            </div>
+          )}
+        </>
+      )}
+    </Col>
   );
 };
 

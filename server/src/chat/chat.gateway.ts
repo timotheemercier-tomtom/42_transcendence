@@ -176,6 +176,7 @@ export class ChatGateway
     if (!uclient) return;
     this.service.guardExists(e.room);
     this.service.guardAdmin(e.room, user);
+    this.service.guardNotOwner(e.room, e.user);
     this.service.toggleBanned(e.room, e.user);
     this._message(
       e.room,
@@ -191,6 +192,7 @@ export class ChatGateway
     const user = this.idmap.get(client.id)!;
     this.service.guardExists(e.room);
     this.service.guardAdmin(e.room, user);
+    this.service.guardNotOwner(e.room, e.user);
     const uclient = this.userToClient.get(e.user);
     if (!uclient) return;
     this.leave(uclient, e.room);
@@ -202,6 +204,7 @@ export class ChatGateway
     const user = this.idmap.get(client.id)!;
     this.service.guardExists(e.room);
     this.service.guardAdmin(e.room, user);
+    this.service.guardNotOwner(e.room, e.user);
     this.service.addMute(e);
     this._message(
       e.room,

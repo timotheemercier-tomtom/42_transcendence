@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Col from './Col';
 import { User } from 'common';
-import { Avatar } from '@mui/material';
+import { Avatar, Typography } from '@mui/material';
 import Row from './Row';
 import { Link, useParams } from 'react-router-dom';
 import { API } from '../util';
@@ -24,7 +24,7 @@ const Friends = () => {
   }, [login]);
   return (
     <Col>
-      <h3>Friends:</h3>
+      <Typography variant="h5">Friends:</Typography>
       <Col overflow={'scroll'}>
         {friends.map((v, i) => (
           <Link key={i} to={'/u/' + v.login}>
