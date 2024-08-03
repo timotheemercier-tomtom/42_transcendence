@@ -21,11 +21,13 @@ user data after successful authentication and setting an HTTP-only cookie with
 
 import {
   Get,
+  Post,
   Req,
   Res,
   UseGuards,
   Controller,
   UnauthorizedException,
+  Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -52,7 +54,7 @@ export class AuthController {
   async redir(host: string, token: string, login: string) {
     const user: User | null = await this.userService.findOne(login);
     if (user?.isTwoFAEnabled) {
-      return `http://${this.config.get('HOST')}:5173/2fa-verify`;
+      return `http://${this.config.get('HOST')}:5173/2fa-verify/${login}`;
     }
     else {
       return `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`;
@@ -91,6 +93,24 @@ export class AuthController {
     const accessToken = this.jwt.sign({ ...user });
     res.redirect(await this.redir(host, accessToken, name));
   }
-    
-  
+
+  @Post(':login/:token/2fa/verify')
+  async verifyTwoFA(
+    @Req() req: Request & any,
+    @Res() res: Response,
+    @Param('login') login: string,
+  ) {
+
+    // do actual verification
+
+
+    // if OK, return redirect string to client
+    const user: User | null = await this.userService.findOne(login);
+    const token = this.jwt.sign({ ...user });
+    req.headers.referer = `http://${this.config.get('HOST')}:5173`;
+    console.log('redirecting...');
+    res.send(
+      `http://${this.config.get('HOST')}:5173/?token=${token}&u=${login}`
+    )
+  }
 }

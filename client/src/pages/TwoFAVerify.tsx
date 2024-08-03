@@ -1,35 +1,44 @@
-
 import { useState, FormEvent } from 'react';
+import { API } from '../util';
+import { useParams } from 'react-router-dom';
 
 export default function TwoFAVerify() {
+  const [twoFAToken, setTwoFAToken] = useState(0);
+  const { login } = useParams<{ login: string }>();
+  const handleVerificationSubmit = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
 
-  const [verificationCode, setVerificationCode] = useState(0);
-
-  const handleVerificationSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    console.log(verificationCode);
-    // todo: actual verification
+    const res = await fetch(
+      `${API}/auth/${login}/${twoFAToken}/2fa/verify`,
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+    );
+    const redir_url = await res.text();
+    location.href = (redir_url);
   };
 
   const verifcationOnChangeHandler = (event: FormEvent<HTMLInputElement>) => {
     if (event.currentTarget.value == '') {
-      setVerificationCode(0);
-    }
-    else {
-      setVerificationCode(event.currentTarget.valueAsNumber);
+      setTwoFAToken(0);
+    } else {
+      setTwoFAToken(event.currentTarget.valueAsNumber);
     }
   };
 
   return (
     <>
-      <h2>Test User</h2>
+      <h2>2FA Verification Code</h2>
       <form onSubmit={handleVerificationSubmit}>
         <label>
           VerificationCode:
           <input
-            id='verifcation-code'
+            id="verifcation-code"
             type="number"
-            value={verificationCode}
+            value={twoFAToken}
             onChange={verifcationOnChangeHandler}
           />
         </label>
